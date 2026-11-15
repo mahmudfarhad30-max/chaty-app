@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Realtime Chat App</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        body {
+            background-color: #e5ddd5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .container {
+            width: 100%;
+            max-width: 420px;
+            height: 100vh;
+            max-height: 750px;
+            background: #fff;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        .screen {
+            display: none;
+            flex-direction: column;
+            height: 100%;
+            width: 100%;
+        }
+        .active {
+            display: flex;
+        }
+        
+        /* Login Screen */
+        .login-box {
+            padding: 40px 25px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            height: 100%;
+            background: #ffffff;
+        }
+        .login-box h2 {
+            text-align: center;
+            color: #075e54;
+            margin-bottom: 30px;
+            font-size: 26px;
+        }
+        .input-group {
+            margin-bottom: 18px;
+        }
+        .input-group label {
+            display: block;
+            margin-bottom: 6px;
+            color: #333;
+            font-size: 14px;
+            font-weight: 600;
+        }
+        .input-group input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 15px;
+            outline: none;
+        }
+        .input-group input:focus {
+            border-color: #075e54;
+        }
+        .btn {
+            width: 100%;
+            padding: 13px;
+            background: #075e54;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        .btn:hover {
+            background: #054c44;
+        }
+        .error-msg {
+            color: #d93025;
+            font-size: 13px;
+            text-align: center;
+            margin-top: 10px;
+            min-height: 18px;
+        }
+
+        /* Header */
+        .header {
+            background: #075e54;
+            color: #fff;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .header h3 {
+            font-size: 18px;
+        }
+        .header-btn {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: #fff;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 13px;
+        }
+
+        /* New Chat Bar */
+        .new-chat-bar {
+            padding: 10px;
+            background: #f0f2f5;
+            display: flex;
+            gap: 8px;
+            border-bottom: 1px solid #ddd;
+        }
+        .new-chat-bar input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 20px;
+            outline: none;
+            font-size: 14px;
+        }
+        .new-chat-bar button {
+            background: #128c7e;
+            color: #fff;
+            border: none;
+            padding: 0 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        /* Friend List */
+        .friend-list {
+            flex: 1;
+            overflow-y: auto;
+        }
+        .empty-state {
+            text-align: center;
+            color: #888;
+            padding: 40px 20px;
+            font-size: 14px;
+        }
+        .friend-item {
+            padding: 14px 15px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+        }
+        .friend-item:hover {
+            background: #f5f6f6;
+        }
+        .avatar {
+            width: 45px;
+            height: 45px;
+            background: #128c7e;
+            color: #fff;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+            font-size: 18px;
+            margin-right: 12px;
+        }
+        .friend-info {
+            flex: 1;
+            overflow: hidden;
+        }
+        .friend-number {
+            font-weight: bold;
+            color: #111;
+            font-size: 16px;
+            margin-bottom: 3px;
+        }
+        .last-msg {
+            color: #667781;
+            font-size: 13px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* Chat Screen */
+        .chat-header {
+            background: #075e54;
+            color: #fff;
+            padding: 12px 15px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .back-btn {
+            background: none;
+            border: none;
+            color: #fff;
+            font-size: 20px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .chat-messages {
+            flex: 1;
+            padding: 15px;
+            overflow-y: auto;
+            background: #efeae2;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .msg {
+            max-width: 75%;
+            padding: 9px 13px;
+            border-radius: 8px;
+            font-size: 14px;
+            line-height: 1.4;
+            word-wrap: break-word;
+        }
+        .msg.sent {
+            background: #d9fdd3;
+            align-self: flex-end;
+            border-top-right-radius: 0;
+        }
+        .msg.received {
+            background: #ffffff;
+            align-self: flex-start;
+            border-top-left-radius: 0;
+        }
+        .msg-time {
+            font-size: 10px;
+            color: #667781;
+            text-align: right;
+            margin-top: 4px;
+        }
+        .chat-input-area {
+            padding: 10px;
+            background: #f0f2f5;
+            display: flex;
+            gap: 8px;
+        }
+        .chat-input-area input {
+            flex: 1;
+            padding: 11px 15px;
+            border: none;
+            border-radius: 20px;
+            outline: none;
+            font-size: 15px;
+        }
+        .send-btn {
+            background: #075e54;
+            color: #fff;
+            border: none;
+            padding: 0 18px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <!-- Login Screen -->
+    <div id="loginScreen" class="screen active">
+        <div class="login-box">
+            <h2>App Login</h2>
+            <div class="input-group">
+                <label>Phone Number</label>
+                <input type="tel" id="loginPhone" placeholder="Enter phone number">
+            </div>
+            <div class="input-group">
+                <label>Password</label>
+                <input type="password" id="loginPass" placeholder="Enter password">
+            </div>
+            <button class="btn" onclick="handleLogin()">Login / Register</button>
+            <div id="loginError" class="error-msg"></div>
+        </div>
+    </div>
+
+    <!-- Home Screen -->
+    <div id="homeScreen" class="screen">
+        <div class="header">
+            <h3 id="currentUserDisplay">Chats</h3>
+            <button class="header-btn" onclick="logout()">Logout</button>
+        </div>
+        <div class="new-chat-bar">
+            <input type="tel" id="targetPhoneInput" placeholder="Enter number to message...">
+            <button onclick="startChatWithNumber()">Chat</button>
+        </div>
+        <div id="friendListContainer" class="friend-list"></div>
+    </div>
+
+    <!-- Chat Screen -->
+    <div id="chatScreen" class="screen">
+        <div class="chat-header">
+            <button class="back-btn" onclick="goBackHome()">&larr;</button>
+            <h3 id="chatTargetName">Number</h3>
+        </div>
+        <div id="chatMessagesContainer" class="chat-messages"></div>
+        <div class="chat-input-area">
+            <input type="text" id="messageInput" placeholder="Type a message..." onkeypress="handleEnter(event)">
+            <button class="send-btn" onclick="sendMessage()">Send</button>
+        </div>
+    </div>
+</div>
+
+<!-- Firebase SDKs -->
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getDatabase, ref, set, get, child, push, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+    // TODO: Replace with your Firebase configuration
+    const firebaseConfig = {
+        apiKey: "YOUR_API_KEY",
+        authDomain: "YOUR_AUTH_DOMAIN",
+        databaseURL: "YOUR_DATABASE_URL",
+        projectId: "YOUR_PROJECT_ID",
+        storageBucket: "YOUR_STORAGE_BUCKET",
+        messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+        appId: "YOUR_APP_ID"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    let currentUser = localStorage.getItem('chatApp_currentUser') || null;
+    let activeChatPartner = null;
+    let messagesUnsubscribe = null;
+
+    window.onload = function() {
+        if (currentUser) {
+            showHomeScreen();
+        }
+    };
+
+    window.handleLogin = async function() {
+        const phone = document.getElementById('loginPhone').value.trim();
+        const pass = document.getElementById('loginPass').value.trim();
+        const errorEl = document.getElementById('loginError');
+
+        if (!phone || !pass) {
+            errorEl.textContent = 'Phone number and password are required.';
+            return;
+        }
+
+        const userRef = ref(db, 'users/' + phone);
+        const snapshot = await get
