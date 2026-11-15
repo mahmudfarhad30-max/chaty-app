@@ -326,15 +326,14 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getDatabase, ref, set, get, child, push, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-    // TODO: Replace with your Firebase configuration
     const firebaseConfig = {
-        apiKey: "YOUR_API_KEY",
-        authDomain: "YOUR_AUTH_DOMAIN",
-        databaseURL: "YOUR_DATABASE_URL",
-        projectId: "YOUR_PROJECT_ID",
-        storageBucket: "YOUR_STORAGE_BUCKET",
-        messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-        appId: "YOUR_APP_ID"
+        apiKey: "AIzaSyA6OaT_Byxdym5F5EkrBQHlfKwPai5uKVA",
+        authDomain: "my-cet-apas.firebaseapp.com",
+        databaseURL: "https://my-cet-apas-default-rtdb.firebaseio.com",
+        projectId: "my-cet-apas",
+        storageBucket: "my-cet-apas.firebasestorage.app",
+        messagingSenderId: "707932206149",
+        appId: "1:707932206149:web:cbe7d8a52f23e488d1df2c"
     };
 
     const app = initializeApp(firebaseConfig);
@@ -342,7 +341,6 @@
 
     let currentUser = localStorage.getItem('chatApp_currentUser') || null;
     let activeChatPartner = null;
-    let messagesUnsubscribe = null;
 
     window.onload = function() {
         if (currentUser) {
@@ -360,5 +358,159 @@
             return;
         }
 
-        const userRef = ref(db, 'users/' + phone);
-        const snapshot = await get
+        try {
+            const userRef = ref(db, 'users/' + phone);
+            const snapshot = await get(userRef);
+            
+            if (snapshot.exists()) {
+                const userData = snapshot.val();
+                if (userData.password === pass) {
+                    currentUser = phone;
+                    localStorage.setItem('chatApp_currentUser', phone);
+                    errorEl.textContent = '';
+                    showHomeScreen();
+                } else {
+                    errorEl.textContent = 'Incorrect password.';
+                }
+            } else {
+                await set(userRef, { password: pass, createdAt: Date.now() });
+                currentUser = phone;
+                localStorage.setItem('chatApp_currentUser', phone);
+                errorEl.textContent = '';
+                showHomeScreen();
+            }
+        } catch (err) {
+            errorEl.textContent = 'Connection error. Please try again.';
+        }
+    };
+
+    function showHomeScreen() {
+        document.getElementById('loginScreen').classList.remove('active');
+        document.getElementById('homeScreen').classList.add('active');
+        document.getElementById('chatScreen').classList.remove('active');
+        document.getElementById('currentUserDisplay').textContent = 'Chats: ' + currentUser;
+        loadFriendList();
+    }
+
+    window.logout = function() {
+        localStorage.removeItem('chatApp_currentUser');
+        currentUser = null;
+        document.getElementById('homeScreen').classList.remove('active');
+        document.getElementById('loginScreen').classList.add('active');
+        document.getElementById('loginPhone').value = '';
+        document.getElementById('loginPass').value = '';
+    }
+
+    window.startChatWithNumber = function() {
+        const targetPhone = document.getElementById('targetPhoneInput').value.trim();
+        if (!targetPhone) return;
+        if (targetPhone === currentUser) {
+            alert("You cannot chat with yourself.");
+            return;
+        }
+        document.getElementById('targetPhoneInput').value = '';
+        openChat(targetPhone);
+    }
+
+    function getChatId(user1, user2) {
+        return user1 < user2 ? `${user1}_${user2}` : `${user2}_${user1}`;
+    }
+
+    function loadFriendList() {
+        const container = document.getElementById('friendListContainer');
+        const chatsRef = ref(db, 'user-chats/' + currentUser);
+
+        onValue(chatsRef, (snapshot) => {
+            container.innerHTML = '';
+            if (!snapshot.exists()) {
+                container.innerHTML = '<div class="empty-state">No chats yet. Enter a number above to start messaging!</div>';
+                return;
+            }
+
+            const chats = snapshot.val();
+            Object.keys(chats).forEach(partnerPhone => {
+                const lastMsg = chats[partnerPhone].lastMessage || '';
+                const div = document.createElement('div');
+                div.className = 'friend-item';
+                div.onclick = () => openChat(partnerPhone);
+                div.innerHTML = `
+                    <div class="avatar">${partnerPhone.charAt(0)}</div>
+                    <div class="friend-info">
+                        <div class="friend-number">${partnerPhone}</div>
+                        <div class="last-msg">${lastMsg}</div>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+        });
+    }
+
+    window.openChat = function(partnerPhone) {
+        activeChatPartner = partnerPhone;
+        document.getElementById('homeScreen').classList.remove('active');
+        document.getElementById('chatScreen').classList.add('active');
+        document.getElementById('chatTargetName').textContent = partnerPhone;
+
+        const chatId = getChatId(currentUser, activeChatPartner);
+        const messagesRef = ref(db, 'messages/' + chatId);
+        const msgContainer = document.getElementById('chatMessagesContainer');
+
+        onValue(messagesRef, (snapshot) => {
+            msgContainer.innerHTML = '';
+            if (!snapshot.exists()) return;
+
+            const messages = snapshot.val();
+            Object.values(messages).forEach(msg => {
+                const div = document.createElement('div');
+                div.className = 'msg ' + (msg.sender === currentUser ? 'sent' : 'received');
+                
+                const timeStr = new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                div.innerHTML = `
+                    <div>${msg.text}</div>
+                    <div class="msg-time">${timeStr}</div>
+                `;
+                msgContainer.appendChild(div);
+            });
+            msgContainer.scrollTop = msgContainer.scrollHeight;
+        });
+    }
+
+    window.goBackHome = function() {
+        activeChatPartner = null;
+        document.getElementById('chatScreen').classList.remove('active');
+        document.getElementById('homeScreen').classList.add('active');
+        loadFriendList();
+    }
+
+    window.sendMessage = function() {
+        const input = document.getElementById('messageInput');
+        const text = input.value.trim();
+        if (!text || !activeChatPartner) return;
+
+        const chatId = getChatId(currentUser, activeChatPartner);
+        const messagesRef = ref(db, 'messages/' + chatId);
+        const newMessageRef = push(messagesRef);
+
+        const msgData = {
+            sender: currentUser,
+            text: text,
+            timestamp: Date.now()
+        };
+
+        set(newMessageRef, msgData);
+
+        set(ref(db, `user-chats/${currentUser}/${activeChatPartner}`), { lastMessage: text, timestamp: Date.now() });
+        set(ref(db, `user-chats/${activeChatPartner}/${currentUser}`), { lastMessage: text, timestamp: Date.now() });
+
+        input.value = '';
+    }
+
+    window.handleEnter = function(e) {
+        if (e.key === 'Enter') {
+            sendMessage();
+        }
+    }
+</script>
+
+</body>
+</html>
