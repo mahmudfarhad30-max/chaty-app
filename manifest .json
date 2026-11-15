@@ -1,0 +1,12 @@
+{
+  "background_color": "#ffffff",
+  "dir": "ltr",
+  "display": "standalone",
+  "name": "chaty",
+  "orientation": "any",
+  "scope": "/",
+  "short_name": "Chaty",
+  "start_url": "/",
+  "theme_color": "#ffffff",
+  "description": "Chaty messaging app"
+}
