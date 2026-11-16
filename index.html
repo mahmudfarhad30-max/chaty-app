@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -21,7 +21,7 @@
         }
         .container {
             width: 100%;
-            max-width: 420px;
+            max-width: 480px;
             height: 100vh;
             max-height: 750px;
             background: #fff;
@@ -36,11 +36,9 @@
             height: 100%;
             width: 100%;
         }
-        .active {
+        .screen.active {
             display: flex;
         }
-        
-        /* Login Screen */
         .login-box {
             padding: 40px 25px;
             display: flex;
@@ -53,14 +51,14 @@
             text-align: center;
             color: #075e54;
             margin-bottom: 30px;
-            font-size: 26px;
+            font-size: 24px;
         }
         .input-group {
-            margin-bottom: 18px;
+            margin-bottom: 15px;
         }
         .input-group label {
             display: block;
-            margin-bottom: 6px;
+            margin-bottom: 5px;
             color: #333;
             font-size: 14px;
             font-weight: 600;
@@ -84,22 +82,20 @@
             border: none;
             border-radius: 6px;
             font-size: 16px;
-            font-weight: bold;
             cursor: pointer;
+            font-weight: bold;
             margin-top: 10px;
         }
         .btn:hover {
             background: #054c44;
         }
         .error-msg {
-            color: #d93025;
+            color: #d32f2f;
             font-size: 13px;
             text-align: center;
             margin-top: 10px;
             min-height: 18px;
         }
-
-        /* Header */
         .header {
             background: #075e54;
             color: #fff;
@@ -120,8 +116,6 @@
             cursor: pointer;
             font-size: 13px;
         }
-
-        /* New Chat Bar */
         .new-chat-bar {
             padding: 10px;
             background: #f0f2f5;
@@ -141,14 +135,12 @@
             background: #128c7e;
             color: #fff;
             border: none;
-            padding: 0 16px;
             border-radius: 20px;
+            padding: 0 16px;
             cursor: pointer;
             font-weight: bold;
             font-size: 14px;
         }
-
-        /* Friend List */
         .friend-list {
             flex: 1;
             overflow-y: auto;
@@ -179,7 +171,7 @@
             justify-content: center;
             align-items: center;
             font-weight: bold;
-            font-size: 18px;
+            font-size: 16px;
             margin-right: 12px;
         }
         .friend-info {
@@ -189,7 +181,7 @@
         .friend-number {
             font-weight: bold;
             color: #111;
-            font-size: 16px;
+            font-size: 15px;
             margin-bottom: 3px;
         }
         .last-msg {
@@ -199,8 +191,14 @@
             overflow: hidden;
             text-overflow: ellipsis;
         }
-
-        /* Chat Screen */
+        .chat-screen {
+            display: none;
+            flex-direction: column;
+            height: 100%;
+        }
+        .chat-screen.active {
+            display: flex;
+        }
         .chat-header {
             background: #075e54;
             color: #fff;
@@ -235,7 +233,7 @@
             word-wrap: break-word;
         }
         .msg.sent {
-            background: #d9fdd3;
+            background: #dcf8c6;
             align-self: flex-end;
             border-top-right-radius: 0;
         }
@@ -281,7 +279,7 @@
     <!-- Login Screen -->
     <div id="loginScreen" class="screen active">
         <div class="login-box">
-            <h2>App Login</h2>
+            <h2>Chatty Login</h2>
             <div class="input-group">
                 <label>Phone Number</label>
                 <input type="tel" id="loginPhone" placeholder="Enter phone number">
@@ -290,8 +288,33 @@
                 <label>Password</label>
                 <input type="password" id="loginPass" placeholder="Enter password">
             </div>
-            <button class="btn" onclick="handleLogin()">Login / Register</button>
+            <button class="btn" onclick="handleLogin()">Login</button>
             <div id="loginError" class="error-msg"></div>
+            
+            <p style="text-align: center; margin-top: 15px; font-size: 14px; color: #555;">
+                অ্যাকাউন্ট নেই? <a href="#" onclick="showRegisterScreen()" style="color: #075e54; font-weight: bold;">Register করুন</a>
+            </p>
+        </div>
+    </div>
+
+    <!-- Register Screen -->
+    <div id="registerScreen" class="screen">
+        <div class="login-box">
+            <h2>Create Account</h2>
+            <div class="input-group">
+                <label>Phone Number</label>
+                <input type="tel" id="regPhone" placeholder="Enter phone number">
+            </div>
+            <div class="input-group">
+                <label>Password</label>
+                <input type="password" id="regPass" placeholder="Enter password">
+            </div>
+            <button class="btn" onclick="handleRegister()">Register</button>
+            <div id="regError" class="error-msg"></div>
+            
+            <p style="text-align: center; margin-top: 15px; font-size: 14px; color: #555;">
+                ইতিমধ্যে অ্যাকাউন্ট আছে? <a href="#" onclick="showLoginScreen()" style="color: #075e54; font-weight: bold;">Login করুন</a>
+            </p>
         </div>
     </div>
 
@@ -311,7 +334,7 @@
     <!-- Chat Screen -->
     <div id="chatScreen" class="screen">
         <div class="chat-header">
-            <button class="back-btn" onclick="goBackHome()">&larr;</button>
+            <button class="back-btn" onclick="goBackHome()">&#8592;</button>
             <h3 id="chatTargetName">Number</h3>
         </div>
         <div id="chatMessagesContainer" class="chat-messages"></div>
@@ -326,21 +349,23 @@
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getDatabase, ref, set, get, child, push, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+    import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
     const firebaseConfig = {
-        apiKey: "AIzaSyA6OaT_Byxdym5F5EkrBQHlfKwPai5uKVA",
+        apiKey: "AlzaSyA60aT_Ryxdyn5F5EkrBQHlFkWPa5uKVA",
         authDomain: "my-cet-apas.firebaseapp.com",
         databaseURL: "https://my-cet-apas-default-rtdb.firebaseio.com",
         projectId: "my-cet-apas",
-        storageBucket: "my-cet-apas.firebasestorage.app",
+        storageBucket: "my-cet-apas.appspot.com",
         messagingSenderId: "707932206149",
-        appId: "1:707932206149:web:cbe7d8a52f23e488d1df2c"
+        appId: "1:707932206149:web:cbe7d8a32f23e408d1df2c"
     };
 
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
+    const auth = getAuth(app);
 
-    let currentUser = localStorage.getItem('chatApp_currentUser') || null;
+    let currentUser = localStorage.getItem('chatApp_currentuser') || null;
     let activeChatPartner = null;
 
     window.onload = function() {
@@ -348,61 +373,86 @@
             showHomeScreen();
         }
     };
+
+    window.showLoginScreen = function() {
+        document.getElementById('registerScreen').classList.remove('active');
+        document.getElementById('loginScreen').classList.add('active');
+    }
+
+    window.showRegisterScreen = function() {
+        document.getElementById('loginScreen').classList.remove('active');
+        document.getElementById('registerScreen').classList.add('active');
+    }
+
     window.handleLogin = async function() {
-    const phone = document.getElementById('loginPhone').value.trim();
-    const pass = document.getElementById('loginPass').value;
-    const errorEl = document.getElementById('loginError');
+        const phone = document.getElementById('loginPhone').value.trim();
+        const pass = document.getElementById('loginPass').value;
+        const errorEl = document.getElementById('loginError');
 
-    if (!phone || !pass) {
-        errorEl.textContent = 'Phone number and password are required.';
-        return;
-    }
-
-    const email = phone + "@chatty.app";
-
-    try {
-        await signInWithEmailAndPassword(auth, email, pass);
-        currentUser = phone;
-        localStorage.setItem('chatApp_currentUser', phone);
-        errorEl.textContent = '';
-        showHomeScreen();
-    } catch (error) {
-        if (error.code === 'auth/user-not-found' || error.code === 'auth/invalid-credential') {
-            try {
-                await createUserWithEmailAndPassword(auth, email, pass);
-                const userRef = ref(db, 'users/' + phone);
-                await set(userRef, { 
-                    password: pass, 
-                    createdAt: Date.now() 
-                });
-                currentUser = phone;
-                localStorage.setItem('chatApp_currentUser', phone);
-                errorEl.textContent = '';
-                showHomeScreen();
-            } catch (regError) {
-                errorEl.textContent = 'Registration error: ' + regError.message;
-            }
-        } else {
-            errorEl.textContent = 'Login error: ' + error.message;
+        if (!phone || !pass) {
+            errorEl.textContent = "Phone number and password are required.";
+            return;
         }
-    }
-};
+
+        const email = phone + "@chatty.app";
+        try {
+            await signInWithEmailAndPassword(auth, email, pass);
+            currentUser = phone;
+            localStorage.setItem('chatApp_currentuser', phone);
+            errorEl.textContent = '';
+            showHomeScreen();
+        } catch (error) {
+            errorEl.textContent = "Login error: " + error.message;
+        }
+    };
+
+    window.handleRegister = async function() {
+        const phone = document.getElementById('regPhone').value.trim();
+        const pass = document.getElementById('regPass').value;
+        const errorEl = document.getElementById('regError');
+
+        if (!phone || !pass) {
+            errorEl.textContent = "Phone number and password are required.";
+            return;
+        }
+
+        const email = phone + "@chatty.app";
+        try {
+            await createUserWithEmailAndPassword(auth, email, pass);
+            
+            const userRef = ref(db, 'users/' + phone);
+            await set(userRef, {
+                password: pass,
+                createdAt: Date.now()
+            });
+
+            currentUser = phone;
+            localStorage.setItem('chatApp_currentuser', phone);
+            errorEl.textContent = '';
+            showHomeScreen();
+        } catch (error) {
+            errorEl.textContent = "Registration error: " + error.message;
+        }
+    };
+
     function showHomeScreen() {
         document.getElementById('loginScreen').classList.remove('active');
-        document.getElementById('homeScreen').classList.add('active');
+        document.getElementById('registerScreen').classList.remove('active');
         document.getElementById('chatScreen').classList.remove('active');
+        document.getElementById('homeScreen').classList.add('active');
         document.getElementById('currentUserDisplay').textContent = 'Chats: ' + currentUser;
         loadFriendList();
     }
 
     window.logout = function() {
-        localStorage.removeItem('chatApp_currentUser');
+        localStorage.removeItem('chatApp_currentuser');
         currentUser = null;
         document.getElementById('homeScreen').classList.remove('active');
+        document.getElementById('chatScreen').classList.remove('active');
         document.getElementById('loginScreen').classList.add('active');
         document.getElementById('loginPhone').value = '';
         document.getElementById('loginPass').value = '';
-    }
+    };
 
     window.startChatWithNumber = function() {
         const targetPhone = document.getElementById('targetPhoneInput').value.trim();
@@ -413,7 +463,7 @@
         }
         document.getElementById('targetPhoneInput').value = '';
         openChat(targetPhone);
-    }
+    };
 
     function getChatId(user1, user2) {
         return user1 < user2 ? `${user1}_${user2}` : `${user2}_${user1}`;
@@ -424,15 +474,15 @@
         const chatsRef = ref(db, 'user-chats/' + currentUser);
 
         onValue(chatsRef, (snapshot) => {
-            container.innerHTML = '';
+            container.innerHTML = "";
             if (!snapshot.exists()) {
-                container.innerHTML = '<div class="empty-state">No chats yet. Enter a number above to start messaging!</div>';
+                container.innerHTML = `<div class="empty-state">No chats yet. Enter a number above to start messaging!</div>`;
                 return;
             }
 
             const chats = snapshot.val();
             Object.keys(chats).forEach(partnerPhone => {
-                const lastMsg = chats[partnerPhone].lastMessage || '';
+                const lastMsg = chats[partnerPhone].lastMessage || "";
                 const div = document.createElement('div');
                 div.className = 'friend-item';
                 div.onclick = () => openChat(partnerPhone);
@@ -459,7 +509,7 @@
         const msgContainer = document.getElementById('chatMessagesContainer');
 
         onValue(messagesRef, (snapshot) => {
-            msgContainer.innerHTML = '';
+            msgContainer.innerHTML = "";
             if (!snapshot.exists()) return;
 
             const messages = snapshot.val();
@@ -476,14 +526,14 @@
             });
             msgContainer.scrollTop = msgContainer.scrollHeight;
         });
-    }
+    };
 
     window.goBackHome = function() {
         activeChatPartner = null;
         document.getElementById('chatScreen').classList.remove('active');
         document.getElementById('homeScreen').classList.add('active');
         loadFriendList();
-    }
+    };
 
     window.sendMessage = function() {
         const input = document.getElementById('messageInput');
@@ -492,7 +542,7 @@
 
         const chatId = getChatId(currentUser, activeChatPartner);
         const messagesRef = ref(db, 'messages/' + chatId);
-        const newMessageRef = push(messagesRef);
+        const rawMessageRef = push(messagesRef);
 
         const msgData = {
             sender: currentUser,
@@ -500,26 +550,29 @@
             timestamp: Date.now()
         };
 
-        set(newMessageRef, msgData);
+        set(rawMessageRef, msgData);
 
         set(ref(db, `user-chats/${currentUser}/${activeChatPartner}`), { lastMessage: text, timestamp: Date.now() });
         set(ref(db, `user-chats/${activeChatPartner}/${currentUser}`), { lastMessage: text, timestamp: Date.now() });
 
         input.value = '';
-    }
+    };
 
     window.handleEnter = function(e) {
         if (e.key === 'Enter') {
             sendMessage();
         }
-        <script>
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('./sw.js')
-        .then((reg) => console.log('Service Worker registered!'))
-        .catch((err) => console.log('Service Worker registration failed: ', err));
-    });
-  }
+    };
+</script>
+
+<script>
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('./sw.js')
+            .then(() => console.log('Service Worker registered!'))
+            .catch((err) => console.log('Service Worker registration failed: ', err));
+        });
+    }
 </script>
 </body>
 </html>
