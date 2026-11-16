@@ -11,12 +11,12 @@
   "description": "Chaty messaging app",
   "icons": [
     {
-      "src": "images/launchericon-192x192.png",
+      "src": "assets/launchericon-192x192.png",
       "sizes": "192x192",
       "type": "image/png"
     },
     {
-      "src": "images/launchericon-512x512.png",
+      "src": "assets/launchericon-512x512.png",
       "sizes": "512x512",
       "type": "image/png"
     }
