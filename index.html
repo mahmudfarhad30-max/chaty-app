@@ -242,12 +242,20 @@
             align-self: flex-start;
             border-top-left-radius: 0;
         }
-        .msg-time {
-            font-size: 10px;
-            color: #667781;
-            text-align: right;
-            margin-top: 4px;
-        }
+     .msg-time {
+  font-size: 10px;
+  color: #667781;
+  text-align: right;
+  margin-top: 4px;
+}
+.tick {
+  font-size: 12px;
+  margin-left: 4px;
+  color: #667781;
+}
+.tick.seen {
+  color: #53bdeb;
+}
         .chat-input-area {
             padding: 10px;
             background: #f0f2f5;
@@ -498,65 +506,84 @@
         });
     }
 
-    window.openChat = function(partnerPhone) {
-        activeChatPartner = partnerPhone;
-        document.getElementById('homeScreen').classList.remove('active');
-        document.getElementById('chatScreen').classList.add('active');
-        document.getElementById('chatTargetName').textContent = partnerPhone;
+ window.openChat = function(partnerPhone) {
+  activeChatPartner = partnerPhone;
+  document.getElementById('homeScreen').classList.remove('active');
+  document.getElementById('chatScreen').classList.add('active');
+  document.getElementById('chatTargetName').textContent = partnerPhone;
 
-        const chatId = getChatId(currentUser, activeChatPartner);
-        const messagesRef = ref(db, 'messages/' + chatId);
-        const msgContainer = document.getElementById('chatMessagesContainer');
+  const chatId = getChatId(currentUser, activeChatPartner);
+  const messagesRef = ref(db, 'messages/' + chatId);
+  const msgContainer = document.getElementById('chatMessagesContainer');
 
-        onValue(messagesRef, (snapshot) => {
-            msgContainer.innerHTML = "";
-            if (!snapshot.exists()) return;
+  onValue(messagesRef, (snapshot) => {
+    msgContainer.innerHTML = '';
+    if (!snapshot.exists()) return;
 
-            const messages = snapshot.val();
-            Object.values(messages).forEach(msg => {
-                const div = document.createElement('div');
-                div.className = 'msg ' + (msg.sender === currentUser ? 'sent' : 'received');
-                
-                const timeStr = new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-                div.innerHTML = `
-                    <div>${msg.text}</div>
-                    <div class="msg-time">${timeStr}</div>
-                `;
-                msgContainer.appendChild(div);
-            });
-            msgContainer.scrollTop = msgContainer.scrollHeight;
-        });
-    };
+    snapshot.forEach((childSnap) => {
+      const msg = childSnap.val();
+      const msgKey = childSnap.key;
+      const isMe = String(msg.sender) === String(currentUser);
 
-    window.goBackHome = function() {
-        activeChatPartner = null;
-        document.getElementById('chatScreen').classList.remove('active');
-        document.getElementById('homeScreen').classList.add('active');
-        loadFriendList();
-    };
+      if (!isMe && msg.status !== 'seen') {
+        set(ref(db, 'messages/' + chatId + '/' + msgKey + '/status'), 'seen');
+      }
 
-    window.sendMessage = function() {
-        const input = document.getElementById('messageInput');
-        const text = input.value.trim();
-        if (!text || !activeChatPartner) return;
+      const div = document.createElement('div');
+      div.className = 'msg ' + (isMe ? 'sent' : 'received');
 
-        const chatId = getChatId(currentUser, activeChatPartner);
-        const messagesRef = ref(db, 'messages/' + chatId);
-        const rawMessageRef = push(messagesRef);
+      let tickHtml = '';
+      if (isMe) {
+        if (msg.status === 'seen') {
+          tickHtml = '<span class="tick seen">&#10003;&#10003;</span>';
+        } else if (msg.status === 'delivered') {
+          tickHtml = '<span class="tick">&#10003;&#10003;</span>';
+        } else {
+          tickHtml = '<span class="tick">&#10003;</span>';
+        }
+      }
 
-        const msgData = {
-            sender: currentUser,
-            text: text,
-            timestamp: Date.now()
-        };
+      const timeStr = new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      div.innerHTML = `
+        <div>${msg.text}</div>
+        <div class="msg-time">${timeStr} ${tickHtml}</div>
+      `;
+      msgContainer.appendChild(div);
+    });
+    msgContainer.scrollTop = msgContainer.scrollHeight;
+  });
+};
 
-        set(rawMessageRef, msgData);
+window.goBackHome = function() {
+  activeChatPartner = null;
+  document.getElementById('chatScreen').classList.remove('active');
+  document.getElementById('homeScreen').classList.add('active');
+  loadFriendList();
+};
 
-        set(ref(db, `user-chats/${currentUser}/${activeChatPartner}`), { lastMessage: text, timestamp: Date.now() });
-        set(ref(db, `user-chats/${activeChatPartner}/${currentUser}`), { lastMessage: text, timestamp: Date.now() });
+window.sendMessage = function() {
+  const input = document.getElementById('messageInput');
+  const text = input.value.trim();
+  if (!text || !activeChatPartner) return;
 
-        input.value = '';
-    };
+  const chatId = getChatId(currentUser, activeChatPartner);
+  const messagesRef = ref(db, 'messages/' + chatId);
+  const rawMessageRef = push(messagesRef);
+
+  const msgData = {
+    sender: currentUser,
+    text: text,
+    timestamp: Date.now(),
+    status: 'delivered'
+  };
+
+  set(rawMessageRef, msgData);
+
+  set(ref(db, 'user-chats/' + currentUser + '/' + activeChatPartner), { lastMessage: text, timestamp: Date.now() });
+  set(ref(db, 'user-chats/' + activeChatPartner + '/' + currentUser), { lastMessage: text, timestamp: Date.now() });
+
+  input.value = '';
+};
 
     window.handleEnter = function(e) {
         if (e.key === 'Enter') {
