@@ -348,43 +348,47 @@
             showHomeScreen();
         }
     };
-
     window.handleLogin = async function() {
-        const phone = document.getElementById('loginPhone').value.trim();
-        const pass = document.getElementById('loginPass').value.trim();
-        const errorEl = document.getElementById('loginError');
+    const phone = document.getElementById('loginPhone').value.trim();
+    const pass = document.getElementById('loginPass').value;
+    const errorEl = document.getElementById('loginError');
 
-        if (!phone || !pass) {
-            errorEl.textContent = 'Phone number and password are required.';
-            return;
-        }
+    if (!phone || !pass) {
+        errorEl.textContent = 'Phone number and password are required.';
+        return;
+    }
 
-        try {
-            const userRef = ref(db, 'users/' + phone);
-            const snapshot = await get(userRef);
-            
-            if (snapshot.exists()) {
-                const userData = snapshot.val();
-                if (userData.password === pass) {
-                    currentUser = phone;
-                    localStorage.setItem('chatApp_currentUser', phone);
-                    errorEl.textContent = '';
-                    showHomeScreen();
-                } else {
-                    errorEl.textContent = 'Incorrect password.';
-                }
-            } else {
-                await set(userRef, { password: pass, createdAt: Date.now() });
+    const email = phone + "@chatty.app";
+
+    try {
+        await signInWithEmailAndPassword(auth, email, pass);
+        currentUser = phone;
+        localStorage.setItem('chatApp_currentUser', phone);
+        errorEl.textContent = '';
+        showHomeScreen();
+    } catch (error) {
+        if (error.code === 'auth/user-not-found' || error.code === 'auth/invalid-credential') {
+            try {
+                await createUserWithEmailAndPassword(auth, email, pass);
+                const userRef = ref(db, 'users/' + phone);
+                await set(userRef, { 
+                    password: pass, 
+                    createdAt: Date.now() 
+                });
                 currentUser = phone;
                 localStorage.setItem('chatApp_currentUser', phone);
                 errorEl.textContent = '';
                 showHomeScreen();
+            } catch (regError) {
+                errorEl.textContent = 'Registration error: ' + regError.message;
             }
-        } catch (err) {
-            errorEl.textContent = 'Connection error. Please try again.';
+        } else {
+            errorEl.textContent = 'Login error: ' + error.message;
         }
-    };
-
+    } catch (err) {
+        errorEl.textContent = 'Connection error. Please try again.';
+    }
+};
     function showHomeScreen() {
         document.getElementById('loginScreen').classList.remove('active');
         document.getElementById('homeScreen').classList.add('active');
