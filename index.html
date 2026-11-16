@@ -351,15 +351,15 @@
     import { getDatabase, ref, set, get, child, push, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
     import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
-    const firebaseConfig = {
-     
-       apiKey: "AIzaSyA60aT_Ryxdyn5F5EkrBQHlFkWPa5uKVA", authDomain: "my-cet-apas.firebaseapp.com",
-        databaseURL: "https://my-cet-apas-default-rtdb.firebaseio.com",
-        projectId: "my-cet-apas",
-        storageBucket: "my-cet-apas.appspot.com",
-        messagingSenderId: "707932206149",
-        appId: "1:707932206149:web:cbe7d8a32f23e408d1df2c"
-    };
+ const firebaseConfig = {
+  apiKey: "AIzaSyA6OaT_Byxdym5F5EkrBQHlfKwPai5uKVA",
+  authDomain: "my-cet-apas.firebaseapp.com",
+  databaseURL: "https://my-cet-apas-default-rtdb.firebaseio.com",
+  projectId: "my-cet-apas",
+  storageBucket: "my-cet-apas.firebasestorage.app",
+  messagingSenderId: "707932206149",
+  appId: "1:707932206149:web:cbe7d8a52f23e488d1df2c"
+};
 
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
