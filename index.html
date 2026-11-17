@@ -7,7 +7,6 @@
 
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
 
     <style>
         :root {
@@ -79,7 +78,7 @@
             color: var(--text-secondary);
             font-size: 20px;
             cursor: pointer;
-            padding: 6px;
+            padding: 8px;
         }
 
         .search-container {
@@ -177,7 +176,6 @@
             font-weight: bold;
         }
 
-        /* মোডাল এবং মেনু স্টাইল */
         .modal {
             display: none;
             position: fixed;
@@ -185,7 +183,7 @@
             background: rgba(0,0,0,0.7);
             justify-content: center;
             align-items: center;
-            z-index: 1000;
+            z-index: 9999;
         }
 
         .modal.active {
@@ -233,12 +231,12 @@
     <!-- হোম স্ক্রিন -->
     <div id="homeScreen" class="screen active">
         <div class="home-header">
-            <div class="my-profile-avatar" id="headerAvatar" onclick="openProfileModal()">0</div>
+            <div class="my-profile-avatar" id="headerAvatar">0</div>
             <div class="app-title">Chatty</div>
-            <button class="menu-icon-btn" onclick="openMenuModal()">⋮</button>
+            <button class="menu-icon-btn" id="menuBtn">⋮</button>
         </div>
         <div class="search-container">
-            <input type="text" id="searchInput" class="search-box" placeholder="Search or enter user ID to chat..." onkeypress="handleSearch(event)">
+            <input type="text" id="searchInput" class="search-box" placeholder="Search or enter user ID to chat...">
         </div>
         <div id="friendListContainer" class="friend-list"></div>
     </div>
@@ -246,33 +244,33 @@
     <!-- চ্যাট স্ক্রিন -->
     <div id="chatScreen" class="screen chat-screen">
         <div class="chat-header">
-            <button class="back-btn" onclick="goBackHome()">←</button>
+            <button class="back-btn" id="backBtn">←</button>
             <div class="avatar" id="chatHeaderAvatar">U</div>
             <div style="flex: 1;">
                 <div id="chatTargetName" style="font-weight: bold; font-size: 15px;">Chat</div>
                 <div id="typingStatus" style="font-size: 10px; color: var(--accent);">online</div>
             </div>
-            <button class="action-icon-btn" onclick="startAudioCall()" title="Audio Call">📞</button>
-            <button class="action-icon-btn" onclick="startVideoCall()" title="Video Call">📹</button>
-            <button class="action-icon-btn" onclick="document.getElementById('mediaFileInput').click()" title="Share Media">📎</button>
-            <input type="file" id="mediaFileInput" style="display: none;" onchange="handleMediaUpload(this)">
+            <button class="action-icon-btn" id="audioCallBtn" title="Audio Call">📞</button>
+            <button class="action-icon-btn" id="videoCallBtn" title="Video Call">📹</button>
+            <button class="action-icon-btn" id="attachBtn" title="Share Media">📎</button>
+            <input type="file" id="mediaFileInput" style="display: none;">
         </div>
         <div id="chatMessagesContainer" class="chat-messages"></div>
         <div class="chat-input-area">
-            <input type="text" id="messageInput" class="message-input" placeholder="Type a message..." onkeypress="handleMessageEnter(event)">
-            <button class="send-btn" onclick="sendMessage()">Send</button>
+            <input type="text" id="messageInput" class="message-input" placeholder="Type a message...">
+            <button class="send-btn" id="sendBtn">Send</button>
         </div>
     </div>
 
-    <!-- মেনু মোডাল (গ্রুপ, সেটিংস, প্রিমিয়াম ইত্যাদি) -->
+    <!-- মেনু মোডাল -->
     <div id="menuModal" class="modal">
         <div class="modal-content">
             <h3 style="margin-bottom: 5px;">Menu & Options</h3>
-            <button class="modal-btn" onclick="openGroupCreate()">👥 Create New Group</button>
-            <button class="modal-btn" onclick="openSettings()">⚙️ Settings</button>
-            <button class="modal-btn" onclick="openPremiumScreen()">⭐ Go Premium</button>
-            <button class="modal-btn logout-btn" onclick="logoutUser()">🚪 Logout</button>
-            <button class="modal-btn" style="background:transparent; text-align:center; justify-content:center;" onclick="closeModals()">Close</button>
+            <button class="modal-btn" id="groupCreateBtn">👥 Create New Group</button>
+            <button class="modal-btn" id="settingsBtn">⚙️ Settings</button>
+            <button class="modal-btn" id="premiumBtn">⭐ Go Premium</button>
+            <button class="modal-btn logout-btn" id="logoutBtn">🚪 Logout</button>
+            <button class="modal-btn" style="background:transparent; text-align:center; justify-content:center;" id="closeMenuBtn">Close</button>
         </div>
     </div>
 
@@ -281,8 +279,8 @@
         <div class="modal-content" style="text-align: center;">
             <h2>⭐ Chatty Premium</h2>
             <p style="color: var(--text-secondary); font-size: 14px;">Unlock unlimited media sharing, custom themes, and ad-free experience!</p>
-            <button class="send-btn" onclick="alert('Subscription feature activated successfully!')">Upgrade Now</button>
-            <button class="modal-btn" style="background:transparent; justify-content:center;" onclick="closeModals()">Back</button>
+            <button class="send-btn" id="upgradeBtn">Upgrade Now</button>
+            <button class="modal-btn" style="background:transparent; justify-content:center;" id="closePremiumBtn">Back</button>
         </div>
     </div>
 
@@ -290,192 +288,193 @@
     <div id="settingsModal" class="modal">
         <div class="modal-content">
             <h3>Settings</h3>
-            <label style="font-size: 13px; color: var(--text-secondary);">Change Username / Profile Name:</label>
+            <label style="font-size: 13px; color: var(--text-secondary);">Change Username:</label>
             <input type="text" id="settingsUsernameInput" class="message-input">
-            <button class="send-btn" onclick="saveSettings()">Save Changes</button>
-            <button class="modal-btn" style="background:transparent; justify-content:center;" onclick="closeModals()">Cancel</button>
+            <button class="send-btn" id="saveSettingsBtn">Save Changes</button>
+            <button class="modal-btn" style="background:transparent; justify-content:center;" id="closeSettingsBtn">Cancel</button>
         </div>
     </div>
 
     <script>
-        const firebaseConfig = {
-            apiKey: "AIzaSyA6DsT_8ysdywGF5EkrBQH1FKwFuls0kVA",
-            authDomain: "my-cet-apas.firebaseapp.com",
-            databaseURL: "https://my-cet-apas-default-rtdb.firebaseio.com",
-            projectId: "my-cet-apas",
-            storageBucket: "my-cet-apas.appspot.com",
-            messagingSenderId: "707932206149",
-            appId: "1:707932206149:web:cbe7d8a52f23e488d1df2c"
-        };
-
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.database();
-
-        let currentUser = localStorage.getItem('chatty_current_user');
-        if (!currentUser) {
-            currentUser = prompt("Enter your phone number or unique ID to login:") || "user_" + Math.floor(Math.random()*1000);
-            localStorage.setItem('chatty_current_user', currentUser);
-        }
-
-        document.getElementById('headerAvatar').innerText = currentUser.charAt(0).toUpperCase();
-
-        let activeChatContact = null;
-
-        function goBackHome() {
-            document.getElementById('chatScreen').classList.remove('active');
-            document.getElementById('homeScreen').classList.add('active');
-            activeChatContact = null;
-        }
-
-        function openChat(contactId) {
-            if (!contactId) return;
-            activeChatContact = contactId;
-            document.getElementById('homeScreen').classList.remove('active');
-            document.getElementById('chatScreen').classList.add('active');
-            document.getElementById('chatTargetName').innerText = contactId;
-            document.getElementById('chatHeaderAvatar').innerText = contactId.charAt(0).toUpperCase();
-            loadMessages();
-        }
-
-        function handleSearch(e) {
-            if (e.key === 'Enter') {
-                const query = document.getElementById('searchInput').value.trim();
-                if (query && query !== currentUser) {
-                    openChat(query);
-                }
-            }
-        }
-
-        function getChatRoomId(user1, user2) {
-            return user1 < user2 ? `${user1}_${user2}` : `${user2}_${user1}`;
-        }
-
-        function sendMessage() {
-            const input = document.getElementById('messageInput');
-            const text = input.value.trim();
-            if (!text || !activeChatContact) return;
-
-            const roomId = getChatRoomId(currentUser, activeChatContact);
-            const messageData = {
-                sender: currentUser,
-                text: text,
-                timestamp: Date.now()
+        document.addEventListener('DOMContentLoaded', function() {
+            const firebaseConfig = {
+                apiKey: "AIzaSyA6DsT_8ysdywGF5EkrBQH1FKwFuls0kVA",
+                authDomain: "my-cet-apas.firebaseapp.com",
+                databaseURL: "https://my-cet-apas-default-rtdb.firebaseio.com",
+                projectId: "my-cet-apas",
+                storageBucket: "my-cet-apas.appspot.com",
+                messagingSenderId: "707932206149",
+                appId: "1:707932206149:web:cbe7d8a52f23e488d1df2c"
             };
 
-            db.ref('chats/' + roomId).push(messageData);
-            db.ref('user-chats/' + currentUser + '/' + activeChatContact).set({ contact: activeChatContact });
-            db.ref('user-chats/' + activeChatContact + '/' + currentUser).set({ contact: currentUser });
+            if (!firebase.apps.length) {
+                firebase.initializeApp(firebaseConfig);
+            }
+            const db = firebase.database();
 
-            input.value = "";
-        }
+            let currentUser = localStorage.getItem('chatty_current_user');
+            if (!currentUser) {
+                currentUser = prompt("Enter your phone number or unique ID to login:") || "user_" + Math.floor(Math.random()*1000);
+                localStorage.setItem('chatty_current_user', currentUser);
+            }
 
-        function handleMessageEnter(e) {
-            if (e.key === 'Enter') sendMessage();
-        }
+            document.getElementById('headerAvatar').innerText = currentUser.charAt(0).toUpperCase();
+            let activeChatContact = null;
 
-        function loadMessages() {
-            if (!activeChatContact) return;
-            const roomId = getChatRoomId(currentUser, activeChatContact);
-            const container = document.getElementById('chatMessagesContainer');
+            window.goBackHome = function() {
+                document.getElementById('chatScreen').classList.remove('active');
+                document.getElementById('homeScreen').classList.add('active');
+                activeChatContact = null;
+            }
+
+            window.openChat = function(contactId) {
+                if (!contactId) return;
+                activeChatContact = contactId;
+                document.getElementById('homeScreen').classList.remove('active');
+                document.getElementById('chatScreen').classList.add('active');
+                document.getElementById('chatTargetName').innerText = contactId;
+                document.getElementById('chatHeaderAvatar').innerText = contactId.charAt(0).toUpperCase();
+                loadMessages();
+            }
+
+            // ইভেন্ট লিসেনার্স
+            document.getElementById('backBtn').addEventListener('click', goBackHome);
+            document.getElementById('menuBtn').addEventListener('click', () => document.getElementById('menuModal').classList.add('active'));
+            document.getElementById('closeMenuBtn').addEventListener('click', () => document.getElementById('menuModal').classList.remove('active'));
             
-            db.ref('chats/' + roomId).on('value', (snapshot) => {
-                container.innerHTML = "";
-                if (!snapshot.exists()) {
-                    container.innerHTML = `<div style="text-align:center; color:var(--text-secondary); margin-top:20px;">No messages yet. Say hello!</div>`;
-                    return;
-                }
-                snapshot.forEach((childSnapshot) => {
-                    const msg = childSnapshot.val();
-                    const msgDiv = document.createElement('div');
-                    msgDiv.className = `msg ${msg.sender === currentUser ? 'sent' : 'received'}`;
-                    msgDiv.innerText = msg.text;
-                    container.appendChild(msgDiv);
-                });
-                container.scrollTop = container.scrollHeight;
-            });
-        }
+            document.getElementById('headerAvatar').addEventListener('click', () => alert("Your ID: " + currentUser));
 
-        function loadFriendList() {
-            const container = document.getElementById('friendListContainer');
-            db.ref('user-chats/' + currentUser).on('value', (snapshot) => {
-                container.innerHTML = "";
-                if (!snapshot.exists()) {
-                    container.innerHTML = `<div style="padding:30px; text-align:center; color:var(--text-secondary);">No chats yet. Search a user ID above to chat!</div>`;
-                    return;
+            document.getElementById('groupCreateBtn').addEventListener('click', () => {
+                document.getElementById('menuModal').classList.remove('active');
+                const groupName = prompt("Enter Group Name:");
+                if (groupName) alert("গ্রুপ '" + groupName + "' সফলভাবে তৈরি হয়েছে!");
+            });
+
+            document.getElementById('settingsBtn').addEventListener('click', () => {
+                document.getElementById('menuModal').classList.remove('active');
+                document.getElementById('settingsUsernameInput').value = currentUser;
+                document.getElementById('settingsModal').classList.add('active');
+            });
+            document.getElementById('closeSettingsBtn').addEventListener('click', () => document.getElementById('settingsModal').classList.remove('active'));
+            document.getElementById('saveSettingsBtn').addEventListener('click', () => {
+                const newName = document.getElementById('settingsUsernameInput').value.trim();
+                if (newName) {
+                    localStorage.setItem('chatty_current_user', newName);
+                    currentUser = newName;
+                    document.getElementById('headerAvatar').innerText = currentUser.charAt(0).toUpperCase();
+                    alert("সেটিংস সফলভাবে আপডেট হয়েছে!");
+                    document.getElementById('settingsModal').classList.remove('active');
                 }
-                const chats = snapshot.val();
-                for (let chatId in chats) {
-                    const contact = chats[chatId].contact;
-                    container.innerHTML += `
-                        <div class="friend-item" onclick="openChat('${contact}')">
+            });
+
+            document.getElementById('premiumBtn').addEventListener('click', () => {
+                document.getElementById('menuModal').classList.remove('active');
+                document.getElementById('premiumModal').classList.add('active');
+            });
+            document.getElementById('closePremiumBtn').addEventListener('click', () => document.getElementById('premiumModal').classList.remove('active'));
+            document.getElementById('upgradeBtn').addEventListener('click', () => alert('Subscription feature activated successfully!'));
+
+            document.getElementById('logoutBtn').addEventListener('click', () => {
+                if (confirm("আপনি কি নিশ্চিতভাবে লগ আউট করতে চান?")) {
+                    localStorage.removeItem('chatty_current_user');
+                    location.reload();
+                }
+            });
+
+            document.getElementById('audioCallBtn').addEventListener('click', () => alert(activeChatContact + "-এর সাথে অডিও কল শুরু হচ্ছে..."));
+            document.getElementById('videoCallBtn').addEventListener('click', () => alert(activeChatContact + "-এর সাথে ভিডিও কল শুরু হচ্ছে..."));
+            document.getElementById('attachBtn').addEventListener('click', () => document.getElementById('mediaFileInput').click());
+            
+            document.getElementById('mediaFileInput').addEventListener('change', function() {
+                if (this.files && this.files[0]) {
+                    alert("মিডিয়া ফাইল সিলেক্ট হয়েছে: " + this.files[0].name);
+                }
+            });
+
+            document.getElementById('searchInput').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    const query = this.value.trim();
+                    if (query && query !== currentUser) {
+                        openChat(query);
+                    }
+                }
+            });
+
+            function getChatRoomId(user1, user2) {
+                return user1 < user2 ? `${user1}_${user2}` : `${user2}_${user1}`;
+            }
+
+            function sendMessage() {
+                const input = document.getElementById('messageInput');
+                const text = input.value.trim();
+                if (!text || !activeChatContact) return;
+
+                const roomId = getChatRoomId(currentUser, activeChatContact);
+                const messageData = {
+                    sender: currentUser,
+                    text: text,
+                    timestamp: Date.now()
+                };
+
+                db.ref('chats/' + roomId).push(messageData);
+                db.ref('user-chats/' + currentUser + '/' + activeChatContact).set({ contact: activeChatContact });
+                db.ref('user-chats/' + activeChatContact + '/' + currentUser).set({ contact: currentUser });
+
+                input.value = "";
+            }
+
+            document.getElementById('sendBtn').addEventListener('click', sendMessage);
+            document.getElementById('messageInput').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') sendMessage();
+            });
+
+            function loadMessages() {
+                if (!activeChatContact) return;
+                const roomId = getChatRoomId(currentUser, activeChatContact);
+                const container = document.getElementById('chatMessagesContainer');
+                
+                db.ref('chats/' + roomId).on('value', (snapshot) => {
+                    container.innerHTML = "";
+                    if (!snapshot.exists()) {
+                        container.innerHTML = `<div style="text-align:center; color:var(--text-secondary); margin-top:20px;">No messages yet. Say hello!</div>`;
+                        return;
+                    }
+                    snapshot.forEach((childSnapshot) => {
+                        const msg = childSnapshot.val();
+                        const msgDiv = document.createElement('div');
+                        msgDiv.className = `msg ${msg.sender === currentUser ? 'sent' : 'received'}`;
+                        msgDiv.innerText = msg.text;
+                        container.appendChild(msgDiv);
+                    });
+                    container.scrollTop = container.scrollHeight;
+                });
+            }
+
+            function loadFriendList() {
+                const container = document.getElementById('friendListContainer');
+                db.ref('user-chats/' + currentUser).on('value', (snapshot) => {
+                    container.innerHTML = "";
+                    if (!snapshot.exists()) {
+                        container.innerHTML = `<div style="padding:30px; text-align:center; color:var(--text-secondary);">No chats yet. Search a user ID above to chat!</div>`;
+                        return;
+                    }
+                    const chats = snapshot.val();
+                    for (let chatId in chats) {
+                        const contact = chats[chatId].contact;
+                        const item = document.createElement('div');
+                        item.className = 'friend-item';
+                        item.innerHTML = `
                             <div class="avatar">${contact.charAt(0).toUpperCase()}</div>
                             <div style="font-weight:bold; font-size:15px; color:var(--text-primary);">${contact}</div>
-                        </div>`;
-                }
-            });
-        }
-
-        // কল এবং মিডিয়া ফিচার ফাংশন
-        function startAudioCall() {
-            alert(activeChatContact . "-এর সাথে অডিও কল শুরু হচ্ছে...");
-        }
-
-        function startVideoCall() {
-            alert(activeChatContact . "-এর সাথে ভিডিও কল শুরু হচ্ছে...");
-        }
-
-        function handleMediaUpload(input) {
-            if (input.files && input.files[0]) {
-                const fileName = input.files[0].name;
-                alert("মিডিয়া ফাইল সিলেক্ট হয়েছে: " . fileName . " (এটি চ্যাটে পাঠানো যাবে)");
+                        `;
+                        item.addEventListener('click', () => openChat(contact));
+                        container.appendChild(item);
+                    }
+                });
             }
-        }
 
-        // মেনু ও মোডাল কন্ট্রোল
-        function openMenuModal() { document.getElementById('menuModal').classList.add('active'); }
-        function openProfileModal() { alert("Your ID: " . currentUser); }
-        function closeModals() {
-            document.querySelectorAll('.modal').forEach(m => m.classList.remove('active'));
-        }
-
-        function openGroupCreate() {
-            closeModals();
-            const groupName = prompt("Enter Group Name:");
-            if (groupName) {
-                alert("গ্রুপ '" . groupName . "' সফলভাবে তৈরি হয়েছে!");
-            }
-        }
-
-        function openSettings() {
-            closeModals();
-            document.getElementById('settingsUsernameInput').value = currentUser;
-            document.getElementById('settingsModal').classList.add('active');
-        }
-
-        function saveSettings() {
-            const newName = document.getElementById('settingsUsernameInput').value.trim();
-            if (newName) {
-                localStorage.setItem('chatty_current_user', newName);
-                currentUser = newName;
-                document.getElementById('headerAvatar').innerText = currentUser.charAt(0).toUpperCase();
-                alert("সেটিংস সফলভাবে আপডেট হয়েছে!");
-                closeModals();
-            }
-        }
-
-        function openPremiumScreen() {
-            closeModals();
-            document.getElementById('premiumModal').classList.add('active');
-        }
-
-        function logoutUser() {
-            if (confirm("আপনি কি নিশ্চিতভাবে লগ আউট করতে চান?")) {
-                localStorage.removeItem('chatty_current_user');
-                location.reload();
-            }
-        }
-
-        loadFriendList();
+            loadFriendList();
+        });
     </script>
 </body>
 </html>
