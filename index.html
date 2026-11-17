@@ -4,8 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chatty - Premium Web Chat</title>
-    
-    <!-- ফায়ারবেস সিডিএন স্কিপ্টসমূহ -->
+
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
@@ -20,23 +19,6 @@
             --msg-received: #202c33;
             --text-primary: #e9edef;
             --text-secondary: #8696a0;
-        }
-
-        body.theme-cyberpunk {
-            --bg-main: #0d0221;
-            --bg-header: #190933;
-            --bg-input: #261447;
-            --accent: #ff007f;
-            --msg-sent: #540d6e;
-            --msg-received: #190933;
-        }
-        body.theme-royal {
-            --bg-main: #0a192f;
-            --bg-header: #112240;
-            --bg-input: #233554;
-            --accent: #64ffda;
-            --msg-sent: #1d4ed8;
-            --msg-received: #112240;
         }
 
         * {
@@ -59,6 +41,7 @@
             height: 100vh;
             width: 100%;
         }
+
         .screen.active {
             display: flex;
         }
@@ -69,46 +52,37 @@
             display: flex;
             align-items: center;
             gap: 14px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.3);
         }
+
         .my-profile-avatar {
             width: 42px;
             height: 42px;
             border-radius: 50%;
             background: var(--accent);
-            color: #111b21;
+            color: #fff;
             display: flex;
             align-items: center;
             justify-content: center;
             font-weight: bold;
-            font-size: 18px;
             cursor: pointer;
-            overflow: hidden;
-            border: 2px solid var(--accent);
-            flex-shrink: 0;
         }
-        .my-profile-avatar img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
+
         .app-title {
             font-size: 20px;
-            font-weight: 700;
-            color: var(--text-primary);
+            font-weight: bold;
         }
 
         .search-container {
-            padding: 10px 14px;
+            padding: 8px 12px;
             background: var(--bg-main);
-            border-bottom: 1px solid #222d34;
         }
+
         .search-box {
             width: 100%;
-            padding: 9px 15px;
-            border-radius: 20px;
+            padding: 8px 12px 8px 32px;
+            background: var(--bg-input);
             border: none;
-            background: var(--bg-header);
+            border-radius: 8px;
             color: var(--text-primary);
             font-size: 14px;
             outline: none;
@@ -117,504 +91,155 @@
         .friend-list {
             flex: 1;
             overflow-y: auto;
+            background: var(--bg-main);
         }
-        .friend-item {
-            padding: 12px 16px;
-            border-bottom: 1px solid #222d34;
-            display: flex;
-            align-items: center;
-            gap: 14px;
-            cursor: pointer;
-        }
-        .friend-item:hover {
-            background: rgba(255,255,255,0.03);
-        }
-        .avatar {
-            width: 46px;
-            height: 46px;
-            background: var(--accent);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            color: #111b21;
-            font-size: 18px;
-            overflow: hidden;
-            flex-shrink: 0;
-        }
-        .avatar img {
+
+        .chat-screen {
+            display: none;
+            flex-direction: column;
+            height: 100vh;
             width: 100%;
-            height: 100%;
-            object-fit: cover;
+            background: #0b141a;
         }
-        .friend-info {
-            flex: 1;
-            overflow: hidden;
-        }
-        .friend-name {
-            font-weight: 600;
-            font-size: 16px;
-            color: var(--text-primary);
-        }
-        .last-msg {
-            font-size: 13px;
-            color: var(--text-secondary);
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            margin-top: 3px;
+
+        .chat-screen.active {
+            display: flex;
         }
 
         .chat-header {
             background: var(--bg-header);
-            padding: 10px 14px;
+            padding: 10px 16px;
             display: flex;
             align-items: center;
             gap: 12px;
         }
+
         .back-btn {
             background: none;
             border: none;
-            color: var(--text-primary);
+            color: var(--text-secondary);
             font-size: 20px;
             cursor: pointer;
         }
+
         .chat-messages {
             flex: 1;
+            padding: 16px;
             overflow-y: auto;
-            padding: 15px;
             display: flex;
             flex-direction: column;
-            gap: 10px;
-        }
-        .msg {
-            padding: 8px 12px;
-            border-radius: 10px;
-            max-width: 72%;
-            position: relative;
-            word-wrap: break-word;
-            font-size: 14px;
-            line-height: 1.4;
-        }
-        .msg.sent {
-            background: var(--msg-sent);
-            align-self: flex-end;
-            border-top-right-radius: 2px;
-        }
-        .msg.received {
-            background: var(--msg-received);
-            align-self: flex-start;
-            border-top-left-radius: 2px;
-        }
-        .msg-time {
-            font-size: 10px;
-            color: var(--text-secondary);
-            margin-top: 4px;
-            display: inline-block;
-            float: right;
-            margin-left: 10px;
-        }
-        .reaction-badge {
-            position: absolute;
-            bottom: -10px;
-            right: 8px;
-            background: var(--bg-header);
-            border: 1px solid #374248;
-            border-radius: 12px;
-            padding: 1px 6px;
-            font-size: 12px;
-        }
-        .typing-indicator {
-            font-size: 12px;
-            color: var(--accent);
-            padding: 4px 16px;
-            font-style: italic;
-            min-height: 22px;
+            gap: 8px;
         }
 
         .chat-input-area {
-            padding: 8px 10px;
             background: var(--bg-header);
+            padding: 10px 16px;
             display: flex;
-            gap: 8px;
             align-items: center;
+            gap: 10px;
         }
-        .chat-input-area input[type="text"] {
+
+        .message-input {
             flex: 1;
-            padding: 10px 14px;
-            border: none;
             background: var(--bg-input);
-            color: var(--text-primary);
-            border-radius: 22px;
-            outline: none;
-            font-size: 14px;
-        }
-        .action-icon-btn {
-            background: none;
             border: none;
-            color: var(--text-secondary);
-            font-size: 20px;
-            cursor: pointer;
-            padding: 4px;
+            padding: 10px 14px;
+            border-radius: 8px;
+            color: var(--text-primary);
+            outline: none;
         }
+
         .send-btn {
             background: var(--accent);
-            color: #111b21;
             border: none;
-            padding: 0 16px;
-            height: 38px;
-            border-radius: 20px;
-            cursor: pointer;
-            font-weight: bold;
-            font-size: 13px;
-        }
-
-        .voice-recording-ui {
-            display: none;
-            align-items: center;
-            background: var(--bg-header);
-            flex: 1;
-            padding: 0 8px;
-            gap: 12px;
-        }
-        .recording-timer {
-            color: #ff4d4d;
-            font-weight: bold;
-            font-size: 14px;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-        .recording-dot {
-            width: 10px;
-            height: 10px;
-            background: #ff4d4d;
-            border-radius: 50%;
-            animation: blink 1s infinite;
-        }
-        @keyframes blink { 50% { opacity: 0.2; } }
-
-        .modal-overlay {
-            display: none;
-            position: fixed;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.75);
-            z-index: 100;
-            justify-content: center;
-            align-items: flex-end;
-        }
-        .modal-overlay.show {
-            display: flex;
-        }
-        .profile-drawer {
-            background: var(--bg-header);
-            width: 100%;
-            max-width: 480px;
-            border-top-left-radius: 22px;
-            border-top-right-radius: 22px;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-            max-height: 90vh;
-            overflow-y: auto;
-        }
-        .profile-pic-large {
-            width: 90px;
-            height: 90px;
-            border-radius: 50%;
-            background: var(--accent);
-            margin: 0 auto;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 34px;
-            font-weight: bold;
-            color: #111b21;
-            overflow: hidden;
-            border: 3px solid var(--accent);
-        }
-        .profile-pic-large img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-        .photo-btn-group {
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-        }
-        .small-pill-btn {
-            background: var(--bg-input);
-            color: var(--text-primary);
-            border: 1px solid #374248;
-            padding: 6px 12px;
-            border-radius: 16px;
-            font-size: 12px;
-            cursor: pointer;
-        }
-        .settings-card {
-            background: var(--bg-main);
-            padding: 12px 14px;
-            border-radius: 12px;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-        .settings-input {
-            width: 100%;
-            padding: 8px 12px;
+            color: white;
+            padding: 10px 16px;
             border-radius: 8px;
-            border: 1px solid #2a3942;
-            background: var(--bg-input);
-            color: var(--text-primary);
-            outline: none;
-        }
-        .premium-btn {
-            background: linear-gradient(135deg, #f59e0b, #d97706);
-            color: #fff;
-            border: none;
-            padding: 12px;
-            border-radius: 12px;
-            font-weight: bold;
-            font-size: 15px;
             cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-        }
-        .logout-main-btn {
-            background: rgba(239, 68, 68, 0.15);
-            color: #f87171;
-            border: 1px solid #ef4444;
-            padding: 11px;
-            border-radius: 12px;
             font-weight: bold;
-            font-size: 14px;
-            cursor: pointer;
-            margin-top: 6px;
-        }
-
-        .premium-screen {
-            background: linear-gradient(180deg, #1a1200 0%, #111b21 100%);
-            padding: 20px;
-            justify-content: center;
-            align-items: center;
-        }
-        .premium-box {
-            background: #1e2428;
-            border: 1px solid #f59e0b;
-            border-radius: 18px;
-            padding: 24px;
-            width: 100%;
-            max-width: 380px;
-        }
-        .tab-row {
-            display: flex;
-            border-bottom: 1px solid #333;
-            margin-bottom: 18px;
-        }
-        .tab-btn {
-            flex: 1;
-            padding: 10px;
-            background: none;
-            border: none;
-            color: var(--text-secondary);
-            font-weight: bold;
-            cursor: pointer;
-            border-bottom: 2px solid transparent;
-        }
-        .tab-btn.active {
-            color: #f59e0b;
-            border-bottom-color: #f59e0b;
         }
     </style>
 </head>
 <body>
 
-    <!-- ১. হোম স্ক্রিন -->
     <div id="homeScreen" class="screen active">
         <div class="home-header">
-            <div class="my-profile-avatar" id="headerAvatar" onclick="openProfileModal()">0</div>
+            <div class="my-profile-avatar" id="headerAvatar">0</div>
             <div class="app-title">Chatty</div>
         </div>
         <div class="search-container">
-            <input type="text" id="searchInput" class="search-box" placeholder="Search or pick contact..." onkeyup="filterOrStartChat()">
+            <input type="text" id="searchInput" class="search-box" placeholder="Search or pick contact...">
         </div>
         <div id="friendListContainer" class="friend-list"></div>
     </div>
 
-    <!-- ২. চ্যাট স্ক্রিন -->
     <div id="chatScreen" class="screen">
         <div class="chat-header">
-            <button class="back-btn" onclick="goBackHome()">⬅</button>
-            <div class="avatar" id="chatHeaderAvatar" style="width:36px; height:36px; font-size:15px;">U</div>
-            <div style="flex:1;">
-                <div id="chatTargetName" style="font-weight:bold; font-size:15px;">User</div>
-                <div id="disappearingStatus" style="font-size:10px; color:var(--accent);"></div>
-            </div>
-            <button class="action-icon-btn" onclick="toggleDisappearingTimer()" title="Self-Destruct Timer">⏱️</button>
-            <button class="action-icon-btn" onclick="shareAppOrChat()" title="Share App">🔗</button>
+            <button class="back-btn" onclick="goBackHome()">←</button>
+            <div id="chatTargetName" style="font-weight: bold; font-size: 16px;">Chat</div>
         </div>
-
         <div id="chatMessagesContainer" class="chat-messages"></div>
-        <div id="typingStatus" class="typing-indicator"></div>
-
         <div class="chat-input-area">
-            <input type="file" id="mediaFileInput" style="display:none;" onchange="handleMediaUpload(this)">
-            <button class="action-icon-btn" onclick="document.getElementById('mediaFileInput').click()" title="Attach File/Image">📎</button>
-            
-            <div id="defaultInputContainer" style="display:flex; flex:1; gap:8px; align-items:center;">
-                <input type="text" id="messageInput" placeholder="Message" onkeypress="handleEnter(event)" oninput="notifyTyping()">
-                <button class="send-btn" onclick="sendMessage()">Send</button>
-            </div>
-
-            <div id="voiceRecordingUi" class="voice-recording-ui">
-                <button class="action-icon-btn" onclick="cancelVoiceRecording()" style="color:#ff4d4d;" title="Delete Recording">🗑️</button>
-                <div class="recording-timer"><span class="recording-dot"></span><span id="recordingTimer">0:00</span></div>
-                <div style="color:var(--text-secondary); font-size:12px; flex:1; text-align:right;">Release to send</div>
-            </div>
-
-            <button class="action-icon-btn" id="voiceRecordBtn" 
-                onmousedown="startVoiceRecording(event)" 
-                ontouchstart="startVoiceRecording(event)" 
-                title="Hold to Record">🎤</button>
+            <input type="text" id="messageInput" class="message-input" placeholder="Type a message">
+            <button class="send-btn" onclick="sendMessage()">Send</button>
         </div>
     </div>
 
-    <!-- ৩. প্রোফাইল ও সেটিংস পপআপ প্যানেল -->
-    <div id="profileModal" class="modal-overlay" onclick="closeProfileModalOnOutside(event)">
-        <div class="profile-drawer">
-            <div style="display:flex; justify-content:space-between; align-items:center;">
-                <h3 style="font-size:17px;">Profile & Settings</h3>
-                <button onclick="closeProfileModal()" style="background:none; border:none; color:var(--text-secondary); font-size:20px; cursor:pointer;">✕</button>
-            </div>
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyA6DsT_8ysdywGF5EkrBQH1FKwFuls0kVA",
+            authDomain: "my-cet-apas.firebaseapp.com",
+            databaseURL: "https://my-cet-apas-default-rtdb.firebaseio.com",
+            projectId: "my-cet-apas",
+            storageBucket: "my-cet-apas.appspot.com",
+            messagingSenderId: "707932206149",
+            appId: "1:707932206149:web:cbe7d8a52f23e488d1df2c"
+        };
 
-            <div class="profile-pic-large" id="modalAvatarPreview">0</div>
-            <div class="photo-btn-group">
-                <input type="file" id="galleryPhotoInput" accept="image/*" style="display:none;" onchange="updateProfilePhoto(this)">
-                <input type="file" id="cameraPhotoInput" accept="image/*" capture="user" style="display:none;" onchange="updateProfilePhoto(this)">
-                <button class="small-pill-btn" onclick="document.getElementById('galleryPhotoInput').click()">🖼️ Gallery</button>
-                <button class="small-pill-btn" onclick="document.getElementById('cameraPhotoInput').click()">📷 Camera</button>
-            </div>
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
 
-            <div class="settings-card">
-                <label style="font-size:12px; color:var(--text-secondary);">Display Name</label>
-                <div style="display:flex; gap:8px;">
-                    <input type="text" id="displayNameInput" class="settings-input" placeholder="Enter your name">
-                    <button class="send-btn" onclick="saveProfileName()">Save</button>
-                </div>
-            </div>
-
-            <div class="settings-card">
-                <label style="font-size:12px; color:var(--text-secondary);">App Theme</label>
-                <div style="display:flex; gap:8px;">
-                    <button class="small-pill-btn" onclick="setAppTheme('default')">Dark Green</button>
-                    <button class="small-pill-btn" onclick="setAppTheme('cyberpunk')">Cyberpunk</button>
-                    <button class="small-pill-btn" onclick="setAppTheme('royal')">Royal Blue</button>
-                </div>
-            </div>
-
-            <button class="premium-btn" onclick="openPremiumScreen()">
-                <span>👑</span> <span>Premium Vault & Secret Login</span>
-            </button>
-
-            <button class="logout-main-btn" onclick="logoutFromChatty()">
-                🚪 Logout from Chatty
-            </button>
-        </div>
-    </div>
-
-    <!-- ৪. প্রিমিয়াম জিমেইল লগইন ও রেজিস্টার পেজ -->
-    <div id="premiumScreen" class="screen premium-screen">
-        <div class="premium-box">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-                <h3 style="color:#f59e0b;">👑 Premium Access</h3>
-                <button onclick="closePremiumScreen()" style="background:none; border:none; color:#aaa; font-size:18px; cursor:pointer;">✕</button>
-            </div>
-
-            <div class="tab-row">
-                <button id="tabLoginBtn" class="tab-btn active" onclick="switchPremiumTab('login')">Login</button>
-                <button id="tabRegisterBtn" class="tab-btn" onclick="switchPremiumTab('register')">Register</button>
-            </div>
-
-            <div id="premiumAuthForm" style="display:flex; flex-direction:column; gap:12px;">
-                <input type="email" id="premGmailInput" class="settings-input" placeholder="Enter your Gmail">
-                <input type="password" id="premPassInput" class="settings-input" placeholder="Enter Password">
-                <button id="premSubmitBtn" class="premium-btn" onclick="handlePremiumAuth()">Login with Gmail</button>
-            </div>
-            <p id="premStatusMsg" style="font-size:12px; color:#00a884; margin-top:12px; text-align:center;"></p>
-        </div>
-    </div>
-
-<script>
-    // আপনার প্রজেক্টের ফায়ারবেস কনফিগারেশন[cite: 6]
-    const firebaseConfig = {
-        apiKey: "AIzaSyA6DsT_8ysdywGF5EkrBQH1FKwFuls0kVA",
-        authDomain: "my-cet-apas.firebaseapp.com",
-        databaseURL: "https://my-cet-apas-default-rtdb.firebaseio.com",
-        projectId: "my-cet-apas",
-        storageBucket: "my-cet-apas.appspot.com",
-        messagingSenderId: "707932206149",
-        appId: "1:707932206149:web:cbe7d8a52f23e488d1df2c"
-    };
-
-    // ফায়ারবেস ইনিশিয়ালাইজেশন[cite: 6]
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
-
-    // বর্তমান ইউজারের ফোন নম্বর বা আইডি (আপনার আগের সিস্টেম অনুযায়ী লোকালস্টোরেজ বা প্রম্পট থেকে সেট হবে)
-    let currentUser = localStorage.getItem('chatty_current_user');
-    if (!currentUser) {
-        currentUser = prompt("Enter your phone number or unique ID to login:") || "user_" + Math.floor(Math.random()*1000);
-        localStorage.setItem('chatty_current_user', currentUser);
-    }
-
-    let activeChatPartner = null;
-    let allChatsData = {};
-    let myProfilePic = localStorage.getItem('chatty_profile_pic') || '';
-    let myDisplayName = localStorage.getItem('chatty_display_name') || '';
-    let autoDeleteSeconds = 0;
-    let currentPremiumMode = 'login';
-
-    window.addEventListener('DOMContentLoaded', () => {
-        refreshProfileUI();
-        loadFriendList();
-        const savedTheme = localStorage.getItem('chatty_theme');
-        if (savedTheme) setAppTheme(savedTheme);
-    });
-
-    function refreshProfileUI() {
-        const headerAv = document.getElementById('headerAvatar');
-        const modalAv = document.getElementById('modalAvatarPreview');
-        const nameInput = document.getElementById('displayNameInput');
-        
-        if (nameInput) nameInput.value = myDisplayName;
-        const fallbackChar = myDisplayName ? myDisplayName.charAt(0).toUpperCase() : currentUser.charAt(0).toUpperCase();
-
-        if (myProfilePic) {
-            headerAv.innerHTML = `<img src="${myProfilePic}" alt="Profile">`;
-            modalAv.innerHTML = `<img src="${myProfilePic}" alt="Profile">`;
-        } else {
-            headerAv.textContent = fallbackChar;
-            modalAv.textContent = fallbackChar;
+        let currentUser = localStorage.getItem('chatty_current_user');
+        if (!currentUser) {
+            currentUser = prompt("Enter your phone number or unique ID to login:") || "user_" + Math.floor(Math.random()*1000);
+            localStorage.setItem('chatty_current_user', currentUser);
         }
-    }
 
-    window.openProfileModal = function() {
-        document.getElementById('profileModal').classList.add('show');
-    };
-    window.closeProfileModal = function() {
-        document.getElementById('profileModal').classList.remove('show');
-    };
-    window.closeProfileModalOnOutside = function(e) {
-        if (e.target.id === 'profileModal') closeProfileModal();
-    };
+        document.getElementById('headerAvatar').innerText = currentUser.charAt(0).toUpperCase();
 
-    window.updateProfilePhoto = function(input) {
-        const file = input.files[0];
-        if (!file) return;
-        const reader = new FileReader();
-        reader.
+        function goBackHome() {
+            document.getElementById('chatScreen').classList.remove('active');
+            document.getElementById('homeScreen').classList.add('active');
+        }
+
+        function loadFriendList() {
+            const container = document.getElementById('friendListContainer');
+            db.ref('user-chats/' + currentUser).on('value', (snapshot) => {
+                container.innerHTML = "";
+                if (!snapshot.exists()) {
+                    container.innerHTML = `<div style="padding:30px; text-align:center; color:var(--text-secondary);">No chats yet. Start a new chat!</div>`;
+                    return;
+                }
+                const chats = snapshot.val();
+                for (let chatId in chats) {
+                    container.innerHTML += `<div style="padding:15px; border-bottom:1px solid #222d34; cursor:pointer;" onclick="openChat('${chats[chatId].contact}')">${chats[chatId].contact}</div>`;
+                }
+            });
+        }
+
+        function openChat(contactId) {
+            document.getElementById('homeScreen').classList.remove('active');
+            document.getElementById('chatScreen').classList.add('active');
+            document.getElementById('chatTargetName').innerText = contactId;
+        }
+
+        function sendMessage() {
+            const input = document.getElementById('messageInput');
+            if (!input.value.trim()) return;
+            input.value = "";
+        }
+
+        loadFriendList();
+    </script>
+</body>
+</html>
