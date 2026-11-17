@@ -108,6 +108,7 @@
             display: flex;
             align-items: center;
             gap: 12px;
+            flex-shrink: 0;
         }
 
         .profile-avatar, .avatar {
@@ -122,6 +123,7 @@
             font-weight: bold;
             cursor: pointer;
             overflow: hidden;
+            flex-shrink: 0;
         }
 
         .profile-avatar img {
@@ -148,6 +150,7 @@
         .search-container {
             padding: 8px 12px;
             background: var(--bg-main);
+            flex-shrink: 0;
         }
 
         .search-box {
@@ -182,6 +185,14 @@
 
         .chat-screen {
             background: #0b141a;
+            display: none;
+            flex-direction: column;
+            height: 100vh;
+            width: 100%;
+        }
+
+        .chat-screen.active {
+            display: flex;
         }
 
         .back-btn {
@@ -199,6 +210,7 @@
             display: flex;
             flex-direction: column;
             gap: 8px;
+            background: #0b141a;
         }
 
         .msg {
@@ -221,12 +233,14 @@
             align-self: flex-start;
         }
 
+        /* চ্যাট ইনপুট এবং ভয়েস রেকর্ডার এরিয়া (WhatsApp Style) */
         .chat-input-area {
             background: var(--bg-header);
             padding: 10px 16px;
             display: flex;
             align-items: center;
             gap: 10px;
+            flex-shrink: 0;
         }
 
         .message-input {
@@ -240,14 +254,19 @@
             font-size: 14px;
         }
 
-        .send-btn {
+        .send-btn, .mic-btn {
             background: var(--accent);
             border: none;
             color: white;
-            padding: 10px 16px;
-            border-radius: 8px;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
             cursor: pointer;
-            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            flex-shrink: 0;
         }
 
         .imo-menu {
@@ -369,6 +388,7 @@
         <div id="friendListContainer" class="friend-list"></div>
     </div>
 
+    <!-- চ্যাট স্ক্রিন (ইনপুট বক্স এবং ভয়েস রেকর্ডারসহ ঠিক করা হয়েছে) -->
     <div id="chatScreen" class="screen chat-screen">
         <div class="chat-header">
             <button class="back-btn" onclick="goBackHome()">←</button>
@@ -385,7 +405,8 @@
         <div id="chatMessagesContainer" class="chat-messages"></div>
         <div class="chat-input-area">
             <input type="text" id="messageInput" class="message-input" placeholder="Type a message..." onkeypress="handleMessageEnter(event)">
-            <button class="send-btn" onclick="sendMessage()">Send</button>
+            <button class="mic-btn" onclick="toggleVoiceRecord()" title="Voice Record">🎤</button>
+            <button class="send-btn" onclick="sendMessage()" title="Send">➤</button>
         </div>
     </div>
 
@@ -408,12 +429,12 @@
         <div class="sub-modal-content">
             <h3>Profile & Settings</h3>
             <label style="font-size: 12px; color: var(--text-secondary);">Display Name:</label>
-            <input type="text" id="editName" class="message-input">
+            <input type="text" id="editName" class="message-input" style="width:100%; background:var(--bg-main);">
             <label style="font-size: 12px; color: var(--text-secondary);">Address / Bio:</label>
-            <input type="text" id="editAddress" class="message-input" placeholder="Enter your address">
+            <input type="text" id="editAddress" class="message-input" style="width:100%; background:var(--bg-main);" placeholder="Enter your address">
             <label style="font-size: 12px; color: var(--text-secondary);">Profile Picture URL:</label>
-            <input type="text" id="editPicUrl" class="message-input" placeholder="Paste image link">
-            <button class="send-btn" onclick="saveProfileSettings()">Save Changes</button>
+            <input type="text" id="editPicUrl" class="message-input" style="width:100%; background:var(--bg-main);" placeholder="Paste image link">
+            <button class="send-btn" style="width:100%; border-radius:8px;" onclick="saveProfileSettings()">Save Changes</button>
             <button class="imo-menu-btn" style="justify-content:center;" onclick="closeSettingsModal()">Cancel</button>
         </div>
     </div>
@@ -422,7 +443,7 @@
         <div class="sub-modal-content" style="text-align: center;">
             <h2>⭐ Chatty Premium</h2>
             <p style="font-size: 13px; color: var(--text-secondary);">Unlock exclusive features, higher storage, and custom themes!</p>
-            <button class="send-btn" onclick="alert('Premium access activated successfully!')">Activate Premium</button>
+            <button class="send-btn" style="width:100%; border-radius:8px;" onclick="alert('Premium access activated successfully!')">Activate Premium</button>
             <button class="imo-menu-btn" style="justify-content:center;" onclick="closePremiumModal()">Close</button>
         </div>
     </div>
@@ -633,6 +654,9 @@
         function startVideoCall() { alert("Video call starting with " + activeChatContact + "..."); }
         function handleMediaUpload(input) {
             if (input.files && input.files[0]) alert("File selected: " + input.files[0].name);
+        }
+        function toggleVoiceRecord() {
+            alert("Voice recording started... (Hold/Tap to record like WhatsApp)");
         }
 
         function openImoMenu() { document.getElementById('imoMenuModal').classList.add('active'); }
