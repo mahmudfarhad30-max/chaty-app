@@ -3,330 +3,618 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Advanced Web Chat App</title>
+    <title>Chatty - Premium Web Chat</title>
+    
+    <!-- ফায়ারবেস সিডিএন স্কিপ্টসমূহ -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+
     <style>
-        /* আগের এবং নতুন সব স্টাইল একসাথে */
-        body {
+        :root {
+            --bg-main: #111b21;
+            --bg-header: #202c33;
+            --bg-input: #2a3942;
+            --accent: #00a884;
+            --msg-sent: #005c4b;
+            --msg-received: #202c33;
+            --text-primary: #e9edef;
+            --text-secondary: #8696a0;
+        }
+
+        body.theme-cyberpunk {
+            --bg-main: #0d0221;
+            --bg-header: #190933;
+            --bg-input: #261447;
+            --accent: #ff007f;
+            --msg-sent: #540d6e;
+            --msg-received: #190933;
+        }
+        body.theme-royal {
+            --bg-main: #0a192f;
+            --bg-header: #112240;
+            --bg-input: #233554;
+            --accent: #64ffda;
+            --msg-sent: #1d4ed8;
+            --msg-received: #112240;
+        }
+
+        * {
+            box-sizing: border-box;
             margin: 0;
             padding: 0;
-            background-color: #111b21;
-            font-family: sans-serif;
-            color: #e9edef;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-main);
+            color: var(--text-primary);
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .screen {
+            display: none;
+            flex-direction: column;
+            height: 100vh;
+            width: 100%;
+        }
+        .screen.active {
+            display: flex;
+        }
+
+        .home-header {
+            background: var(--bg-header);
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+        }
+        .my-profile-avatar {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            background: var(--accent);
+            color: #111b21;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 18px;
+            cursor: pointer;
+            overflow: hidden;
+            border: 2px solid var(--accent);
+            flex-shrink: 0;
+        }
+        .my-profile-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .app-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .search-container {
+            padding: 10px 14px;
+            background: var(--bg-main);
+            border-bottom: 1px solid #222d34;
+        }
+        .search-box {
+            width: 100%;
+            padding: 9px 15px;
+            border-radius: 20px;
+            border: none;
+            background: var(--bg-header);
+            color: var(--text-primary);
+            font-size: 14px;
+            outline: none;
+        }
+
+        .friend-list {
+            flex: 1;
+            overflow-y: auto;
+        }
+        .friend-item {
+            padding: 12px 16px;
+            border-bottom: 1px solid #222d34;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            cursor: pointer;
+        }
+        .friend-item:hover {
+            background: rgba(255,255,255,0.03);
+        }
+        .avatar {
+            width: 46px;
+            height: 46px;
+            background: var(--accent);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: #111b21;
+            font-size: 18px;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+        .avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .friend-info {
+            flex: 1;
+            overflow: hidden;
+        }
+        .friend-name {
+            font-weight: 600;
+            font-size: 16px;
+            color: var(--text-primary);
+        }
+        .last-msg {
+            font-size: 13px;
+            color: var(--text-secondary);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            margin-top: 3px;
+        }
+
+        .chat-header {
+            background: var(--bg-header);
+            padding: 10px 14px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .back-btn {
+            background: none;
+            border: none;
+            color: var(--text-primary);
+            font-size: 20px;
+            cursor: pointer;
+        }
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .msg {
+            padding: 8px 12px;
+            border-radius: 10px;
+            max-width: 72%;
+            position: relative;
+            word-wrap: break-word;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+        .msg.sent {
+            background: var(--msg-sent);
+            align-self: flex-end;
+            border-top-right-radius: 2px;
+        }
+        .msg.received {
+            background: var(--msg-received);
+            align-self: flex-start;
+            border-top-left-radius: 2px;
         }
         .msg-time {
-            font-size: 9px;
-            color: #8696a0;
-            text-align: right;
-            margin-top: 3px;
+            font-size: 10px;
+            color: var(--text-secondary);
+            margin-top: 4px;
             display: inline-block;
             float: right;
-            margin-left: 8px;
+            margin-left: 10px;
         }
+        .reaction-badge {
+            position: absolute;
+            bottom: -10px;
+            right: 8px;
+            background: var(--bg-header);
+            border: 1px solid #374248;
+            border-radius: 12px;
+            padding: 1px 6px;
+            font-size: 12px;
+        }
+        .typing-indicator {
+            font-size: 12px;
+            color: var(--accent);
+            padding: 4px 16px;
+            font-style: italic;
+            min-height: 22px;
+        }
+
         .chat-input-area {
             padding: 8px 10px;
-            background: #202c33;
+            background: var(--bg-header);
             display: flex;
             gap: 8px;
             align-items: center;
-            flex-shrink: 0;
         }
         .chat-input-area input[type="text"] {
             flex: 1;
-            padding: 9px 12px;
+            padding: 10px 14px;
             border: none;
-            background: #2a3942;
-            color: #e9edef;
-            border-radius: 20px;
+            background: var(--bg-input);
+            color: var(--text-primary);
+            border-radius: 22px;
             outline: none;
-            font-size: 13px;
+            font-size: 14px;
         }
         .action-icon-btn {
             background: none;
             border: none;
-            color: #8696a0;
-            font-size: 18px;
+            color: var(--text-secondary);
+            font-size: 20px;
             cursor: pointer;
+            padding: 4px;
         }
         .send-btn {
-            background: #00a884;
+            background: var(--accent);
             color: #111b21;
             border: none;
-            padding: 0 14px;
-            height: 36px;
+            padding: 0 16px;
+            height: 38px;
             border-radius: 20px;
             cursor: pointer;
             font-weight: bold;
-            font-size: 12px;
+            font-size: 13px;
         }
-        /* নতুন ফিচারের জন্য ছোট কিছু স্টাইল */
-        .typing-indicator {
-            font-size: 11px;
-            color: #00a884;
-            padding: 2px 15px;
-            font-style: italic;
-        }
-        .reaction-picker {
+
+        .voice-recording-ui {
             display: none;
-            position: absolute;
-            background: #233138;
-            border-radius: 20px;
-            padding: 4px 8px;
-            gap: 6px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
-            z-index: 10;
+            align-items: center;
+            background: var(--bg-header);
+            flex: 1;
+            padding: 0 8px;
+            gap: 12px;
         }
-        .reaction-picker span {
+        .recording-timer {
+            color: #ff4d4d;
+            font-weight: bold;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .recording-dot {
+            width: 10px;
+            height: 10px;
+            background: #ff4d4d;
+            border-radius: 50%;
+            animation: blink 1s infinite;
+        }
+        @keyframes blink { 50% { opacity: 0.2; } }
+
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.75);
+            z-index: 100;
+            justify-content: center;
+            align-items: flex-end;
+        }
+        .modal-overlay.show {
+            display: flex;
+        }
+        .profile-drawer {
+            background: var(--bg-header);
+            width: 100%;
+            max-width: 480px;
+            border-top-left-radius: 22px;
+            border-top-right-radius: 22px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        .profile-pic-large {
+            width: 90px;
+            height: 90px;
+            border-radius: 50%;
+            background: var(--accent);
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 34px;
+            font-weight: bold;
+            color: #111b21;
+            overflow: hidden;
+            border: 3px solid var(--accent);
+        }
+        .profile-pic-large img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .photo-btn-group {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+        .small-pill-btn {
+            background: var(--bg-input);
+            color: var(--text-primary);
+            border: 1px solid #374248;
+            padding: 6px 12px;
+            border-radius: 16px;
+            font-size: 12px;
             cursor: pointer;
-            font-size: 16px;
+        }
+        .settings-card {
+            background: var(--bg-main);
+            padding: 12px 14px;
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .settings-input {
+            width: 100%;
+            padding: 8px 12px;
+            border-radius: 8px;
+            border: 1px solid #2a3942;
+            background: var(--bg-input);
+            color: var(--text-primary);
+            outline: none;
+        }
+        .premium-btn {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            color: #fff;
+            border: none;
+            padding: 12px;
+            border-radius: 12px;
+            font-weight: bold;
+            font-size: 15px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        .logout-main-btn {
+            background: rgba(239, 68, 68, 0.15);
+            color: #f87171;
+            border: 1px solid #ef4444;
+            padding: 11px;
+            border-radius: 12px;
+            font-weight: bold;
+            font-size: 14px;
+            cursor: pointer;
+            margin-top: 6px;
+        }
+
+        .premium-screen {
+            background: linear-gradient(180deg, #1a1200 0%, #111b21 100%);
+            padding: 20px;
+            justify-content: center;
+            align-items: center;
+        }
+        .premium-box {
+            background: #1e2428;
+            border: 1px solid #f59e0b;
+            border-radius: 18px;
+            padding: 24px;
+            width: 100%;
+            max-width: 380px;
+        }
+        .tab-row {
+            display: flex;
+            border-bottom: 1px solid #333;
+            margin-bottom: 18px;
+        }
+        .tab-btn {
+            flex: 1;
+            padding: 10px;
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-weight: bold;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+        }
+        .tab-btn.active {
+            color: #f59e0b;
+            border-bottom-color: #f59e0b;
         }
     </style>
 </head>
 <body>
 
-    <!-- চ্যাট ইন্টারফেসের মূল স্ট্রাকচার -->
+    <!-- ১. হোম স্ক্রিন -->
     <div id="homeScreen" class="screen active">
-        <div style="padding: 15px; background: #202c33; display: flex; justify-content: space-between; align-items: center;">
-            <h2>Chats</h2>
-            <input type="text" id="searchInput" placeholder="Search or start new chat" onkeyup="filterOrStartChat()" style="padding: 6px 12px; border-radius: 15px; border: none; background: #2a3942; color: white;">
+        <div class="home-header">
+            <div class="my-profile-avatar" id="headerAvatar" onclick="openProfileModal()">0</div>
+            <div class="app-title">Chatty</div>
         </div>
-        <div id="friendListContainer"></div>
+        <div class="search-container">
+            <input type="text" id="searchInput" class="search-box" placeholder="Search or pick contact..." onkeyup="filterOrStartChat()">
+        </div>
+        <div id="friendListContainer" class="friend-list"></div>
     </div>
 
-    <div id="chatScreen" class="screen" style="display:none; flex-direction:column; height:100vh;">
-        <div style="padding: 10px 15px; background: #202c33; display: flex; align-items: center; gap: 10px;">
-            <button onclick="goBackHome()" style="background:none; border:none; color:white; cursor:pointer;">⬅</button>
-            <h3 id="chatTargetName" style="margin:0; flex:1;"></h3>
-            <!-- শেয়ার অপশন বা বাটন -->
-            <button onclick="shareAppOrChat()" class="action-icon-btn" title="Share">🔗</button>
+    <!-- ২. চ্যাট স্ক্রিন -->
+    <div id="chatScreen" class="screen">
+        <div class="chat-header">
+            <button class="back-btn" onclick="goBackHome()">⬅</button>
+            <div class="avatar" id="chatHeaderAvatar" style="width:36px; height:36px; font-size:15px;">U</div>
+            <div style="flex:1;">
+                <div id="chatTargetName" style="font-weight:bold; font-size:15px;">User</div>
+                <div id="disappearingStatus" style="font-size:10px; color:var(--accent);"></div>
+            </div>
+            <button class="action-icon-btn" onclick="toggleDisappearingTimer()" title="Self-Destruct Timer">⏱️</button>
+            <button class="action-icon-btn" onclick="shareAppOrChat()" title="Share App">🔗</button>
         </div>
 
-        <div id="chatMessagesContainer" style="flex:1; overflow-y:auto; padding: 15px; display:flex; flex-direction:column; gap:10px;"></div>
-        
-        <!-- লাইভ টাইপিং ইন্ডিকেটর দেখানোর জায়গা -->
+        <div id="chatMessagesContainer" class="chat-messages"></div>
         <div id="typingStatus" class="typing-indicator"></div>
 
         <div class="chat-input-area">
-            <!-- ফাইল বা ছবি আপলোড করার ইনপুট (লুকানো) -->
-            <input type="file" id="mediaFileInput" style="display: none;" onchange="handleMediaUpload(this)">
-            <button class="action-icon-btn" onclick="document.getElementById('mediaFileInput').click()">📎</button>
+            <input type="file" id="mediaFileInput" style="display:none;" onchange="handleMediaUpload(this)">
+            <button class="action-icon-btn" onclick="document.getElementById('mediaFileInput').click()" title="Attach File/Image">📎</button>
             
-            <!-- ভয়েস রেকর্ড বাটন -->
-            <button class="action-icon-btn" id="voiceRecordBtn" onclick="toggleVoiceRecording()">🎤</button>
+            <div id="defaultInputContainer" style="display:flex; flex:1; gap:8px; align-items:center;">
+                <input type="text" id="messageInput" placeholder="Message" onkeypress="handleEnter(event)" oninput="notifyTyping()">
+                <button class="send-btn" onclick="sendMessage()">Send</button>
+            </div>
 
-            <input type="text" id="messageInput" placeholder="Type a message" onkeypress="handleEnter(event)" oninput="notifyTyping()">
-            <button class="send-btn" onclick="sendMessage()">Send</button>
+            <div id="voiceRecordingUi" class="voice-recording-ui">
+                <button class="action-icon-btn" onclick="cancelVoiceRecording()" style="color:#ff4d4d;" title="Delete Recording">🗑️</button>
+                <div class="recording-timer"><span class="recording-dot"></span><span id="recordingTimer">0:00</span></div>
+                <div style="color:var(--text-secondary); font-size:12px; flex:1; text-align:right;">Release to send</div>
+            </div>
+
+            <button class="action-icon-btn" id="voiceRecordBtn" 
+                onmousedown="startVoiceRecording(event)" 
+                ontouchstart="startVoiceRecording(event)" 
+                title="Hold to Record">🎤</button>
+        </div>
+    </div>
+
+    <!-- ৩. প্রোফাইল ও সেটিংস পপআপ প্যানেল -->
+    <div id="profileModal" class="modal-overlay" onclick="closeProfileModalOnOutside(event)">
+        <div class="profile-drawer">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <h3 style="font-size:17px;">Profile & Settings</h3>
+                <button onclick="closeProfileModal()" style="background:none; border:none; color:var(--text-secondary); font-size:20px; cursor:pointer;">✕</button>
+            </div>
+
+            <div class="profile-pic-large" id="modalAvatarPreview">0</div>
+            <div class="photo-btn-group">
+                <input type="file" id="galleryPhotoInput" accept="image/*" style="display:none;" onchange="updateProfilePhoto(this)">
+                <input type="file" id="cameraPhotoInput" accept="image/*" capture="user" style="display:none;" onchange="updateProfilePhoto(this)">
+                <button class="small-pill-btn" onclick="document.getElementById('galleryPhotoInput').click()">🖼️ Gallery</button>
+                <button class="small-pill-btn" onclick="document.getElementById('cameraPhotoInput').click()">📷 Camera</button>
+            </div>
+
+            <div class="settings-card">
+                <label style="font-size:12px; color:var(--text-secondary);">Display Name</label>
+                <div style="display:flex; gap:8px;">
+                    <input type="text" id="displayNameInput" class="settings-input" placeholder="Enter your name">
+                    <button class="send-btn" onclick="saveProfileName()">Save</button>
+                </div>
+            </div>
+
+            <div class="settings-card">
+                <label style="font-size:12px; color:var(--text-secondary);">App Theme</label>
+                <div style="display:flex; gap:8px;">
+                    <button class="small-pill-btn" onclick="setAppTheme('default')">Dark Green</button>
+                    <button class="small-pill-btn" onclick="setAppTheme('cyberpunk')">Cyberpunk</button>
+                    <button class="small-pill-btn" onclick="setAppTheme('royal')">Royal Blue</button>
+                </div>
+            </div>
+
+            <button class="premium-btn" onclick="openPremiumScreen()">
+                <span>👑</span> <span>Premium Vault & Secret Login</span>
+            </button>
+
+            <button class="logout-main-btn" onclick="logoutFromChatty()">
+                🚪 Logout from Chatty
+            </button>
+        </div>
+    </div>
+
+    <!-- ৪. প্রিমিয়াম জিমেইল লগইন ও রেজিস্টার পেজ -->
+    <div id="premiumScreen" class="screen premium-screen">
+        <div class="premium-box">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                <h3 style="color:#f59e0b;">👑 Premium Access</h3>
+                <button onclick="closePremiumScreen()" style="background:none; border:none; color:#aaa; font-size:18px; cursor:pointer;">✕</button>
+            </div>
+
+            <div class="tab-row">
+                <button id="tabLoginBtn" class="tab-btn active" onclick="switchPremiumTab('login')">Login</button>
+                <button id="tabRegisterBtn" class="tab-btn" onclick="switchPremiumTab('register')">Register</button>
+            </div>
+
+            <div id="premiumAuthForm" style="display:flex; flex-direction:column; gap:12px;">
+                <input type="email" id="premGmailInput" class="settings-input" placeholder="Enter your Gmail">
+                <input type="password" id="premPassInput" class="settings-input" placeholder="Enter Password">
+                <button id="premSubmitBtn" class="premium-btn" onclick="handlePremiumAuth()">Login with Gmail</button>
+            </div>
+            <p id="premStatusMsg" style="font-size:12px; color:#00a884; margin-top:12px; text-align:center;"></p>
         </div>
     </div>
 
 <script>
-    // ফায়ারবেস এবং চ্যাট লজিক ফাংশনগুলো
-    function getChatId(user1, user2) {
-        return user1 < user2 ? `${user1}_${user2}` : `${user2}_${user1}`;
-    }
-
-    function loadFriendList() {
-        const container = document.getElementById('friendListContainer');
-        onValue(ref(db, 'user-chats/' + currentUser), (snapshot) => {
-            container.innerHTML = "";
-            if (!snapshot.exists()) {
-                container.innerHTML = `<div class="empty-state" style="padding:20px; text-align:center; color:#8696a0;">No chats yet. Pick a contact above!</div>`;
-                return;
-            }
-            allChatsData = snapshot.val();
-            renderChatList(allChatsData);
-        });
-    }
-
-    function renderChatList(chats) {
-        const container = document.getElementById('friendListContainer');
-        container.innerHTML = "";
-        Object.keys(chats).forEach(partnerPhone => {
-            const lastMsg = chats[partnerPhone].lastMessage || "";
-            const displayName = savedContactNames[partnerPhone] || partnerPhone;
-            const div = document.createElement('div');
-            div.className = 'friend-item';
-            div.style.cssText = "padding: 12px 15px; border-bottom: 1px solid #222d34; display: flex; gap: 12px; cursor: pointer;";
-            div.onclick = () => openChat(partnerPhone);
-            div.innerHTML = `
-                <div class="avatar" style="width:40px; height:40px; background:#00a884; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:bold;">${displayName.charAt(0).toUpperCase()}</div>
-                <div class="friend-info">
-                    <div class="friend-number" style="font-weight:bold; color:#e9edef;">${displayName}</div>
-                    <div class="last-msg" style="font-size:12px; color:#8696a0; margin-top:3px;">${lastMsg}</div>
-                </div>
-            `;
-            container.appendChild(div);
-        });
-    }
-
-    window.filterOrStartChat = function() {
-        const query = document.getElementById('searchInput').value.toLowerCase();
-        const filtered = {};
-        Object.keys(allChatsData).forEach(phone => {
-            const name = (savedContactNames[phone] || "").toLowerCase();
-            if (phone.toLowerCase().includes(query) || name.includes(query)) {
-                filtered[phone] = allChatsData[phone];
-            }
-        });
-        renderChatList(filtered);
+    // আপনার প্রজেক্টের ফায়ারবেস কনফিগারেশন[cite: 6]
+    const firebaseConfig = {
+        apiKey: "AIzaSyA6DsT_8ysdywGF5EkrBQH1FKwFuls0kVA",
+        authDomain: "my-cet-apas.firebaseapp.com",
+        databaseURL: "https://my-cet-apas-default-rtdb.firebaseio.com",
+        projectId: "my-cet-apas",
+        storageBucket: "my-cet-apas.appspot.com",
+        messagingSenderId: "707932206149",
+        appId: "1:707932206149:web:cbe7d8a52f23e488d1df2c"
     };
 
-    window.openChat = function(partnerPhone) {
-        activeChatPartner = partnerPhone;
-        document.getElementById('homeScreen').style.display = 'none';
-        document.getElementById('chatScreen').style.display = 'flex';
-        document.getElementById('chatTargetName').textContent = savedContactNames[partnerPhone] || partnerPhone;
+    // ফায়ারবেস ইনিশিয়ালাইজেশন[cite: 6]
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
 
-        const chatId = getChatId(currentUser, activeChatPartner);
-        
-        // রিয়েল-টাইম মেসেজ লোড
-        onValue(ref(db, 'messages/' + chatId), (snapshot) => {
-            const msgContainer = document.getElementById('chatMessagesContainer');
-            msgContainer.innerHTML = '';
-            if (!snapshot.exists()) return;
+    // বর্তমান ইউজারের ফোন নম্বর বা আইডি (আপনার আগের সিস্টেম অনুযায়ী লোকালস্টোরেজ বা প্রম্পট থেকে সেট হবে)
+    let currentUser = localStorage.getItem('chatty_current_user');
+    if (!currentUser) {
+        currentUser = prompt("Enter your phone number or unique ID to login:") || "user_" + Math.floor(Math.random()*1000);
+        localStorage.setItem('chatty_current_user', currentUser);
+    }
 
-            snapshot.forEach((childSnap) => {
-                const msgKey = childSnap.key;
-                const msg = childSnap.val();
-                const isMe = String(msg.sender) === String(currentUser);
-                const div = document.createElement('div');
-                div.className = 'msg ' + (isMe ? 'sent' : 'received');
-                div.style.cssText = isMe ? "background: #005c4b; padding: 8px 12px; border-radius: 8px; max-width: 60%; align-self: flex-end; position:relative;" : "background: #202c33; padding: 8px 12px; border-radius: 8px; max-width: 60%; align-self: flex-start; position:relative;";
+    let activeChatPartner = null;
+    let allChatsData = {};
+    let myProfilePic = localStorage.getItem('chatty_profile_pic') || '';
+    let myDisplayName = localStorage.getItem('chatty_display_name') || '';
+    let autoDeleteSeconds = 0;
+    let currentPremiumMode = 'login';
 
-                let contentHtml = `<span>${msg.text || ''}</span>`;
-                if (msg.type === 'image') {
-                    contentHtml = `<img src="${msg.url}" alt="Shared image" style="max-width: 200px; border-radius: 6px;">`;
-                } else if (msg.type === 'file') {
-                    contentHtml = `<a href="${msg.url}" target="_blank" style="color: #53bdeb; text-decoration: none;">📁 ${msg.fileName}</a>`;
-                } else if (msg.type === 'audio') {
-                    contentHtml = `<audio controls src="${msg.url}" style="height: 35px; width: 200px;"></audio>`;
-                }
-
-                // মেসেজ রিয়্যাকশন দেখানোর ব্যবস্থা
-                let reactionHtml = msg.reaction ? `<div style="position: absolute; bottom: -10px; right: 10px; background: #202c33; border-radius: 10px; padding: 2px 5px; font-size:12px;">${msg.reaction}</div>` : '';
-
-                const timeStr = new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-                div.innerHTML = `${contentHtml}<span class="msg-time">${timeStr}</span>${reactionHtml}`;
-                
-                // মেসেজে ক্লিক করে ইমোজি রিঅ্যাক্ট করার অপশন
-                div.ondblclick = () => addReaction(chatId, msgKey, '❤️');
-
-                msgContainer.appendChild(div);
-            });
-            msgContainer.scrollTop = msgContainer.scrollHeight;
-        });
-
-        // টাইপিং স্ট্যাটাস লিসেনার
-        onValue(ref(db, 'typing/' + chatId + '/' + partnerPhone), (snapshot) => {
-            const statusDiv = document.getElementById('typingStatus');
-            if (snapshot.val() === true) {
-                statusDiv.textContent = `${savedContactNames[partnerPhone] || partnerPhone} is typing...`;
-            } else {
-                statusDiv.textContent = '';
-            }
-        });
-    };
-
-    window.goBackHome = function() {
-        activeChatPartner = null;
-        document.getElementById('chatScreen').style.display = 'none';
-        document.getElementById('homeScreen').style.display = 'block';
+    window.addEventListener('DOMContentLoaded', () => {
+        refreshProfileUI();
         loadFriendList();
-    };
+        const savedTheme = localStorage.getItem('chatty_theme');
+        if (savedTheme) setAppTheme(savedTheme);
+    });
 
-    function sendDataToChat(payload) {
-        if (!activeChatPartner) return;
-        const chatId = getChatId(currentUser, activeChatPartner);
-        const msgData = {
-            sender: currentUser,
-            ...payload,
-            timestamp: Date.now(),
-            status: 'delivered'
-        };
-        push(ref(db, 'messages/' + chatId), msgData);
-        set(ref(db, 'user-chats/' + currentUser + '/' + activeChatPartner), { lastMessage: payload.text || `[${payload.type}]`, timestamp: Date.now() });
-        set(ref(db, 'user-chats/' + activeChatPartner + '/' + currentUser), { lastMessage: payload.text || `[${payload.type}]`, timestamp: Date.now() });
+    function refreshProfileUI() {
+        const headerAv = document.getElementById('headerAvatar');
+        const modalAv = document.getElementById('modalAvatarPreview');
+        const nameInput = document.getElementById('displayNameInput');
         
-        // মেসেজ পাঠানোর পর টাইপিং স্ট্যাটাস ফলস করে দেওয়া
-        set(ref(db, 'typing/' + chatId + '/' + currentUser), false);
+        if (nameInput) nameInput.value = myDisplayName;
+        const fallbackChar = myDisplayName ? myDisplayName.charAt(0).toUpperCase() : currentUser.charAt(0).toUpperCase();
+
+        if (myProfilePic) {
+            headerAv.innerHTML = `<img src="${myProfilePic}" alt="Profile">`;
+            modalAv.innerHTML = `<img src="${myProfilePic}" alt="Profile">`;
+        } else {
+            headerAv.textContent = fallbackChar;
+            modalAv.textContent = fallbackChar;
+        }
     }
 
-    window.sendMessage = function() {
-        const input = document.getElementById('messageInput');
-        const text = input.value.trim();
-        if (!text) return;
-        sendDataToChat({ type: 'text', text: text });
-        input.value = '';
+    window.openProfileModal = function() {
+        document.getElementById('profileModal').classList.add('show');
+    };
+    window.closeProfileModal = function() {
+        document.getElementById('profileModal').classList.remove('show');
+    };
+    window.closeProfileModalOnOutside = function(e) {
+        if (e.target.id === 'profileModal') closeProfileModal();
     };
 
-    window.handleEnter = function(e) {
-        if (e.key === 'Enter') sendMessage();
-    };
-
-    // ১. ছবি বা ফাইল আপলোড হ্যান্ডলার
-    window.handleMediaUpload = function(input) {
+    window.updateProfilePhoto = function(input) {
         const file = input.files[0];
         if (!file) return;
-        // লোকাল বা ডামি প্রিভিউ লিংক (ফায়ারবেস স্টোরেজ বা বেস৬৪ ইউআরএল)
         const reader = new FileReader();
-        reader.onload = function(e) {
-            const fileType = file.type.startsWith('image/') ? 'image' : 'file';
-            sendDataToChat({
-                type: fileType,
-                url: e.target.result,
-                fileName: file.name,
-                text: file.name
-            });
-        };
-        reader.readAsDataURL(file);
-    };
-
-    // ২. লাইভ টাইপিং নোটিফিকেশন
-    let typingTimer;
-    window.notifyTyping = function() {
-        if (!activeChatPartner) return;
-        const chatId = getChatId(currentUser, activeChatPartner);
-        set(ref(db, 'typing/' + chatId + '/' + currentUser), true);
-        
-        clearTimeout(typingTimer);
-        typingTimer = setTimeout(() => {
-            set(ref(db, 'typing/' + chatId + '/' + currentUser), false);
-        }, 2000);
-    };
-
-    // ৩. মেসেজ রিঅ্যাকশন যোগ করা
-    function addReaction(chatId, msgKey, emoji) {
-        set(ref(db, `messages/${chatId}/${msgKey}/reaction`), emoji);
-    }
-
-    // ৪. ভয়েস রেকর্ড সিমুলেশন / টগল
-    let isRecording = false;
-    window.toggleVoiceRecording = function() {
-        const btn = document.getElementById('voiceRecordBtn');
-        if (!isRecording) {
-            isRecording = true;
-            btn.style.color = '#ff4d4d';
-            // এখানে ব্রাউজারের MediaRecorder API ব্যবহার করে ভয়েস রেকর্ড করা যাবে
-            alert("Recording started... (Click mic again to stop & send)");
-        } else {
-            isRecording = false;
-            btn.style.color = '#8696a0';
-            // ডামি ভয়েস নোট পাঠানো
-            sendDataToChat({ type: 'audio', url: '#', text: '[Voice Note]' });
-        }
-    };
-
-    // ৫. অ্যাপ বা চ্যাট লিংক শেয়ার করার অপশন
-    window.shareAppOrChat = function() {
-        if (navigator.share) {
-            navigator.share({
-                title: 'Web Chat App',
-                text: 'Come chat with me on this awesome web app!',
-                url: window.location.href,
-            }).catch(console.error);
-        } else {
-            prompt("Copy this link to share:", window.location.href);
-        }
-    };
-</script>
-</body>
-</html>
+        reader.
