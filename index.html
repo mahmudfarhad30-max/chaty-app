@@ -6,15 +6,15 @@
     <title>Chatty - Premium Web Chat</title>
 
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-<script src="https://download.agora.io/sdk/release/AgoraRTC_N-4.17.0.js"></script>
+    <script src="https://download.agora.io/sdk/release/AgoraRTC_N-4.17.0.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
-    
+
     <style>
         :root {
             --bg-main: #111b21;
             --bg-header: #202c33;
             --bg-input: #2a3942;
-            --accent: #00a884;
+            --accent: #008884;
             --msg-sent: #005c4b;
             --msg-received: #202c33;
             --text-primary: #e9edef;
@@ -129,7 +129,7 @@
             flex-shrink: 0;
         }
 
-        .profile-avatar img {
+        .profile-avatar img, .avatar img {
             width: 100%;
             height: 100%;
             object-fit: cover;
@@ -263,7 +263,7 @@
 
         .chat-input-area {
             background: var(--bg-header);
-            padding: 10px 16px;
+            padding: 10px 10px;
             display: flex;
             align-items: center;
             gap: 10px;
@@ -315,11 +315,6 @@
             max-width: 320px;
             height: 100%;
             padding: 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            box-shadow: 4px 0 15px rgba(0,0,0,0.5);
-            overflow-y: auto;
         }
 
         .imo-profile-header {
@@ -343,6 +338,7 @@
             display: flex;
             align-items: center;
             gap: 12px;
+            width: 100%;
         }
 
         .imo-menu-btn:hover {
@@ -382,7 +378,7 @@
 </head>
 <body>
 
-    <!-- ১. লগইন স্ক্রিন -->
+    <!-- Login Screen -->
     <div id="loginScreen" class="screen auth-container active">
         <div class="auth-card">
             <h2 class="auth-title">Chatty Login</h2>
@@ -393,7 +389,7 @@
         </div>
     </div>
 
-    <!-- ২. রেজিস্টার স্ক্রিন -->
+    <!-- Register Screen -->
     <div id="registerScreen" class="screen auth-container">
         <div class="auth-card">
             <h2 class="auth-title">Create Account</h2>
@@ -404,7 +400,7 @@
         </div>
     </div>
 
-    <!-- ৩. হোম স্ক্রিন -->
+    <!-- Home Screen -->
     <div id="homeScreen" class="screen">
         <div class="home-header">
             <div class="profile-avatar" id="headerAvatar" onclick="openImoMenu()">
@@ -419,7 +415,7 @@
         <div id="friendListContainer" class="friend-list"></div>
     </div>
 
-    <!-- ৪. চ্যাট স্ক্রিন -->
+    <!-- Chat Screen -->
     <div id="chatScreen" class="screen chat-screen">
         <div class="chat-header">
             <button class="back-btn" onclick="goBackHome()">←</button>
@@ -430,19 +426,16 @@
             </div>
             <button class="action-icon-btn" onclick="startAudioCall()" title="Audio Call">📞</button>
             <button class="action-icon-btn" onclick="startVideoCall()" title="Video Call">📹</button>
-            <button class="action-icon-btn" onclick="document.getElementById('mediaFileInput').click()" title="Share Media">📎</button>
-            <input type="file" id="mediaFileInput" style="display: none;" onchange="handleMediaUpload(this)">
         </div>
         <div id="chatMessagesContainer" class="chat-messages"></div>
         <div class="chat-input-area">
             <input type="text" id="messageInput" class="message-input" placeholder="Type a message..." onkeypress="handleMessageEnter(event)">
-            <button class="mic-btn" onclick="toggleVoiceRecord()" title="Voice Record">🎤</button>
             <button class="send-btn" onclick="sendMessage()" title="Send">➤</button>
         </div>
     </div>
 
-    <!-- ইমু মেনু ড্রয়ার -->
-    <div id="imoMenuModal" class="imo-menu" onclick="closeImoMenu(event)">
+    <!-- Profile Drawer / Menu -->
+    <div id="imoMenu" class="imo-menu" onclick="closeImoMenu(event)">
         <div class="imo-menu-content" onclick="event.stopPropagation()">
             <div class="imo-profile-header">
                 <div class="profile-avatar" style="width: 60px; height: 60px; font-size: 22px;" id="menuAvatar">C</div>
@@ -451,46 +444,44 @@
             </div>
             <button class="imo-menu-btn" onclick="openSettingsModal()">⚙️ Settings & Profile</button>
             <button class="imo-menu-btn" onclick="openPremiumModal()">⭐ Premium Login / Features</button>
-            <button class="imo-menu-btn" onclick="alert('Share feature activated!')">📤 Share App</button>
-            <div style="flex: 1;"></div>
             <button class="imo-menu-btn logout-menu-btn" onclick="logoutUser()">🚪 Logout</button>
         </div>
     </div>
 
-    <!-- সেটিংস মোডাল -->
+    <!-- Settings Modal -->
     <div id="settingsModal" class="sub-modal">
         <div class="sub-modal-content">
             <h3>Profile & Settings</h3>
             <label style="font-size: 12px; color: var(--text-secondary);">Display Name:</label>
-            <input type="text" id="editName" class="message-input" style="width:100%; background:var(--bg-main);">
+            <input type="text" id="editName" class="message-input" style="width: 100%; background: var(--bg-main);">
             <label style="font-size: 12px; color: var(--text-secondary);">Address / Bio:</label>
-            <input type="text" id="editAddress" class="message-input" style="width:100%; background:var(--bg-main);" placeholder="Enter your address">
+            <input type="text" id="editAddress" class="message-input" style="width: 100%; background: var(--bg-main);">
             <label style="font-size: 12px; color: var(--text-secondary);">Profile Picture URL:</label>
-            <input type="text" id="editPicUrl" class="message-input" style="width:100%; background:var(--bg-main);" placeholder="Paste image link">
-            <button class="btn-primary-custom" style="height:45px;" onclick="saveProfileSettings()">Save Changes</button>
-            <button class="imo-menu-btn" style="justify-content:center;" onclick="closeSettingsModal()">Cancel</button>
+            <input type="text" id="editPicUrl" class="message-input" style="width: 100%; background: var(--bg-main);">
+            <button class="btn-primary-custom" style="height: 45px;" onclick="saveProfileSettings()">Save Changes</button>
+            <button class="btn-primary-custom" style="height: 45px; background: #555;" onclick="closeSettingsModal()">Cancel</button>
         </div>
     </div>
 
-    <!-- প্রিমিয়াম মোডাল -->
+    <!-- Premium Modal -->
     <div id="premiumModal" class="sub-modal">
         <div class="sub-modal-content" style="text-align: center;">
             <h2>⭐ Chatty Premium</h2>
-            <p style="font-size: 13px; color: var(--text-secondary);">Unlock exclusive features, higher storage, and custom themes!</p>
-            <button class="btn-primary-custom" style="height:45px;" onclick="alert('Premium access activated successfully!')">Activate Premium</button>
-            <button class="imo-menu-btn" style="justify-content:center;" onclick="closePremiumModal()">Close</button>
+            <p style="font-size: 13px; color: var(--text-secondary);">Unlock exclusive features, higher storage, and custom themes.</p>
+            <button class="btn-primary-custom" style="height: 45px;" onclick="alert('Premium access activated successfully!')">Activate Premium</button>
+            <button class="imo-menu-btn" style="justify-content: center;" onclick="closePremiumModal()">Close</button>
         </div>
     </div>
 
     <script>
         const firebaseConfig = {
-            apiKey: "AIzaSyA6DsT_8ysdywGF5EkrBQH1FKwFuls0kVA",
+            apiKey: "AIzaSyA6DsT_8ysdywGF3EkrBqH1FkWFuls0KVA",
             authDomain: "my-cet-apas.firebaseapp.com",
             databaseURL: "https://my-cet-apas-default-rtdb.firebaseio.com",
             projectId: "my-cet-apas",
             storageBucket: "my-cet-apas.appspot.com",
             messagingSenderId: "707932206149",
-            appId: "1:707932206149:web:cbe7d8a52f23e488d1df2c"
+            appId: "1:707932206149:web:cbe7d8a52f3e488d1df2c"
         };
 
         if (!firebase.apps.length) {
@@ -523,16 +514,15 @@
                 alert("Please enter email/phone and password!");
                 return;
             }
-            const safeKey = email.replace(/[.#$\/\[\]]/g, "_");
+            const safeKey = email.replace(/[.#$/[\]]/g, "_");
 
             db.ref('users/' + safeKey).once('value', (snapshot) => {
                 if (snapshot.exists()) {
                     alert("Account already exists!");
                 } else {
-                    db.ref('users/' + safeKey).set({ email: email, password: pass, name: email, address: "Not set", pic: "" }).then(() => {
-                        alert("Registration successful!");
-                        switchToLogin();
-                    });
+                    db.ref('users/' + safeKey).set({ email: email, password: pass, name: email, address: "Not set", pic: "" });
+                    alert("Registration successful!");
+                    switchToLogin();
                 }
             });
         }
@@ -544,7 +534,7 @@
                 alert("Please enter email/phone and password!");
                 return;
             }
-            const safeKey = email.replace(/[.#$\/\[\]]/g, "_");
+            const safeKey = email.replace(/[.#$/[\]]/g, "_");
 
             db.ref('users/' + safeKey).once('value', (snapshot) => {
                 if (!snapshot.exists()) {
@@ -576,7 +566,7 @@
                     const data = snapshot.val();
                     const name = data.name || currentUser;
                     const pic = data.pic || "";
-                    
+
                     document.getElementById('menuUsername').innerText = name;
                     document.getElementById('menuUserEmail').innerText = data.email || currentUser;
 
@@ -587,8 +577,57 @@
                         document.getElementById('headerAvatar').innerText = name.charAt(0).toUpperCase();
                         document.getElementById('menuAvatar').innerText = name.charAt(0).toUpperCase();
                     }
+                    
+                    document.getElementById('editName').value = data.name || "";
+                    document.getElementById('editAddress').value = data.address || "";
+                    document.getElementById('editPicUrl').value = data.pic || "";
                 }
             });
+        }
+
+        function openImoMenu() {
+            document.getElementById('imoMenu').classList.add('active');
+        }
+
+        function closeImoMenu(event) {
+            document.getElementById('imoMenu').classList.remove('active');
+        }
+
+        function openSettingsModal() {
+            closeImoMenu();
+            document.getElementById('settingsModal').classList.add('active');
+        }
+
+        function closeSettingsModal() {
+            document.getElementById('settingsModal').classList.remove('active');
+        }
+
+        function saveProfileSettings() {
+            const name = document.getElementById('editName').value.trim();
+            const address = document.getElementById('editAddress').value.trim();
+            const pic = document.getElementById('editPicUrl').value.trim();
+
+            db.ref('users/' + currentUser).update({ name: name, address: address, pic: pic }).then(() => {
+                alert("Profile updated successfully!");
+                closeSettingsModal();
+                loadUserProfile();
+            });
+        }
+
+        function openPremiumModal() {
+            closeImoMenu();
+            document.getElementById('premiumModal').classList.add('active');
+        }
+
+        function closePremiumModal() {
+            document.getElementById('premiumModal').classList.remove('active');
+        }
+
+        function logoutUser() {
+            if (confirm("Are you sure you want to logout?")) {
+                localStorage.removeItem('chatty_current_user');
+                location.reload();
+            }
         }
 
         let activeChatContact = null;
@@ -633,9 +672,9 @@
             if (!text || !activeChatContact) return;
 
             const roomId = getChatRoomId(currentUser, activeChatContact);
-            const messageData = { 
-                sender: currentUser, 
-                text: text, 
+            const messageData = {
+                sender: currentUser,
+                text: text,
                 timestamp: Date.now(),
                 status: "sent"
             };
@@ -655,11 +694,11 @@
             if (!activeChatContact) return;
             const roomId = getChatRoomId(currentUser, activeChatContact);
             const container = document.getElementById('chatMessagesContainer');
-            
+
             db.ref('chats/' + roomId).on('value', (snapshot) => {
                 container.innerHTML = "";
                 if (!snapshot.exists()) {
-                    container.innerHTML = `<div style="text-align:center; color:var(--text-secondary); margin-top:20px;">No messages yet. Say hello!</div>`;
+                    container.innerHTML = `<div style="text-align: center; color: var(--text-secondary); margin-top: 20px;">No messages yet. Start chatting!</div>`;
                     return;
                 }
                 snapshot.forEach((child) => {
@@ -670,9 +709,6 @@
                     
                     let tickHTML = "";
                     if (isSent) {
-                        const tickClass = msg.status === 'seen' ? 'tick seen' : 'tick';
-                        tickHTML = `<span class="${tickClass}">✓✓</span>`;
-                    } else {
                         tickHTML = `<span class="tick">✓</span>`;
                     }
 
@@ -694,7 +730,7 @@
             db.ref('user-chats/' + currentUser).on('value', (snapshot) => {
                 container.innerHTML = "";
                 if (!snapshot.exists()) {
-                    container.innerHTML = `<div style="padding:30px; text-align:center; color:var(--text-secondary);">No chats yet. Search user ID above!</div>`;
+                    container.innerHTML = `<div style="padding: 30px; text-align: center; color: var(--text-secondary);">No chats yet. Search a user ID to start!</div>`;
                     return;
                 }
                 const chats = snapshot.val();
@@ -702,109 +738,47 @@
                     const contact = chats[id].contact;
                     const item = document.createElement('div');
                     item.className = 'friend-item';
-                    item.innerHTML = `<div class="avatar">${contact.charAt(0).toUpperCase()}</div><div style="font-weight:bold; color:var(--text-primary);">${contact}</div>`;
+                    item.innerHTML = `<div class="avatar">${contact.charAt(0).toUpperCase()}</div><div style="font-weight: bold;">${contact}</div>`;
                     item.onclick = () => openChat(contact);
                     container.appendChild(item);
                 }
             });
-    const agoraOptions = {
-    appId: "ebbb0fef7s934bdf33fc3cb057ee0c",
-    channel: "chatycall",
-    token: null,
-    uid: null
-};
-
-async function startAudioCall() {
-    try {
-        await client.join(agoraOptions.appId, agoraOptions.channel, agoraOptions.token, agoraOptions.uid);
-        localAudioTrack = await AgoraRTC.createMicrophoneAudioTrack();
-        await client.publish([localAudioTrack]);
-        alert("Audio call started successfully!");
-    } catch (error) {
-        console.error(error);
-        alert("Failed to start audio call.");
-    }
-}
-
-async function startVideoCall() {
-    try {
-        await client.join(agoraOptions.appId, agoraOptions.channel, agoraOptions.token, agoraOptions.uid);
-        const localAudioTrack = await AgoraRTC.createMicrophoneAudioTrack();
-        const localVideoTrack = await AgoraRTC.createCameraVideoTrack();
-        localVideoTrack.play("chatMessagesContainer");
-        await client.publish([localAudioTrack, localVideoTrack]);
-        alert("Video call started successfully!");
-    } catch (error) {
-        console.error(error);
-        alert("Failed to start video call.");
-    }
-}
-            document.getElementById('editName').value = data.name || "";
-                    document.getElementById('editAddress').value = data.address || "";
-                    document.getElementById('editPicUrl').value = data.pic || "";
-                }
-            });
-            document.getElementById('settingsModal').classList.add('active');
-        }
-        function closeSettingsModal() { document.getElementById('settingsModal').classList.remove('active'); }
-
-        function saveProfileSettings() {
-            const name = document.getElementById('editName').value.trim();
-            const address = document.getElementById('editAddress').value.trim();
-            const pic = document.getElementById('editPicUrl').value.trim();
-
-            db.ref('users/' + currentUser).update({ name: name, address: address, pic: pic }).then(() => {
-                alert("Profile updated successfully!");
-                closeSettingsModal();
-                loadUserProfile();
-            });
         }
 
-        function openPremiumModal() {
-            closeImoMenu();
-            document.getElementById('premiumModal').classList.add('active');
-        }
-        function closePremiumModal() { document.getElementById('premiumModal').classList.remove('active'); }
-
-        function logoutUser() {
-            if (confirm("Are you sure you want to logout?")) {
-                localStorage.removeItem('chatty_current_user');
-                location.reload();
-            }
         const client = AgoraRTC.createClient({ mode: "rtc", codec: "vp8" });
 
-const agoraOptions = {
-    appId: "ebbb9f7e934bdf33fc3cb057ee0c",
-    channel: "chatycall",
-    token: null,
-    uid: null
-};
+        const agoraOptions = {
+            appId: "ebbb9f7e934bdf33fc3cb057ee0c",
+            channel: "chatycall",
+            token: null,
+            uid: null
+        };
 
-async function startAudioCall() {
-    try {
-        await client.join(agoraOptions.appId, agoraOptions.channel, agoraOptions.token, agoraOptions.uid);
-        const localAudioTrack = await AgoraRTC.createMicrophoneAudioTrack();
-        await client.publish([localAudioTrack]);
-        alert("Audio call started successfully!");
-    } catch (error) {
-        console.error(error);
-        alert("Failed to start audio call.");
-    }
-}
+        async function startAudioCall() {
+            try {
+                await client.join(agoraOptions.appId, agoraOptions.channel, agoraOptions.token, agoraOptions.uid);
+                const localAudioTrack = await AgoraRTC.createMicrophoneAudioTrack();
+                await client.publish([localAudioTrack]);
+                alert("Audio call started successfully!");
+            } catch (error) {
+                console.error(error);
+                alert("Failed to start audio call.");
+            }
+        }
 
-async function startVideoCall() {
-    try {
-        await client.join(agoraOptions.appId, agoraOptions.channel, agoraOptions.token, agoraOptions.uid);
-        const localAudioTrack = await AgoraRTC.createMicrophoneAudioTrack();
-        const localVideoTrack = await AgoraRTC.createCameraVideoTrack();
-        localVideoTrack.play("chatMessagesContainer");
-        await client.publish([localAudioTrack, localVideoTrack]);
-        alert("Video call started successfully!");
-    } catch (error) {
-        console.error(error);
-        alert("Failed to start video call.");
-    }
-}
+        async function startVideoCall() {
+            try {
+                await client.join(agoraOptions.appId, agoraOptions.channel, agoraOptions.token, agoraOptions.uid);
+                const localAudioTrack = await AgoraRTC.createMicrophoneAudioTrack();
+                const localVideoTrack = await AgoraRTC.createCameraVideoTrack();
+                localVideoTrack.play("chatMessagesContainer");
+                await client.publish([localAudioTrack, localVideoTrack]);
+                alert("Video call started successfully!");
+            } catch (error) {
+                console.error(error);
+                alert("Failed to start video call.");
+            }
+        }
     </script>
 </body>
 </html>
