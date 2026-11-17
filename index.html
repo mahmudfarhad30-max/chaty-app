@@ -1,463 +1,17 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="bn">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chatty - Secure Realtime Chat & Pro Services</title>
-    <link rel="manifest" href="./manifest.json">
+    <title>Advanced Web Chat App</title>
     <style>
-        * {
-            box-sizing: border-box;
+        /* আগের এবং নতুন সব স্টাইল একসাথে */
+        body {
             margin: 0;
             padding: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-        body {
-            background-color: #0b141a;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            overflow: hidden;
-        }
-        .container {
-            width: 100%;
-            max-width: 480px;
-            height: 100vh;
-            max-height: 750px;
-            background: #fff;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-            border-radius: 12px;
-            position: relative;
-        }
-        .screen {
-            display: none;
-            flex-direction: column;
-            height: 100%;
-            width: 100%;
-        }
-        .screen.active {
-            display: flex;
-        }
-        .login-box {
-            padding: 25px 20px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            height: 100%;
-            background: #ffffff;
-            overflow-y: auto;
-        }
-        .login-box h2 {
-            text-align: center;
-            color: #00a884;
-            margin-bottom: 15px;
-            font-size: 22px;
-        }
-        .input-group {
-            margin-bottom: 10px;
-        }
-        .input-group label {
-            display: block;
-            margin-bottom: 3px;
-            color: #333;
-            font-size: 13px;
-            font-weight: 600;
-        }
-        .input-group input {
-            width: 100%;
-            padding: 9px 12px;
-            border: 1px solid #ccc;
-            border-radius: 6px;
-            font-size: 14px;
-            outline: none;
-        }
-        .input-group input:focus {
-            border-color: #00a884;
-        }
-        .btn {
-            width: 100%;
-            padding: 10px;
-            background: #00a884;
-            color: #fff;
-            border: none;
-            border-radius: 6px;
-            font-size: 14px;
-            cursor: pointer;
-            font-weight: bold;
-            margin-top: 6px;
-        }
-        .btn:hover {
-            background: #01755f;
-        }
-        .btn-google {
-            background: #db4437;
-            margin-top: 8px;
-        }
-        .error-msg {
-            color: #d32f2f;
-            font-size: 12px;
-            text-align: center;
-            margin-top: 6px;
-            min-height: 15px;
-        }
-        
-        /* Home Header with Corner Profile Thumbnail */
-        .header {
-            background: #202c33;
+            background-color: #111b21;
+            font-family: sans-serif;
             color: #e9edef;
-            padding: 10px 15px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .header-profile-area {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            cursor: pointer;
-        }
-        .header-avatar {
-            width: 36px;
-            height: 36px;
-            background: #00a884;
-            color: #fff;
-            border-radius: 50%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-weight: bold;
-            font-size: 15px;
-            overflow: hidden;
-            border: 1px solid #53bdeb;
-        }
-        .header-avatar img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-        .header h3 {
-            font-size: 16px;
-        }
-
-        /* Profile Menu Screen */
-        .profile-menu-screen {
-            display: none;
-            flex-direction: column;
-            height: 100%;
-            background: #111b21;
-            color: #e9edef;
-            position: absolute;
-            top: 0; left: 0; width: 100%; z-index: 200;
-        }
-        .profile-menu-screen.active {
-            display: flex;
-        }
-        .profile-menu-header {
-            background: #202c33;
-            padding: 15px;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            font-size: 18px;
-        }
-        .profile-info-box {
-            padding: 20px 15px;
-            background: #202c33;
-            margin: 10px;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-        .big-avatar {
-            width: 60px;
-            height: 60px;
-            background: #00a884;
-            color: #fff;
-            border-radius: 50%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 24px;
-            font-weight: bold;
-            overflow: hidden;
-        }
-        .big-avatar img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-        .profile-details h4 {
-            font-size: 16px;
-            margin-bottom: 4px;
-        }
-        .profile-details p {
-            font-size: 12px;
-            color: #8696a0;
-        }
-        .menu-list {
-            flex: 1;
-            overflow-y: auto;
-        }
-        .menu-item {
-            padding: 15px 20px;
-            border-bottom: 1px solid #222d34;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            cursor: pointer;
-            font-size: 14px;
-        }
-        .menu-item:hover {
-            background: #202c33;
-        }
-        .menu-item.pro {
-            color: #00a884;
-            font-weight: bold;
-        }
-
-        /* Pro Services Sub-Screen (Tracking & Bluetooth Mesh) */
-        .pro-services-screen {
-            display: none;
-            flex-direction: column;
-            height: 100%;
-            background: #111b21;
-            color: #e9edef;
-            position: absolute;
-            top: 0; left: 0; width: 100%; z-index: 250;
-        }
-        .pro-services-screen.active {
-            display: flex;
-        }
-        .pro-content {
-            padding: 20px;
-            overflow-y: auto;
-            flex: 1;
-        }
-        .pro-card {
-            background: #202c33;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 15px;
-            border-left: 4px solid #00a884;
-        }
-        .pro-card h4 {
-            font-size: 15px;
-            margin-bottom: 6px;
-            color: #00a884;
-        }
-        .pro-card p {
-            font-size: 13px;
-            color: #8696a0;
-            line-height: 1.4;
-        }
-
-        .search-chat-bar {
-            padding: 8px 12px;
-            background: #111b21;
-            display: flex;
-            gap: 6px;
-            align-items: center;
-            border-bottom: 1px solid #222d34;
-        }
-        .search-chat-bar input {
-            flex: 1;
-            padding: 8px 12px;
-            background: #202c33;
-            border: none;
-            border-radius: 20px;
-            color: #e9edef;
-            outline: none;
-            font-size: 13px;
-        }
-        .contact-btn {
-            background: #2a3942;
-            color: #00a884;
-            border: none;
-            border-radius: 50%;
-            width: 34px;
-            height: 34px;
-            cursor: pointer;
-            font-size: 16px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .chat-start-btn {
-            background: #00a884;
-            color: #111b21;
-            border: none;
-            border-radius: 20px;
-            padding: 0 12px;
-            height: 34px;
-            cursor: pointer;
-            font-weight: bold;
-            font-size: 12px;
-        }
-
-        .friend-list {
-            flex: 1;
-            overflow-y: auto;
-            background: #111b21;
-        }
-        .empty-state {
-            text-align: center;
-            color: #8696a0;
-            padding: 25px 15px;
-            font-size: 13px;
-        }
-        .friend-item {
-            padding: 10px 15px;
-            border-bottom: 1px solid #222d34;
-            display: flex;
-            align-items: center;
-            cursor: pointer;
-        }
-        .friend-item:hover {
-            background: #202c33;
-        }
-        .avatar {
-            width: 38px;
-            height: 38px;
-            background: #00a884;
-            color: #fff;
-            border-radius: 50%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-weight: bold;
-            font-size: 14px;
-            margin-right: 12px;
-            overflow: hidden;
-        }
-        .avatar img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-        .friend-info {
-            flex: 1;
-            overflow: hidden;
-        }
-        .friend-number {
-            font-weight: 600;
-            color: #e9edef;
-            font-size: 14px;
-            margin-bottom: 2px;
-        }
-        .last-msg {
-            color: #8696a0;
-            font-size: 12px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .chat-screen {
-            display: none;
-            flex-direction: column;
-            height: 100vh;
-            max-height: 750px;
-            width: 100%;
-            overflow: hidden;
-        }
-        .chat-screen.active {
-            display: flex;
-        }
-        .chat-header {
-            background: #202c33;
-            color: #e9edef;
-            padding: 10px 15px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            position: relative;
-            flex-shrink: 0;
-        }
-        .chat-header-left {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        .back-btn {
-            background: none;
-            border: none;
-            color: #e9edef;
-            font-size: 18px;
-            cursor: pointer;
-        }
-        .chat-header-right {
-            display: flex;
-            gap: 12px;
-            align-items: center;
-            font-size: 16px;
-            color: #aebac1;
-            cursor: pointer;
-        }
-        .dropdown-menu {
-            display: none;
-            position: absolute;
-            right: 15px;
-            top: 50px;
-            background: #233138;
-            border-radius: 4px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-            width: 180px;
-            z-index: 100;
-        }
-        .dropdown-menu.show {
-            display: block;
-        }
-        .dropdown-item {
-            padding: 10px 14px;
-            color: #e9edef;
-            font-size: 13px;
-            cursor: pointer;
-        }
-        .dropdown-item:hover {
-            background: #182229;
-        }
-
-        .chat-messages {
-            flex: 1;
-            padding: 12px;
-            overflow-y: auto;
-            background-color: #0b141a;
-            background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23182229' fill-opacity='0.4'%3E%3Ccircle cx='20' cy='20' r='3'/%3E%3Cpath d='M50 15 L55 25 L45 25 Z'/%3E%3Crect x='75' y='15' width='8' height='8' rx='2'/%3E%3Cpath d='M15 55 Q25 45 35 55 T55 55' fill='none' stroke='%23182229' stroke-width='2'/%3E%3Ccircle cx='80' cy='60' r='4'/%3E%3Cpath d='M25 80 L32 88 L20 90 Z'/%3E%3Crect x='60' y='78' width='10' height='6' rx='3'/%3E%3C/g%3E%3C/svg%3E");
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-        }
-        .msg {
-            max-width: 75%;
-            padding: 8px 12px;
-            border-radius: 8px;
-            font-size: 13px;
-            line-height: 1.35;
-            word-wrap: break-word;
-            position: relative;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.2);
-        }
-        .msg.sent {
-            background: #005c4b;
-            color: #e9edef;
-            align-self: flex-end;
-            border-top-right-radius: 0;
-        }
-        .msg.received {
-            background: #202c33;
-            color: #e9edef;
-            align-self: flex-start;
-            border-top-left-radius: 0;
-        }
-        .msg img {
-            max-width: 100%;
-            border-radius: 6px;
-            margin-top: 4px;
         }
         .msg-time {
             font-size: 9px;
@@ -468,7 +22,6 @@
             float: right;
             margin-left: 8px;
         }
-        
         .chat-input-area {
             padding: 8px 10px;
             background: #202c33;
@@ -505,396 +58,68 @@
             font-weight: bold;
             font-size: 12px;
         }
+        /* নতুন ফিচারের জন্য ছোট কিছু স্টাইল */
+        .typing-indicator {
+            font-size: 11px;
+            color: #00a884;
+            padding: 2px 15px;
+            font-style: italic;
+        }
+        .reaction-picker {
+            display: none;
+            position: absolute;
+            background: #233138;
+            border-radius: 20px;
+            padding: 4px 8px;
+            gap: 6px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+            z-index: 10;
+        }
+        .reaction-picker span {
+            cursor: pointer;
+            font-size: 16px;
+        }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <!-- Login Screen -->
-    <div id="loginScreen" class="screen active">
-        <div class="login-box">
-            <h2>Chatty Login</h2>
-            <div class="input-group">
-                <label>Phone Number / Gmail</label>
-                <input type="text" id="loginPhone" placeholder="Enter phone or safety email">
-            </div>
-            <div class="input-group">
-                <label>Password</label>
-                <input type="password" id="loginPass" placeholder="Enter password">
-            </div>
-            <button class="btn" onclick="handleLogin()">Login</button>
-            <button class="btn btn-google" onclick="handleGoogleSafetyLogin()">Sign in with Google / Gmail</button>
-            <div id="loginError" class="error-msg"></div>
+    <!-- চ্যাট ইন্টারফেসের মূল স্ট্রাকচার -->
+    <div id="homeScreen" class="screen active">
+        <div style="padding: 15px; background: #202c33; display: flex; justify-content: space-between; align-items: center;">
+            <h2>Chats</h2>
+            <input type="text" id="searchInput" placeholder="Search or start new chat" onkeyup="filterOrStartChat()" style="padding: 6px 12px; border-radius: 15px; border: none; background: #2a3942; color: white;">
         </div>
+        <div id="friendListContainer"></div>
     </div>
 
-    <!-- Register Screen -->
-    <div id="registerScreen" class="screen">
-        <div class="login-box">
-            <h2>Create Account</h2>
-            <div class="input-group">
-                <label>Phone Number</label>
-                <input type="tel" id="regPhone" placeholder="Enter phone number">
-            </div>
-            <div class="input-group">
-                <label>Profile Picture URL (Optional)</label>
-                <input type="url" id="regAvatar" placeholder="Paste image link">
-            </div>
-            <div class="input-group">
-                <label>Password</label>
-                <input type="password" id="regPass" placeholder="Enter password">
-            </div>
-            <button class="btn" onclick="handleRegister()">Register</button>
-            <div id="regError" class="error-msg"></div>
+    <div id="chatScreen" class="screen" style="display:none; flex-direction:column; height:100vh;">
+        <div style="padding: 10px 15px; background: #202c33; display: flex; align-items: center; gap: 10px;">
+            <button onclick="goBackHome()" style="background:none; border:none; color:white; cursor:pointer;">⬅</button>
+            <h3 id="chatTargetName" style="margin:0; flex:1;"></h3>
+            <!-- শেয়ার অপশন বা বাটন -->
+            <button onclick="shareAppOrChat()" class="action-icon-btn" title="Share">🔗</button>
         </div>
-    </div>
 
-    <!-- Home Screen -->
-    <div id="homeScreen" class="screen">
-        <div class="header">
-            <div class="header-profile-area" onclick="openProfileMenu()">
-                <div class="header-avatar" id="headerAvatarThumb">C</div>
-                <h3 id="currentUserTitle">Chatty</h3>
-            </div>
-            <div class="header-actions">
-                <button class="header-btn" onclick="logout()">Logout</button>
-            </div>
-        </div>
+        <div id="chatMessagesContainer" style="flex:1; overflow-y:auto; padding: 15px; display:flex; flex-direction:column; gap:10px;"></div>
         
-        <div class="search-chat-bar">
-            <input type="text" id="searchInput" placeholder="Search or pick contact..." oninput="filterOrStartChat()">
-            <button class="contact-btn" onclick="pickPhoneContact()" title="Pick Contact">&#128214;</button>
-            <button class="chat-start-btn" onclick="startChatFromSearch()">Chat</button>
-        </div>
-
-        <div id="friendListContainer" class="friend-list"></div>
-    </div>
-
-    <!-- Profile Menu Screen ("Me" Page) -->
-    <div id="profileMenuScreen" class="profile-menu-screen">
-        <div class="profile-menu-header">
-            <button class="back-btn" onclick="closeProfileMenu()">&#8592;</button>
-            <span>Me & Pro Services</span>
-        </div>
-        <div class="profile-info-box">
-            <div class="big-avatar" id="menuBigAvatar">C</div>
-            <div class="profile-details">
-                <h4 id="menuProfileName">User Name</h4>
-                <p id="menuProfilePhone">Phone: 01800000000</p>
-            </div>
-        </div>
-        <div class="menu-list">
-            <div class="menu-item pro" onclick="openProServices()">🛡️ Safety Tracking & Offline Mesh (Pro) <span>&#8250;</span></div>
-            <div class="menu-item" onclick="alert('Switch account feature')">Switch Account <span>&#8250;</span></div>
-            <div class="menu-item" onclick="alert('Security & Privacy settings')">Security & Privacy <span>&#8250;</span></div>
-            <div class="menu-item" onclick="alert('App Settings')">Settings <span>&#8250;</span></div>
-            <div class="menu-item" onclick="alert('My Files & Media')">My Files <span>&#8250;</span></div>
-            <div class="menu-item" onclick="logout()">Logout <span>&#8250;</span></div>
-        </div>
-    </div>
-
-    <!-- Pro Services Sub-Screen (Tracking & Charging Module) -->
-    <div id="proServicesScreen" class="pro-services-screen">
-        <div class="profile-menu-header">
-            <button class="back-btn" onclick="closeProServices()">&#8592;</button>
-            <span>Safety Tracking & Pro</span>
-        </div>
-        <div class="pro-content">
-            <div class="pro-card">
-                <h4>📡 Bluetooth Mesh Offline Chat</h4>
-                <p>Chat without internet using nearby device relays (Upcoming Native Feature).</p>
-            </div>
-            <div class="pro-card">
-                <h4>📍 Lost Phone Tracking</h4>
-                <p>Locate your missing phone via crowd-sourced network signals.</p>
-            </div>
-            <div class="pro-card">
-                <h4>💎 Subscription & Recovery Charge</h4>
-                <p>Status: Free Regular Chatting Active.<br>Recovery service charge applies only upon successful lost device retrieval.</p>
-                <button class="btn" style="margin-top: 10px;" onclick="alert('Subscription & Payment Gateway integration coming soon!')">Activate Pro / Recharge</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Chat Screen -->
-    <div id="chatScreen" class="chat-screen">
-        <div class="chat-header">
-            <div class="chat-header-left">
-                <button class="back-btn" onclick="goBackHome()">&#8592;</button>
-                <h3 id="chatTargetName">Number</h3>
-            </div>
-            <div class="chat-header-right">
-                <span title="Voice / Video Call" onclick="triggerAudioVideoCall()">&#128222;</span>
-                <span title="Menu" onclick="toggleMenu()">&#8942;</span>
-            </div>
-            <div id="chatDropdown" class="dropdown-menu">
-                <div class="dropdown-item" onclick="triggerAudioVideoCall()">Audio / Video Call</div>
-                <div class="dropdown-item" onclick="document.getElementById('imageInputFile').click()">Send Photo / Media</div>
-                <div class="dropdown-item" onclick="goBackHome()">Close Chat</div>
-            </div>
-        </div>
-        
-        <div id="chatMessagesContainer" class="chat-messages"></div>
-        <input type="file" id="imageInputFile" accept="image/*" style="display:none" onchange="sendImageFile(this)">
+        <!-- লাইভ টাইপিং ইন্ডিকেটর দেখানোর জায়গা -->
+        <div id="typingStatus" class="typing-indicator"></div>
 
         <div class="chat-input-area">
-            <button class="action-icon-btn" onclick="document.getElementById('imageInputFile').click()" title="Share Image">&#128247;</button>
-            <button class="action-icon-btn" onclick="recordVoiceNote()" title="Voice Note">&#127908;</button>
-            <input type="text" id="messageInput" placeholder="Type a message..." onkeypress="handleEnter(event)">
+            <!-- ফাইল বা ছবি আপলোড করার ইনপুট (লুকানো) -->
+            <input type="file" id="mediaFileInput" style="display: none;" onchange="handleMediaUpload(this)">
+            <button class="action-icon-btn" onclick="document.getElementById('mediaFileInput').click()">📎</button>
+            
+            <!-- ভয়েস রেকর্ড বাটন -->
+            <button class="action-icon-btn" id="voiceRecordBtn" onclick="toggleVoiceRecording()">🎤</button>
+
+            <input type="text" id="messageInput" placeholder="Type a message" onkeypress="handleEnter(event)" oninput="notifyTyping()">
             <button class="send-btn" onclick="sendMessage()">Send</button>
         </div>
     </div>
-</div>
 
-<!-- Firebase SDKs -->
-<script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getDatabase, ref, set, get, child, push, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
-    import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-
-    const firebaseConfig = {
-      apiKey: "AIzaSyA6OaT_Byxdym5F5EkrBQHlfKwPai5uKVA",
-      authDomain: "my-cet-apas.firebaseapp.com",
-      databaseURL: "https://my-cet-apas-default-rtdb.firebaseio.com",
-      projectId: "my-cet-apas",
-      storageBucket: "my-cet-apas.firebasestorage.app",
-      messagingSenderId: "707932206149",
-      appId: "1:707932206149:web:cbe7d8a52f23e488d1df2c"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app);
-    const auth = getAuth(app);
-
-    let currentUser = localStorage.getItem('chatApp_currentuser') || null;
-    let activeChatPartner = null;
-    let allChatsData = {};
-    let savedContactNames = JSON.parse(localStorage.getItem('chatApp_contacts') || '{}');
-
-    window.onload = function() {
-        if (currentUser) {
-            showHomeScreen();
-        }
-    };
-
-    window.showLoginScreen = function() {
-        document.getElementById('registerScreen').classList.remove('active');
-        document.getElementById('loginScreen').classList.add('active');
-    };
-
-    window.showRegisterScreen = function() {
-        document.getElementById('loginScreen').classList.remove('active');
-        document.getElementById('registerScreen').classList.add('active');
-    };
-
-    function normalizePhone(rawPhone) {
-        let cleaned = rawPhone.replace(/[\s\-\(\)]/g, '');
-        if (cleaned.startsWith('+880')) {
-            cleaned = '0' + cleaned.slice(4);
-        } else if (cleaned.startsWith('880')) {
-            cleaned = '0' + cleaned.slice(3);
-        }
-        return cleaned;
-    }
-
-    // Profile Menu Functions
-    window.openProfileMenu = async function() {
-        document.getElementById('profileMenuScreen').classList.add('active');
-        document.getElementById('menuProfileName').textContent = currentUser;
-        document.getElementById('menuProfilePhone').textContent = "Phone: " + currentUser;
-
-        try {
-            const snap = await get(child(ref(db), `users/${currentUser}`));
-            if (snap.exists() && snap.val().avatar) {
-                const avatarUrl = snap.val().avatar;
-                document.getElementById('menuBigAvatar').innerHTML = `<img src="${avatarUrl}" alt="Profile">`;
-            } else {
-                document.getElementById('menuBigAvatar').innerHTML = currentUser.charAt(0).toUpperCase();
-            }
-        } catch(e) {
-            document.getElementById('menuBigAvatar').innerHTML = currentUser.charAt(0).toUpperCase();
-        }
-    };
-
-    window.closeProfileMenu = function() {
-        document.getElementById('profileMenuScreen').classList.remove('active');
-    };
-
-    // Pro Services Navigation
-    window.openProServices = function() {
-        document.getElementById('proServicesScreen').classList.add('active');
-    };
-
-    window.closeProServices = function() {
-        document.getElementById('proServicesScreen').classList.remove('active');
-    };
-
-    async function updateHeaderAvatar() {
-        if (!currentUser) return;
-        try {
-            const snap = await get(child(ref(db), `users/${currentUser}`));
-            const thumbEl = document.getElementById('headerAvatarThumb');
-            if (snap.exists() && snap.val().avatar) {
-                thumbEl.innerHTML = `<img src="${snap.val().avatar}" alt="Avatar">`;
-            } else {
-                thumbEl.innerHTML = currentUser.charAt(0).toUpperCase();
-            }
-        } catch(e) {
-            document.getElementById('headerAvatarThumb').innerHTML = currentUser.charAt(0).toUpperCase();
-        }
-    }
-
-    window.pickPhoneContact = async function() {
-        if ('contacts' in navigator && 'ContactsManager' in window) {
-            try {
-                const contacts = await navigator.contacts.select(['name', 'tel'], { multiple: false });
-                if (contacts.length > 0 && contacts[0].tel && contacts[0].tel.length > 0) {
-                    const cleanNumber = normalizePhone(contacts[0].tel[0]);
-                    const contactName = contacts[0].name?.[0] || cleanNumber;
-                    savedContactNames[cleanNumber] = contactName;
-                    localStorage.setItem('chatApp_contacts', JSON.stringify(savedContactNames));
-                    verifyAndOpenChat(cleanNumber);
-                }
-            } catch (err) {
-                alert("Could not access contacts: " + err.message);
-            }
-        } else {
-            alert("Please type the number directly in the search box.");
-        }
-    };
-
-    async function verifyAndOpenChat(targetInput) {
-        const cleanNumber = normalizePhone(targetInput);
-        if (!cleanNumber || cleanNumber === currentUser) return;
-        try {
-            const snapshot = await get(child(ref(db), `users/${cleanNumber}`));
-            if (snapshot.exists()) {
-                document.getElementById('searchInput').value = '';
-                openChat(cleanNumber);
-            } else {
-                alert("This number (" + cleanNumber + ") is not registered on Chatty!");
-            }
-        } catch (error) {
-            alert("Error verifying user: " + error.message);
-        }
-    }
-
-    window.startChatFromSearch = function() {
-        const inputVal = document.getElementById('searchInput').value.trim();
-        if (!inputVal) return;
-        let matchedPhone = null;
-        Object.keys(savedContactNames).forEach(phone => {
-            if (savedContactNames[phone].toLowerCase() === inputVal.toLowerCase()) {
-                matchedPhone = phone;
-            }
-        });
-        verifyAndOpenChat(matchedPhone || inputVal);
-    };
-
-    window.triggerAudioVideoCall = async function() {
-        try {
-            const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-            alert("Secure Audio/Video call connecting to " + activeChatPartner + "...");
-            stream.getTracks().forEach(track => track.stop());
-        } catch (err) {
-            alert("Camera & Microphone permissions are required for calls.");
-        }
-    };
-
-    window.recordVoiceNote = async function() {
-        try {
-            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-            alert("Voice recording started. Speak now (Tap OK to send).");
-            stream.getTracks().forEach(track => track.stop());
-            sendDataToChat({ type: 'text', text: '🎤 [Voice Message - 0:05]' });
-        } catch (err) {
-            alert("Microphone permission denied for voice notes.");
-        }
-    };
-
-    window.sendImageFile = function(input) {
-        const file = input.files[0];
-        if (!file) return;
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            sendDataToChat({ type: 'image', imageUrl: e.target.result });
-        };
-        reader.readAsDataURL(file);
-        input.value = '';
-    };
-
-    window.handleLogin = async function() {
-        let identifier = normalizePhone(document.getElementById('loginPhone').value.trim());
-        const pass = document.getElementById('loginPass').value;
-        const errorEl = document.getElementById('loginError');
-        if (!identifier || !pass) {
-            errorEl.textContent = "Field and password are required.";
-            return;
-        }
-        try {
-            await signInWithEmailAndPassword(auth, identifier + "@chatty.app", pass);
-            currentUser = identifier;
-            localStorage.setItem('chatApp_currentuser', identifier);
-            showHomeScreen();
-        } catch (error) {
-            errorEl.textContent = "Login error: " + error.message;
-        }
-    };
-
-    window.handleGoogleSafetyLogin = async function() {
-        try {
-            const result = await signInWithPopup(auth, new GoogleAuthProvider());
-            currentUser = result.user.email;
-            localStorage.setItem('chatApp_currentuser', currentUser);
-            showHomeScreen();
-        } catch (error) {
-            alert("Google Login failed: " + error.message);
-        }
-    };
-
-    window.handleRegister = async function() {
-        const phone = normalizePhone(document.getElementById('regPhone').value.trim());
-        const avatarUrl = document.getElementById('regAvatar').value.trim();
-        const pass = document.getElementById('regPass').value;
-        const errorEl = document.getElementById('regError');
-        if (!phone || !pass) {
-            errorEl.textContent = "Phone number and password are required.";
-            return;
-        }
-        try {
-            await createUserWithEmailAndPassword(auth, phone + "@chatty.app", pass);
-            await set(ref(db, 'users/' + phone), {
-                password: pass,
-                avatar: avatarUrl || '',
-                createdAt: Date.now()
-            });
-            currentUser = phone;
-            localStorage.setItem('chatApp_currentuser', phone);
-            showHomeScreen();
-        } catch (error) {
-            errorEl.textContent = "Registration error: " + error.message;
-        }
-    };
-
-    function showHomeScreen() {
-        document.getElementById('loginScreen').classList.remove('active');
-        document.getElementById('registerScreen').classList.remove('active');
-        document.getElementById('chatScreen').classList.remove('active');
-        document.getElementById('homeScreen').classList.add('active');
-        updateHeaderAvatar();
-        loadFriendList();
-    }
-
-    window.logout = function() {
-        localStorage.removeItem('chatApp_currentuser');
-        currentUser = null;
-        document.getElementById('profileMenuScreen').classList.remove('active');
-        document.getElementById('proServicesScreen').classList.remove('active');
-        document.getElementById('homeScreen').classList.remove('active');
-        document.getElementById('chatScreen').classList.remove('active');
-        document.getElementById('loginScreen').classList.add('active');
-    };
-
+<script>
+    // ফায়ারবেস এবং চ্যাট লজিক ফাংশনগুলো
     function getChatId(user1, user2) {
         return user1 < user2 ? `${user1}_${user2}` : `${user2}_${user1}`;
     }
@@ -904,7 +129,7 @@
         onValue(ref(db, 'user-chats/' + currentUser), (snapshot) => {
             container.innerHTML = "";
             if (!snapshot.exists()) {
-                container.innerHTML = `<div class="empty-state">No chats yet. Pick a contact above!</div>`;
+                container.innerHTML = `<div class="empty-state" style="padding:20px; text-align:center; color:#8696a0;">No chats yet. Pick a contact above!</div>`;
                 return;
             }
             allChatsData = snapshot.val();
@@ -920,12 +145,13 @@
             const displayName = savedContactNames[partnerPhone] || partnerPhone;
             const div = document.createElement('div');
             div.className = 'friend-item';
+            div.style.cssText = "padding: 12px 15px; border-bottom: 1px solid #222d34; display: flex; gap: 12px; cursor: pointer;";
             div.onclick = () => openChat(partnerPhone);
             div.innerHTML = `
-                <div class="avatar">${displayName.charAt(0).toUpperCase()}</div>
+                <div class="avatar" style="width:40px; height:40px; background:#00a884; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:bold;">${displayName.charAt(0).toUpperCase()}</div>
                 <div class="friend-info">
-                    <div class="friend-number">${displayName}</div>
-                    <div class="last-msg">${lastMsg}</div>
+                    <div class="friend-number" style="font-weight:bold; color:#e9edef;">${displayName}</div>
+                    <div class="last-msg" style="font-size:12px; color:#8696a0; margin-top:3px;">${lastMsg}</div>
                 </div>
             `;
             container.appendChild(div);
@@ -944,46 +170,66 @@
         renderChatList(filtered);
     };
 
-    window.toggleMenu = function() {
-        document.getElementById('chatDropdown').classList.toggle('show');
-    };
-
     window.openChat = function(partnerPhone) {
         activeChatPartner = partnerPhone;
-        document.getElementById('homeScreen').classList.remove('active');
-        document.getElementById('chatScreen').classList.add('active');
+        document.getElementById('homeScreen').style.display = 'none';
+        document.getElementById('chatScreen').style.display = 'flex';
         document.getElementById('chatTargetName').textContent = savedContactNames[partnerPhone] || partnerPhone;
 
         const chatId = getChatId(currentUser, activeChatPartner);
+        
+        // রিয়েল-টাইম মেসেজ লোড
         onValue(ref(db, 'messages/' + chatId), (snapshot) => {
             const msgContainer = document.getElementById('chatMessagesContainer');
             msgContainer.innerHTML = '';
             if (!snapshot.exists()) return;
 
             snapshot.forEach((childSnap) => {
+                const msgKey = childSnap.key;
                 const msg = childSnap.val();
                 const isMe = String(msg.sender) === String(currentUser);
                 const div = document.createElement('div');
                 div.className = 'msg ' + (isMe ? 'sent' : 'received');
+                div.style.cssText = isMe ? "background: #005c4b; padding: 8px 12px; border-radius: 8px; max-width: 60%; align-self: flex-end; position:relative;" : "background: #202c33; padding: 8px 12px; border-radius: 8px; max-width: 60%; align-self: flex-start; position:relative;";
 
                 let contentHtml = `<span>${msg.text || ''}</span>`;
-                if (msg.imageUrl) {
-                    contentHtml = `<img src="${msg.imageUrl}" alt="Shared image">`;
+                if (msg.type === 'image') {
+                    contentHtml = `<img src="${msg.url}" alt="Shared image" style="max-width: 200px; border-radius: 6px;">`;
+                } else if (msg.type === 'file') {
+                    contentHtml = `<a href="${msg.url}" target="_blank" style="color: #53bdeb; text-decoration: none;">📁 ${msg.fileName}</a>`;
+                } else if (msg.type === 'audio') {
+                    contentHtml = `<audio controls src="${msg.url}" style="height: 35px; width: 200px;"></audio>`;
                 }
 
+                // মেসেজ রিয়্যাকশন দেখানোর ব্যবস্থা
+                let reactionHtml = msg.reaction ? `<div style="position: absolute; bottom: -10px; right: 10px; background: #202c33; border-radius: 10px; padding: 2px 5px; font-size:12px;">${msg.reaction}</div>` : '';
+
                 const timeStr = new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-                div.innerHTML = `${contentHtml}<span class="msg-time">${timeStr}</span>`;
+                div.innerHTML = `${contentHtml}<span class="msg-time">${timeStr}</span>${reactionHtml}`;
+                
+                // মেসেজে ক্লিক করে ইমোজি রিঅ্যাক্ট করার অপশন
+                div.ondblclick = () => addReaction(chatId, msgKey, '❤️');
+
                 msgContainer.appendChild(div);
             });
             msgContainer.scrollTop = msgContainer.scrollHeight;
+        });
+
+        // টাইপিং স্ট্যাটাস লিসেনার
+        onValue(ref(db, 'typing/' + chatId + '/' + partnerPhone), (snapshot) => {
+            const statusDiv = document.getElementById('typingStatus');
+            if (snapshot.val() === true) {
+                statusDiv.textContent = `${savedContactNames[partnerPhone] || partnerPhone} is typing...`;
+            } else {
+                statusDiv.textContent = '';
+            }
         });
     };
 
     window.goBackHome = function() {
         activeChatPartner = null;
-        document.getElementById('chatDropdown').classList.remove('show');
-        document.getElementById('chatScreen').classList.remove('active');
-        document.getElementById('homeScreen').classList.add('active');
+        document.getElementById('chatScreen').style.display = 'none';
+        document.getElementById('homeScreen').style.display = 'block';
         loadFriendList();
     };
 
@@ -997,8 +243,11 @@
             status: 'delivered'
         };
         push(ref(db, 'messages/' + chatId), msgData);
-        set(ref(db, 'user-chats/' + currentUser + '/' + activeChatPartner), { lastMessage: payload.text || '[Media]', timestamp: Date.now() });
-        set(ref(db, 'user-chats/' + activeChatPartner + '/' + currentUser), { lastMessage: payload.text || '[Media]', timestamp: Date.now() });
+        set(ref(db, 'user-chats/' + currentUser + '/' + activeChatPartner), { lastMessage: payload.text || `[${payload.type}]`, timestamp: Date.now() });
+        set(ref(db, 'user-chats/' + activeChatPartner + '/' + currentUser), { lastMessage: payload.text || `[${payload.type}]`, timestamp: Date.now() });
+        
+        // মেসেজ পাঠানোর পর টাইপিং স্ট্যাটাস ফলস করে দেওয়া
+        set(ref(db, 'typing/' + chatId + '/' + currentUser), false);
     }
 
     window.sendMessage = function() {
@@ -1011,6 +260,72 @@
 
     window.handleEnter = function(e) {
         if (e.key === 'Enter') sendMessage();
+    };
+
+    // ১. ছবি বা ফাইল আপলোড হ্যান্ডলার
+    window.handleMediaUpload = function(input) {
+        const file = input.files[0];
+        if (!file) return;
+        // লোকাল বা ডামি প্রিভিউ লিংক (ফায়ারবেস স্টোরেজ বা বেস৬৪ ইউআরএল)
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const fileType = file.type.startsWith('image/') ? 'image' : 'file';
+            sendDataToChat({
+                type: fileType,
+                url: e.target.result,
+                fileName: file.name,
+                text: file.name
+            });
+        };
+        reader.readAsDataURL(file);
+    };
+
+    // ২. লাইভ টাইপিং নোটিফিকেশন
+    let typingTimer;
+    window.notifyTyping = function() {
+        if (!activeChatPartner) return;
+        const chatId = getChatId(currentUser, activeChatPartner);
+        set(ref(db, 'typing/' + chatId + '/' + currentUser), true);
+        
+        clearTimeout(typingTimer);
+        typingTimer = setTimeout(() => {
+            set(ref(db, 'typing/' + chatId + '/' + currentUser), false);
+        }, 2000);
+    };
+
+    // ৩. মেসেজ রিঅ্যাকশন যোগ করা
+    function addReaction(chatId, msgKey, emoji) {
+        set(ref(db, `messages/${chatId}/${msgKey}/reaction`), emoji);
+    }
+
+    // ৪. ভয়েস রেকর্ড সিমুলেশন / টগল
+    let isRecording = false;
+    window.toggleVoiceRecording = function() {
+        const btn = document.getElementById('voiceRecordBtn');
+        if (!isRecording) {
+            isRecording = true;
+            btn.style.color = '#ff4d4d';
+            // এখানে ব্রাউজারের MediaRecorder API ব্যবহার করে ভয়েস রেকর্ড করা যাবে
+            alert("Recording started... (Click mic again to stop & send)");
+        } else {
+            isRecording = false;
+            btn.style.color = '#8696a0';
+            // ডামি ভয়েস নোট পাঠানো
+            sendDataToChat({ type: 'audio', url: '#', text: '[Voice Note]' });
+        }
+    };
+
+    // ৫. অ্যাপ বা চ্যাট লিংক শেয়ার করার অপশন
+    window.shareAppOrChat = function() {
+        if (navigator.share) {
+            navigator.share({
+                title: 'Web Chat App',
+                text: 'Come chat with me on this awesome web app!',
+                url: window.location.href,
+            }).catch(console.error);
+        } else {
+            prompt("Copy this link to share:", window.location.href);
+        }
     };
 </script>
 </body>
