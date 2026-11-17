@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chatty - Premium Web Chat</title>
 
-    <!-- নতুন যোগ করুন: PWABuilder-এর ম্যানিফেস্ট ত্রুটি দূর করার জন্য -->
+    <!-- PWABuilder Manifest Link -->
     <link rel="manifest" href="manifest.json">
 
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
@@ -24,7 +24,6 @@
             --text-secondary: #8696a0;
         }
 
-        /* ১৬ নম্বর লাইনের ভুল `- {` ঠিক করে এখানে `* {` করা হলো */
         * {
             box-sizing: border-box;
             margin: 0;
@@ -446,6 +445,10 @@
                 <div id="menuUsername" style="font-weight: bold; font-size: 16px;">User</div>
                 <div style="font-size: 12px; color: var(--text-secondary);" id="menuUserEmail">email@gmail.com</div>
             </div>
+            
+            <!-- সাইড মেনুতে Settings-এর ঠিক উপরে শেয়ার অপশন যুক্ত করা হলো -->
+            <button class="imo-menu-btn" onclick="shareAppMenu()">🔗 Share App</button>
+
             <button class="imo-menu-btn" onclick="openSettingsModal()">⚙️ Settings & Profile</button>
             <button class="imo-menu-btn" onclick="openPremiumModal()">⭐ Premium Login / Features</button>
             <button class="imo-menu-btn logout-menu-btn" onclick="logoutUser()">🚪 Logout</button>
@@ -634,6 +637,20 @@
             }
         }
 
+        // সাইড মেনু শেয়ার ফাংশন
+        function shareAppMenu() {
+            closeImoMenu();
+            if (navigator.share) {
+                navigator.share({
+                    title: 'Chatty Messaging App',
+                    text: 'Check out my real-time chat app!',
+                    url: window.location.href,
+                }).catch(console.error);
+            } else {
+                alert("Share link copied: " + window.location.href);
+            }
+        }
+
         let activeChatContact = null;
 
         function goBackHome() {
@@ -766,7 +783,7 @@
                 alert("Audio call started successfully!");
             } catch (error) {
                 console.error(error);
-                alert("Failed to start audio call.");
+                alert("Failed to start audio call. Please check microphone permission.");
             }
         }
 
@@ -780,7 +797,7 @@
                 alert("Video call started successfully!");
             } catch (error) {
                 console.error(error);
-                alert("Failed to start video call.");
+                alert("Failed to start video call. Please check camera/microphone permission.");
             }
         }
     </script>
