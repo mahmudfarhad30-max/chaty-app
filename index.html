@@ -653,7 +653,6 @@
             }
         }
 
-        // ফোনের কন্টাক্ট পারমিশন ও ফেচ করার ফাংশন
         async function importPhoneContacts() {
             if ('contacts' in navigator && 'Picker' in navigator.contacts) {
                 try {
@@ -824,7 +823,6 @@
             uid: null
         };
 
-        // মাইক্রোফোন পারমিশনসহ অডিও কল লজিক
         async function startAudioCall() {
             try {
                 const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -840,7 +838,6 @@
             }
         }
 
-        // ক্যামেরা ও মাইক্রোফোন পারমিশনসহ ভিডিও কল লজিক
         async function startVideoCall() {
             try {
                 const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: true });
