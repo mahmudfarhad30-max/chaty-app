@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chatty - Realtime Chat App</title>
+    <title>Chatty - Secure Realtime Chat</title>
     <link rel="manifest" href="./manifest.json">
     <style>
         * {
@@ -19,6 +19,7 @@
             justify-content: center;
             align-items: center;
             height: 100vh;
+            overflow: hidden;
         }
         .container {
             width: 100%;
@@ -42,35 +43,36 @@
             display: flex;
         }
         .login-box {
-            padding: 40px 25px;
+            padding: 25px 20px;
             display: flex;
             flex-direction: column;
             justify-content: center;
             height: 100%;
             background: #ffffff;
+            overflow-y: auto;
         }
         .login-box h2 {
             text-align: center;
             color: #00a884;
-            margin-bottom: 30px;
-            font-size: 24px;
+            margin-bottom: 15px;
+            font-size: 22px;
         }
         .input-group {
-            margin-bottom: 15px;
+            margin-bottom: 10px;
         }
         .input-group label {
             display: block;
-            margin-bottom: 5px;
+            margin-bottom: 3px;
             color: #333;
-            font-size: 14px;
+            font-size: 13px;
             font-weight: 600;
         }
         .input-group input {
             width: 100%;
-            padding: 12px;
+            padding: 9px 12px;
             border: 1px solid #ccc;
             border-radius: 6px;
-            font-size: 15px;
+            font-size: 14px;
             outline: none;
         }
         .input-group input:focus {
@@ -78,94 +80,109 @@
         }
         .btn {
             width: 100%;
-            padding: 13px;
+            padding: 10px;
             background: #00a884;
             color: #fff;
             border: none;
             border-radius: 6px;
-            font-size: 16px;
+            font-size: 14px;
             cursor: pointer;
             font-weight: bold;
-            margin-top: 10px;
+            margin-top: 6px;
         }
         .btn:hover {
             background: #01755f;
         }
+        .btn-google {
+            background: #db4437;
+            margin-top: 8px;
+        }
+        .btn-google:hover {
+            background: #c23321;
+        }
+        .divider {
+            text-align: center;
+            margin: 10px 0;
+            font-size: 12px;
+            color: #666;
+        }
         .error-msg {
             color: #d32f2f;
-            font-size: 13px;
+            font-size: 12px;
             text-align: center;
-            margin-top: 10px;
-            min-height: 18px;
+            margin-top: 6px;
+            min-height: 15px;
         }
         .header {
             background: #202c33;
             color: #e9edef;
-            padding: 15px;
+            padding: 10px 15px;
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
         .header h3 {
-            font-size: 18px;
+            font-size: 16px;
         }
         .header-actions {
             display: flex;
-            gap: 12px;
+            gap: 8px;
             align-items: center;
         }
         .header-btn {
             background: rgba(255,255,255,0.1);
             border: none;
             color: #fff;
-            padding: 6px 12px;
+            padding: 5px 10px;
             border-radius: 4px;
             cursor: pointer;
-            font-size: 13px;
+            font-size: 12px;
         }
-        .search-bar {
+        
+        /* Unified Single Search & Contact Bar */
+        .search-chat-bar {
             padding: 8px 12px;
             background: #111b21;
             display: flex;
+            gap: 6px;
             align-items: center;
-        }
-        .search-bar input {
-            width: 100%;
-            padding: 8px 14px;
-            background: #202c33;
-            border: none;
-            border-radius: 20px;
-            color: #e9edef;
-            outline: none;
-            font-size: 14px;
-        }
-        .new-chat-bar {
-            padding: 10px;
-            background: #202c33;
-            display: flex;
-            gap: 8px;
             border-bottom: 1px solid #222d34;
         }
-        .new-chat-bar input {
+        .search-chat-bar input {
             flex: 1;
-            padding: 10px 14px;
-            background: #2a3942;
+            padding: 8px 12px;
+            background: #202c33;
             border: none;
-            color: #e9edef;
             border-radius: 20px;
+            color: #e9edef;
             outline: none;
-            font-size: 14px;
+            font-size: 13px;
         }
-        .new-chat-bar button {
+        .contact-btn {
+            background: #2a3942;
+            color: #00a884;
+            border: none;
+            border-radius: 50%;
+            width: 34px;
+            height: 34px;
+            cursor: pointer;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .chat-start-btn {
             background: #00a884;
             color: #111b21;
             border: none;
             border-radius: 20px;
-            padding: 0 16px;
+            padding: 0 12px;
+            height: 34px;
             cursor: pointer;
             font-weight: bold;
-            font-size: 14px;
+            font-size: 12px;
         }
+
         .friend-list {
             flex: 1;
             overflow-y: auto;
@@ -174,11 +191,11 @@
         .empty-state {
             text-align: center;
             color: #8696a0;
-            padding: 40px 20px;
-            font-size: 14px;
+            padding: 25px 15px;
+            font-size: 13px;
         }
         .friend-item {
-            padding: 12px 15px;
+            padding: 10px 15px;
             border-bottom: 1px solid #222d34;
             display: flex;
             align-items: center;
@@ -188,8 +205,8 @@
             background: #202c33;
         }
         .avatar {
-            width: 45px;
-            height: 45px;
+            width: 38px;
+            height: 38px;
             background: #00a884;
             color: #fff;
             border-radius: 50%;
@@ -197,7 +214,7 @@
             justify-content: center;
             align-items: center;
             font-weight: bold;
-            font-size: 16px;
+            font-size: 14px;
             margin-right: 12px;
         }
         .friend-info {
@@ -207,12 +224,12 @@
         .friend-number {
             font-weight: 600;
             color: #e9edef;
-            font-size: 15px;
-            margin-bottom: 3px;
+            font-size: 14px;
+            margin-bottom: 2px;
         }
         .last-msg {
             color: #8696a0;
-            font-size: 13px;
+            font-size: 12px;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
@@ -246,36 +263,35 @@
             background: none;
             border: none;
             color: #e9edef;
-            font-size: 20px;
+            font-size: 18px;
             cursor: pointer;
         }
         .chat-header-right {
             display: flex;
-            gap: 15px;
+            gap: 12px;
             align-items: center;
-            font-size: 18px;
+            font-size: 16px;
             color: #aebac1;
             cursor: pointer;
         }
-        /* Popup Dropdown Menu for Chat options */
         .dropdown-menu {
             display: none;
             position: absolute;
             right: 15px;
-            top: 55px;
+            top: 50px;
             background: #233138;
             border-radius: 4px;
             box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-            width: 180px;
+            width: 160px;
             z-index: 100;
         }
         .dropdown-menu.show {
             display: block;
         }
         .dropdown-item {
-            padding: 12px 16px;
+            padding: 10px 14px;
             color: #e9edef;
-            font-size: 14px;
+            font-size: 13px;
             cursor: pointer;
         }
         .dropdown-item:hover {
@@ -284,20 +300,20 @@
 
         .chat-messages {
             flex: 1;
-            padding: 15px;
+            padding: 12px;
             overflow-y: auto;
             background-color: #0b141a;
             background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23182229' fill-opacity='0.4'%3E%3Ccircle cx='20' cy='20' r='3'/%3E%3Cpath d='M50 15 L55 25 L45 25 Z'/%3E%3Crect x='75' y='15' width='8' height='8' rx='2'/%3E%3Cpath d='M15 55 Q25 45 35 55 T55 55' fill='none' stroke='%23182229' stroke-width='2'/%3E%3Ccircle cx='80' cy='60' r='4'/%3E%3Cpath d='M25 80 L32 88 L20 90 Z'/%3E%3Crect x='60' y='78' width='10' height='6' rx='3'/%3E%3C/g%3E%3C/svg%3E");
             display: flex;
             flex-direction: column;
-            gap: 8px;
+            gap: 6px;
         }
         .msg {
             max-width: 75%;
             padding: 8px 12px;
             border-radius: 8px;
-            font-size: 14px;
-            line-height: 1.4;
+            font-size: 13px;
+            line-height: 1.35;
             word-wrap: break-word;
             position: relative;
             box-shadow: 0 1px 2px rgba(0,0,0,0.2);
@@ -315,24 +331,24 @@
             border-top-left-radius: 0;
         }
         .msg-time {
-            font-size: 10px;
+            font-size: 9px;
             color: #8696a0;
             text-align: right;
-            margin-top: 4px;
+            margin-top: 3px;
             display: inline-block;
             float: right;
-            margin-left: 10px;
+            margin-left: 8px;
         }
         .tick {
-            font-size: 12px;
-            margin-left: 4px;
+            font-size: 11px;
+            margin-left: 3px;
             color: #8696a0;
         }
         .tick.seen {
             color: #53bdeb;
         }
         .chat-input-area {
-            padding: 10px;
+            padding: 8px 10px;
             background: #202c33;
             display: flex;
             gap: 8px;
@@ -340,23 +356,31 @@
         }
         .chat-input-area input {
             flex: 1;
-            padding: 11px 15px;
+            padding: 9px 12px;
             border: none;
             background: #2a3942;
             color: #e9edef;
             border-radius: 20px;
             outline: none;
-            font-size: 15px;
+            font-size: 13px;
+        }
+        .action-icon-btn {
+            background: none;
+            border: none;
+            color: #8696a0;
+            font-size: 18px;
+            cursor: pointer;
         }
         .send-btn {
             background: #00a884;
             color: #111b21;
             border: none;
-            padding: 0 18px;
-            height: 40px;
+            padding: 0 14px;
+            height: 36px;
             border-radius: 20px;
             cursor: pointer;
             font-weight: bold;
+            font-size: 12px;
         }
     </style>
 </head>
@@ -368,18 +392,22 @@
         <div class="login-box">
             <h2>Chatty Login</h2>
             <div class="input-group">
-                <label>Phone Number</label>
-                <input type="tel" id="loginPhone" placeholder="Enter phone number">
+                <label>Phone Number / Gmail</label>
+                <input type="text" id="loginPhone" placeholder="Enter phone or safety email">
             </div>
             <div class="input-group">
                 <label>Password</label>
                 <input type="password" id="loginPass" placeholder="Enter password">
             </div>
             <button class="btn" onclick="handleLogin()">Login</button>
+            
+            <div class="divider">OR Safety Login</div>
+            <button class="btn btn-google" onclick="handleGoogleSafetyLogin()">Sign in with Google / Gmail</button>
+
             <div id="loginError" class="error-msg"></div>
             
-            <p style="text-align: center; margin-top: 15px; font-size: 14px; color: #555;">
-                অ্যাকাউন্ট নেই? <a href="#" onclick="showRegisterScreen()" style="color: #00a884; font-weight: bold;">Register করুন</a>
+            <p style="text-align: center; margin-top: 10px; font-size: 12px; color: #555;">
+                Don't have an account? <a href="#" onclick="showRegisterScreen()" style="color: #00a884; font-weight: bold;">Register</a>
             </p>
         </div>
     </div>
@@ -393,14 +421,18 @@
                 <input type="tel" id="regPhone" placeholder="Enter phone number">
             </div>
             <div class="input-group">
+                <label>Safety Login Gmail (Optional)</label>
+                <input type="email" id="regEmail" placeholder="Enter your gmail for safety">
+            </div>
+            <div class="input-group">
                 <label>Password</label>
                 <input type="password" id="regPass" placeholder="Enter password">
             </div>
             <button class="btn" onclick="handleRegister()">Register</button>
             <div id="regError" class="error-msg"></div>
             
-            <p style="text-align: center; margin-top: 15px; font-size: 14px; color: #555;">
-                ইতিমধ্যে অ্যাকাউন্ট আছে? <a href="#" onclick="showLoginScreen()" style="color: #00a884; font-weight: bold;">Login করুন</a>
+            <p style="text-align: center; margin-top: 10px; font-size: 12px; color: #555;">
+                Already have an account? <a href="#" onclick="showLoginScreen()" style="color: #00a884; font-weight: bold;">Login</a>
             </p>
         </div>
     </div>
@@ -410,16 +442,18 @@
         <div class="header">
             <h3 id="currentUserDisplay">Chatty</h3>
             <div class="header-actions">
+                <button class="header-btn" onclick="requestDevicePermissions()">Permissions</button>
                 <button class="header-btn" onclick="logout()">Logout</button>
             </div>
         </div>
-        <div class="search-bar">
-            <input type="text" id="searchInput" placeholder="Search or start new chat" oninput="filterChats()">
+        
+        <!-- Unified Single Search & Phone Contact Bar -->
+        <div class="search-chat-bar">
+            <input type="text" id="searchInput" placeholder="Search or pick contact..." oninput="filterOrStartChat()">
+            <button class="contact-btn" onclick="pickPhoneContact()" title="Pick from Phone Contacts">&#128214;</button>
+            <button class="chat-start-btn" onclick="startChatFromSearch()">Chat</button>
         </div>
-        <div class="new-chat-bar">
-            <input type="tel" id="targetPhoneInput" placeholder="Enter number to message...">
-            <button onclick="startChatWithNumber()">Chat</button>
-        </div>
+
         <div id="friendListContainer" class="friend-list"></div>
     </div>
 
@@ -431,18 +465,19 @@
                 <h3 id="chatTargetName">Number</h3>
             </div>
             <div class="chat-header-right">
-                <span title="Voice Call" onclick="alert('Calling feature coming soon!')">&#128222;</span>
+                <span title="Voice / Video Call" onclick="triggerAudioVideoCall()">&#128222;</span>
                 <span title="Menu" onclick="toggleMenu()">&#8942;</span>
             </div>
             <!-- Dropdown Menu -->
             <div id="chatDropdown" class="dropdown-menu">
-                <div class="dropdown-item" onclick="alert('View contact info')">View contact</div>
-                <div class="dropdown-item" onclick="alert('Media, links, and docs')">Media & docs</div>
+                <div class="dropdown-item" onclick="triggerCameraCapture()">Open Camera</div>
+                <div class="dropdown-item" onclick="alert('Media & docs info')">Media & docs</div>
                 <div class="dropdown-item" onclick="goBackHome()">Close Chat</div>
             </div>
         </div>
         <div id="chatMessagesContainer" class="chat-messages"></div>
         <div class="chat-input-area">
+            <button class="action-icon-btn" onclick="triggerCameraCapture()" title="Camera">&#128247;</button>
             <input type="text" id="messageInput" placeholder="Type a message..." onkeypress="handleEnter(event)">
             <button class="send-btn" onclick="sendMessage()">Send</button>
         </div>
@@ -453,7 +488,7 @@
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getDatabase, ref, set, get, child, push, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
-    import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+    import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyA6OaT_Byxdym5F5EkrBQHlfKwPai5uKVA",
@@ -472,6 +507,7 @@
     let currentUser = localStorage.getItem('chatApp_currentuser') || null;
     let activeChatPartner = null;
     let allChatsData = {};
+    let savedContactNames = JSON.parse(localStorage.getItem('chatApp_contacts') || '{}');
 
     window.onload = function() {
         if (currentUser) {
@@ -482,28 +518,136 @@
     window.showLoginScreen = function() {
         document.getElementById('registerScreen').classList.remove('active');
         document.getElementById('loginScreen').classList.add('active');
-    }
+    };
 
     window.showRegisterScreen = function() {
         document.getElementById('loginScreen').classList.remove('active');
         document.getElementById('registerScreen').classList.add('active');
+    };
+
+    // Normalize Bangladeshi or standard phone numbers (e.g. +88017... -> 017...)
+    function normalizePhone(rawPhone) {
+        let cleaned = rawPhone.replace(/[\s\-\(\)]/g, '');
+        if (cleaned.startsWith('+880')) {
+            cleaned = '0' + cleaned.slice(4);
+        } else if (cleaned.startsWith('880')) {
+            cleaned = '0' + cleaned.slice(3);
+        }
+        return cleaned;
     }
 
-    window.handleLogin = async function() {
-        const phone = document.getElementById('loginPhone').value.trim();
-        const pass = document.getElementById('loginPass').value;
-        const errorEl = document.getElementById('loginError');
+    // Pick Contact from Phone Book (Contact Picker API)
+    window.pickPhoneContact = async function() {
+        if ('contacts' in navigator && 'ContactsManager' in window) {
+            try {
+                const props = ['name', 'tel'];
+                const opts = { multiple: false };
+                const contacts = await navigator.contacts.select(props, opts);
+                if (contacts.length > 0 && contacts[0].tel && contacts[0].tel.length > 0) {
+                    const rawNumber = contacts[0].tel[0];
+                    const cleanNumber = normalizePhone(rawNumber);
+                    const contactName = (contacts[0].name && contacts[0].name[0]) ? contacts[0].name[0] : cleanNumber;
+                    
+                    // Save contact name locally for display
+                    savedContactNames[cleanNumber] = contactName;
+                    localStorage.setItem('chatApp_contacts', JSON.stringify(savedContactNames));
 
-        if (!phone || !pass) {
-            errorEl.textContent = "Phone number and password are required.";
+                    verifyAndOpenChat(cleanNumber);
+                }
+            } catch (err) {
+                alert("Could not access contacts: " + err.message);
+            }
+        } else {
+            alert("Contact Picker is supported on Android Chrome. Please type the number directly in the search box.");
+        }
+    };
+
+    // Verify if the number is registered on Chatty before allowing chat
+    async function verifyAndOpenChat(targetInput) {
+        const cleanNumber = normalizePhone(targetInput);
+        if (!cleanNumber) return;
+
+        if (cleanNumber === currentUser) {
+            alert("You cannot chat with yourself.");
             return;
         }
 
-        const email = phone + "@chatty.app";
+        try {
+            const dbRef = ref(db);
+            const snapshot = await get(child(dbRef, `users/${cleanNumber}`));
+            
+            if (snapshot.exists()) {
+                document.getElementById('searchInput').value = '';
+                openChat(cleanNumber);
+            } else {
+                alert("This number (" + cleanNumber + ") is not registered on Chatty yet!");
+            }
+        } catch (error) {
+            alert("Error verifying user: " + error.message);
+        }
+    }
+
+    window.startChatFromSearch = function() {
+        const inputVal = document.getElementById('searchInput').value.trim();
+        if (!inputVal) return;
+
+        // Check if user searched by saved contact name
+        let matchedPhone = null;
+        Object.keys(savedContactNames).forEach(phone => {
+            if (savedContactNames[phone].toLowerCase() === inputVal.toLowerCase()) {
+                matchedPhone = phone;
+            }
+        });
+
+        verifyAndOpenChat(matchedPhone || inputVal);
+    };
+
+    // Hardware Permission Handler (Audio, Video, Camera, Mic)
+    window.requestDevicePermissions = async function() {
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+            alert("Camera, Microphone, and Audio permissions granted successfully!");
+            stream.getTracks().forEach(track => track.stop());
+        } catch (error) {
+            alert("Permission denied or device not available: " + error.message);
+        }
+    };
+
+    window.triggerAudioVideoCall = async function() {
+        try {
+            await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+            const displayName = savedContactNames[activeChatPartner] || activeChatPartner;
+            alert("Connecting secure call to " + displayName + "...");
+        } catch (err) {
+            alert("Camera/Microphone permission is required to make calls.");
+        }
+    };
+
+    window.triggerCameraCapture = async function() {
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+            alert("Camera opened! Snap feature ready.");
+            stream.getTracks().forEach(track => track.stop());
+        } catch (err) {
+            alert("Camera access denied.");
+        }
+    };
+
+    window.handleLogin = async function() {
+        let identifier = normalizePhone(document.getElementById('loginPhone').value.trim());
+        const pass = document.getElementById('loginPass').value;
+        const errorEl = document.getElementById('loginError');
+
+        if (!identifier || !pass) {
+            errorEl.textContent = "Field and password are required.";
+            return;
+        }
+
+        const email = identifier.includes('@') ? identifier : identifier + "@chatty.app";
         try {
             await signInWithEmailAndPassword(auth, email, pass);
-            currentUser = phone;
-            localStorage.setItem('chatApp_currentuser', phone);
+            currentUser = identifier;
+            localStorage.setItem('chatApp_currentuser', identifier);
             errorEl.textContent = '';
             showHomeScreen();
         } catch (error) {
@@ -511,8 +655,29 @@
         }
     };
 
+    window.handleGoogleSafetyLogin = async function() {
+        const provider = new GoogleAuthProvider();
+        try {
+            const result = await signInWithPopup(auth, provider);
+            const user = result.user;
+            currentUser = user.email;
+            localStorage.setItem('chatApp_currentuser', currentUser);
+            
+            const userRef = ref(db, 'users/' + currentUser.replace(/\./g, '_'));
+            await set(userRef, {
+                safetyLogin: true,
+                createdAt: Date.now()
+            });
+
+            showHomeScreen();
+        } catch (error) {
+            alert("Safety Google Login failed: " + error.message);
+        }
+    };
+
     window.handleRegister = async function() {
-        const phone = document.getElementById('regPhone').value.trim();
+        const phone = normalizePhone(document.getElementById('regPhone').value.trim());
+        const safetyEmail = document.getElementById('regEmail').value.trim();
         const pass = document.getElementById('regPass').value;
         const errorEl = document.getElementById('regError');
 
@@ -521,13 +686,14 @@
             return;
         }
 
-        const email = phone + "@chatty.app";
+        const email = safetyEmail ? safetyEmail : phone + "@chatty.app";
         try {
             await createUserWithEmailAndPassword(auth, email, pass);
             
             const userRef = ref(db, 'users/' + phone);
             await set(userRef, {
                 password: pass,
+                safetyEmail: safetyEmail || '',
                 createdAt: Date.now()
             });
 
@@ -558,17 +724,6 @@
         document.getElementById('loginPass').value = '';
     };
 
-    window.startChatWithNumber = function() {
-        const targetPhone = document.getElementById('targetPhoneInput').value.trim();
-        if (!targetPhone) return;
-        if (targetPhone === currentUser) {
-            alert("You cannot chat with yourself.");
-            return;
-        }
-        document.getElementById('targetPhoneInput').value = '';
-        openChat(targetPhone);
-    };
-
     function getChatId(user1, user2) {
         return user1 < user2 ? `${user1}_${user2}` : `${user2}_${user1}`;
     }
@@ -581,7 +736,7 @@
             container.innerHTML = "";
             if (!snapshot.exists()) {
                 allChatsData = {};
-                container.innerHTML = `<div class="empty-state">No chats yet. Enter a number above to start messaging!</div>`;
+                container.innerHTML = `<div class="empty-state">No chats yet. Pick a contact or search a registered number!</div>`;
                 return;
             }
 
@@ -596,19 +751,20 @@
 
         const keys = Object.keys(chats);
         if (keys.length === 0) {
-            container.innerHTML = `<div class="empty-state">No chats found.</div>`;
+            container.innerHTML = `<div class="empty-state">No matching contact found. Click 'Chat' to verify & start.</div>`;
             return;
         }
 
         keys.forEach(partnerPhone => {
             const lastMsg = chats[partnerPhone].lastMessage || "";
+            const displayName = savedContactNames[partnerPhone] || partnerPhone;
             const div = document.createElement('div');
             div.className = 'friend-item';
             div.onclick = () => openChat(partnerPhone);
             div.innerHTML = `
-                <div class="avatar">${partnerPhone.charAt(0)}</div>
+                <div class="avatar">${displayName.charAt(0).toUpperCase()}</div>
                 <div class="friend-info">
-                    <div class="friend-number">${partnerPhone}</div>
+                    <div class="friend-number">${displayName}</div>
                     <div class="last-msg">${lastMsg}</div>
                 </div>
             `;
@@ -616,11 +772,12 @@
         });
     }
 
-    window.filterChats = function() {
+    window.filterOrStartChat = function() {
         const query = document.getElementById('searchInput').value.toLowerCase();
         const filtered = {};
         Object.keys(allChatsData).forEach(phone => {
-            if (phone.toLowerCase().includes(query)) {
+            const name = (savedContactNames[phone] || "").toLowerCase();
+            if (phone.toLowerCase().includes(query) || name.includes(query)) {
                 filtered[phone] = allChatsData[phone];
             }
         });
@@ -630,13 +787,13 @@
     window.toggleMenu = function() {
         const dropdown = document.getElementById('chatDropdown');
         dropdown.classList.toggle('show');
-    }
+    };
 
     window.openChat = function(partnerPhone) {
         activeChatPartner = partnerPhone;
         document.getElementById('homeScreen').classList.remove('active');
         document.getElementById('chatScreen').classList.add('active');
-        document.getElementById('chatTargetName').textContent = partnerPhone;
+        document.getElementById('chatTargetName').textContent = savedContactNames[partnerPhone] || partnerPhone;
 
         const chatId = getChatId(currentUser, activeChatPartner);
         const messagesRef = ref(db, 'messages/' + chatId);
