@@ -39,16 +39,10 @@
             flex-direction: column;
             height: 100vh;
             width: 100%;
-            position: absolute;
-            top: 0;
-            left: 0;
-            background-color: var(--bg-main);
-            z-index: 1;
         }
 
         .screen.active {
             display: flex;
-            z-index: 10;
         }
 
         .auth-container {
@@ -57,7 +51,8 @@
             justify-content: center;
             align-items: center;
             padding: 20px;
-            z-index: 20;
+            height: 100vh;
+            width: 100%;
         }
 
         .auth-card {
@@ -204,7 +199,6 @@
 
         .chat-screen {
             background: #0b141a;
-            z-index: 30;
         }
 
         .back-btn {
@@ -387,6 +381,7 @@
 </head>
 <body>
 
+    <!-- ১. লগইন স্ক্রিন -->
     <div id="loginScreen" class="screen auth-container active">
         <div class="auth-card">
             <h2 class="auth-title">Chatty Login</h2>
@@ -397,6 +392,7 @@
         </div>
     </div>
 
+    <!-- ২. রেজিস্টার স্ক্রিন -->
     <div id="registerScreen" class="screen auth-container">
         <div class="auth-card">
             <h2 class="auth-title">Create Account</h2>
@@ -407,6 +403,7 @@
         </div>
     </div>
 
+    <!-- ৩. হোম স্ক্রিন -->
     <div id="homeScreen" class="screen">
         <div class="home-header">
             <div class="profile-avatar" id="headerAvatar" onclick="openImoMenu()">
@@ -421,6 +418,7 @@
         <div id="friendListContainer" class="friend-list"></div>
     </div>
 
+    <!-- ৪. চ্যাট স্ক্রিন -->
     <div id="chatScreen" class="screen chat-screen">
         <div class="chat-header">
             <button class="back-btn" onclick="goBackHome()">←</button>
@@ -442,6 +440,7 @@
         </div>
     </div>
 
+    <!-- ইমু মেনু ড্রয়ার -->
     <div id="imoMenuModal" class="imo-menu" onclick="closeImoMenu(event)">
         <div class="imo-menu-content" onclick="event.stopPropagation()">
             <div class="imo-profile-header">
@@ -457,6 +456,7 @@
         </div>
     </div>
 
+    <!-- সেটিংস মোডাল -->
     <div id="settingsModal" class="sub-modal">
         <div class="sub-modal-content">
             <h3>Profile & Settings</h3>
@@ -471,6 +471,7 @@
         </div>
     </div>
 
+    <!-- প্রিমিয়াম মোডাল -->
     <div id="premiumModal" class="sub-modal">
         <div class="sub-modal-content" style="text-align: center;">
             <h2>⭐ Chatty Premium</h2>
