@@ -6,8 +6,9 @@
     <title>Chatty - Premium Web Chat</title>
 
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://download.agora.io/sdk/release/AgoraRTC_N-4.17.0.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
-
+   
     <style>
         :root {
             --bg-main: #111b21;
@@ -757,6 +758,40 @@
                 localStorage.removeItem('chatty_current_user');
                 location.reload();
             }
+        const client = AgoraRTC.createClient({ mode: "rtc", codec: "vp8" });
+const agoraOptions = {
+  appId: "ebbb8f9f7e9846d8bf33fc3cb057ee8c",
+  channel: "chatycall",
+  token: null,
+  uid: null
+};
+
+async function startAudioCall() {
+  try {
+    await client.join(agoraOptions.appId, agoraOptions.channel, agoraOptions.token, agoraOptions.uid);
+    const localAudioTrack = await AgoraRTC.createMicrophoneAudioTrack();
+    await client.publish([localAudioTrack]);
+    alert("Audio call started successfully!");
+  } catch (error) {
+    console.error(error);
+    alert("Failed to start audio call.");
+  }
+}
+
+async function startVideoCall() {
+  try {
+    await client.join(agoraOptions.appId, agoraOptions.channel, agoraOptions.token, agoraOptions.uid);
+    const localAudioTrack = await AgoraRTC.createMicrophoneAudioTrack();
+    const localVideoTrack = await AgoraRTC.createCameraVideoTrack();
+    
+    localVideoTrack.play("chatMessagesContainer");
+    await client.publish([localAudioTrack, localVideoTrack]);
+    alert("Video call started successfully!");
+  } catch (error) {
+    console.error(error);
+    alert("Failed to start video call.");
+  }
+}    
         }
     </script>
 </body>
