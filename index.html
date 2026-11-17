@@ -172,14 +172,15 @@
             outline: none;
         }
 
-        .search-btn {
+        .search-btn, .contact-import-btn {
             background: var(--bg-input);
             border: none;
             color: var(--text-primary);
-            padding: 0 16px;
+            padding: 0 12px;
             border-radius: 8px;
             cursor: pointer;
             font-weight: bold;
+            font-size: 14px;
         }
 
         .friend-list {
@@ -285,7 +286,7 @@
             font-size: 14px;
         }
 
-        .send-btn, .mic-btn {
+        .send-btn, .attachment-btn {
             background: var(--accent);
             border: none;
             color: white;
@@ -413,6 +414,7 @@
         </div>
         <div class="search-container">
             <input type="text" id="searchInput" class="search-box" placeholder="Search or enter user ID..." onkeypress="handleSearch(event)">
+            <button class="contact-import-btn" onclick="importPhoneContacts()" title="Import Contacts">📇</button>
             <button class="search-btn" onclick="triggerSearch()">Search</button>
         </div>
         <div id="friendListContainer" class="friend-list"></div>
@@ -432,6 +434,9 @@
         </div>
         <div id="chatMessagesContainer" class="chat-messages"></div>
         <div class="chat-input-area">
+            <button class="attachment-btn" onclick="openGallery()" title="Attach Image">📎</button>
+            <input type="file" id="imageInput" accept="image/*" style="display: none;" onchange="handleImageUpload(event)">
+            
             <input type="text" id="messageInput" class="message-input" placeholder="Type a message..." onkeypress="handleMessageEnter(event)">
             <button class="send-btn" onclick="sendMessage()" title="Send">➤</button>
         </div>
@@ -446,9 +451,7 @@
                 <div style="font-size: 12px; color: var(--text-secondary);" id="menuUserEmail">email@gmail.com</div>
             </div>
             
-            <!-- সাইড মেনুতে Settings-এর ঠিক উপরে শেয়ার অপশন যুক্ত করা হলো -->
             <button class="imo-menu-btn" onclick="shareAppMenu()">🔗 Share App</button>
-
             <button class="imo-menu-btn" onclick="openSettingsModal()">⚙️ Settings & Profile</button>
             <button class="imo-menu-btn" onclick="openPremiumModal()">⭐ Premium Login / Features</button>
             <button class="imo-menu-btn logout-menu-btn" onclick="logoutUser()">🚪 Logout</button>
@@ -637,7 +640,6 @@
             }
         }
 
-        // সাইড মেনু শেয়ার ফাংশন
         function shareAppMenu() {
             closeImoMenu();
             if (navigator.share) {
@@ -649,6 +651,53 @@
             } else {
                 alert("Share link copied: " + window.location.href);
             }
+        }
+
+        // ফোনের কন্টাক্ট পারমিশন ও ফেচ করার ফাংশন
+        async function importPhoneContacts() {
+            if ('contacts' in navigator && 'Picker' in navigator.contacts) {
+                try {
+                    const props = ['name', 'tel'];
+                    const opts = { multiple: true };
+                    const contacts = await navigator.contacts.select(props, opts);
+                    if (contacts.length > 0) {
+                        const phoneOrName = contacts[0].tel[0] || contacts[0].name;
+                        document.getElementById('searchInput').value = phoneOrName;
+                        triggerSearch();
+                    }
+                } catch (ex) {
+                    console.error(ex);
+                    alert("Contact access cancelled or not supported.");
+                }
+            } else {
+                alert("Direct contact picker is not supported on this browser. You can type the number directly.");
+            }
+        }
+
+        function openGallery() {
+            document.getElementById('imageInput').click();
+        }
+
+        function handleImageUpload(event) {
+            const file = event.target.files[0];
+            if (!file || !activeChatContact) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const imageUrl = e.target.result;
+                const roomId = getChatRoomId(currentUser, activeChatContact);
+                const messageData = {
+                    sender: currentUser,
+                    text: `<img src="${imageUrl}" style="max-width:100%; border-radius:8px;">`,
+                    timestamp: Date.now(),
+                    status: "sent"
+                };
+
+                db.ref('chats/' + roomId).push(messageData);
+                db.ref('user-chats/' + currentUser + '/' + activeChatContact).set({ contact: activeChatContact });
+                db.ref('user-chats/' + activeChatContact + '/' + currentUser).set({ contact: currentUser });
+            };
+            reader.readAsDataURL(file);
         }
 
         let activeChatContact = null;
@@ -751,7 +800,7 @@
             db.ref('user-chats/' + currentUser).on('value', (snapshot) => {
                 container.innerHTML = "";
                 if (!snapshot.exists()) {
-                    container.innerHTML = `<div style="padding: 30px; text-align: center; color: var(--text-secondary);">No chats yet. Search a user ID to start!</div>`;
+                    container.innerHTML = `<div style="padding: 30px; text-align: center; color: var(--text-secondary);">No chats yet. Search a user ID or import contacts!</div>`;
                     return;
                 }
                 const chats = snapshot.val();
@@ -775,20 +824,28 @@
             uid: null
         };
 
+        // মাইক্রোফোন পারমিশনসহ অডিও কল লজিক
         async function startAudioCall() {
             try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                stream.getTracks().forEach(track => track.stop());
+
                 await client.join(agoraOptions.appId, agoraOptions.channel, agoraOptions.token, agoraOptions.uid);
                 const localAudioTrack = await AgoraRTC.createMicrophoneAudioTrack();
                 await client.publish([localAudioTrack]);
                 alert("Audio call started successfully!");
             } catch (error) {
                 console.error(error);
-                alert("Failed to start audio call. Please check microphone permission.");
+                alert("Failed to start audio call. Please allow microphone permission.");
             }
         }
 
+        // ক্যামেরা ও মাইক্রোফোন পারমিশনসহ ভিডিও কল লজিক
         async function startVideoCall() {
             try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: true });
+                stream.getTracks().forEach(track => track.stop());
+
                 await client.join(agoraOptions.appId, agoraOptions.channel, agoraOptions.token, agoraOptions.uid);
                 const localAudioTrack = await AgoraRTC.createMicrophoneAudioTrack();
                 const localVideoTrack = await AgoraRTC.createCameraVideoTrack();
@@ -797,7 +854,7 @@
                 alert("Video call started successfully!");
             } catch (error) {
                 console.error(error);
-                alert("Failed to start video call. Please check camera/microphone permission.");
+                alert("Failed to start video call. Please allow camera/microphone permission.");
             }
         }
     </script>
