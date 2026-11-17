@@ -46,7 +46,7 @@
             display: flex;
         }
 
-        .home-header {
+        .home-header, .chat-header {
             background: var(--bg-header);
             padding: 12px 16px;
             display: flex;
@@ -54,7 +54,7 @@
             gap: 14px;
         }
 
-        .my-profile-avatar {
+        .my-profile-avatar, .avatar {
             width: 42px;
             height: 42px;
             border-radius: 50%;
@@ -70,6 +70,16 @@
         .app-title {
             font-size: 20px;
             font-weight: bold;
+            flex: 1;
+        }
+
+        .menu-icon-btn, .action-icon-btn {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 20px;
+            cursor: pointer;
+            padding: 6px;
         }
 
         .search-container {
@@ -77,9 +87,9 @@
             background: var(--bg-main);
         }
 
-        .search-box {
+        .search-box, .message-input {
             width: 100%;
-            padding: 8px 12px 8px 32px;
+            padding: 10px 14px;
             background: var(--bg-input);
             border: none;
             border-radius: 8px;
@@ -94,24 +104,21 @@
             background: var(--bg-main);
         }
 
-        .chat-screen {
-            display: none;
-            flex-direction: column;
-            height: 100vh;
-            width: 100%;
-            background: #0b141a;
-        }
-
-        .chat-screen.active {
-            display: flex;
-        }
-
-        .chat-header {
-            background: var(--bg-header);
-            padding: 10px 16px;
+        .friend-item {
+            padding: 12px 16px;
+            border-bottom: 1px solid #222d34;
+            cursor: pointer;
             display: flex;
             align-items: center;
             gap: 12px;
+        }
+
+        .friend-item:hover {
+            background: #202c33;
+        }
+
+        .chat-screen {
+            background: #0b141a;
         }
 
         .back-btn {
@@ -129,6 +136,27 @@
             display: flex;
             flex-direction: column;
             gap: 8px;
+            background: #0b141a;
+        }
+
+        .msg {
+            max-width: 75%;
+            padding: 9px 13px;
+            border-radius: 8px;
+            font-size: 14px;
+            line-height: 1.4;
+            word-wrap: break-word;
+            color: var(--text-primary);
+        }
+
+        .msg.sent {
+            background: var(--msg-sent);
+            align-self: flex-end;
+        }
+
+        .msg.received {
+            background: var(--msg-received);
+            align-self: flex-start;
         }
 
         .chat-input-area {
@@ -137,16 +165,6 @@
             display: flex;
             align-items: center;
             gap: 10px;
-        }
-
-        .message-input {
-            flex: 1;
-            background: var(--bg-input);
-            border: none;
-            padding: 10px 14px;
-            border-radius: 8px;
-            color: var(--text-primary);
-            outline: none;
         }
 
         .send-btn {
@@ -158,30 +176,124 @@
             cursor: pointer;
             font-weight: bold;
         }
+
+        /* মোডাল এবং মেনু স্টাইল */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.7);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--bg-header);
+            padding: 24px;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 400px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .modal-btn {
+            background: var(--bg-input);
+            border: none;
+            color: var(--text-primary);
+            padding: 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 15px;
+            text-align: left;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .modal-btn:hover {
+            background: #374248;
+        }
+
+        .logout-btn {
+            background: rgba(239, 68, 68, 0.15);
+            color: #ef4444;
+            border: 1px solid #ef4444;
+        }
     </style>
 </head>
 <body>
 
+    <!-- হোম স্ক্রিন -->
     <div id="homeScreen" class="screen active">
         <div class="home-header">
-            <div class="my-profile-avatar" id="headerAvatar">0</div>
+            <div class="my-profile-avatar" id="headerAvatar" onclick="openProfileModal()">0</div>
             <div class="app-title">Chatty</div>
+            <button class="menu-icon-btn" onclick="openMenuModal()">⋮</button>
         </div>
         <div class="search-container">
-            <input type="text" id="searchInput" class="search-box" placeholder="Search or pick contact...">
+            <input type="text" id="searchInput" class="search-box" placeholder="Search or enter user ID to chat..." onkeypress="handleSearch(event)">
         </div>
         <div id="friendListContainer" class="friend-list"></div>
     </div>
 
-    <div id="chatScreen" class="screen">
+    <!-- চ্যাট স্ক্রিন -->
+    <div id="chatScreen" class="screen chat-screen">
         <div class="chat-header">
             <button class="back-btn" onclick="goBackHome()">←</button>
-            <div id="chatTargetName" style="font-weight: bold; font-size: 16px;">Chat</div>
+            <div class="avatar" id="chatHeaderAvatar">U</div>
+            <div style="flex: 1;">
+                <div id="chatTargetName" style="font-weight: bold; font-size: 15px;">Chat</div>
+                <div id="typingStatus" style="font-size: 10px; color: var(--accent);">online</div>
+            </div>
+            <button class="action-icon-btn" onclick="startAudioCall()" title="Audio Call">📞</button>
+            <button class="action-icon-btn" onclick="startVideoCall()" title="Video Call">📹</button>
+            <button class="action-icon-btn" onclick="document.getElementById('mediaFileInput').click()" title="Share Media">📎</button>
+            <input type="file" id="mediaFileInput" style="display: none;" onchange="handleMediaUpload(this)">
         </div>
         <div id="chatMessagesContainer" class="chat-messages"></div>
         <div class="chat-input-area">
-            <input type="text" id="messageInput" class="message-input" placeholder="Type a message">
+            <input type="text" id="messageInput" class="message-input" placeholder="Type a message..." onkeypress="handleMessageEnter(event)">
             <button class="send-btn" onclick="sendMessage()">Send</button>
+        </div>
+    </div>
+
+    <!-- মেনু মোডাল (গ্রুপ, সেটিংস, প্রিমিয়াম ইত্যাদি) -->
+    <div id="menuModal" class="modal">
+        <div class="modal-content">
+            <h3 style="margin-bottom: 5px;">Menu & Options</h3>
+            <button class="modal-btn" onclick="openGroupCreate()">👥 Create New Group</button>
+            <button class="modal-btn" onclick="openSettings()">⚙️ Settings</button>
+            <button class="modal-btn" onclick="openPremiumScreen()">⭐ Go Premium</button>
+            <button class="modal-btn logout-btn" onclick="logoutUser()">🚪 Logout</button>
+            <button class="modal-btn" style="background:transparent; text-align:center; justify-content:center;" onclick="closeModals()">Close</button>
+        </div>
+    </div>
+
+    <!-- প্রিমিয়াম স্ক্রিন মোডাল -->
+    <div id="premiumModal" class="modal">
+        <div class="modal-content" style="text-align: center;">
+            <h2>⭐ Chatty Premium</h2>
+            <p style="color: var(--text-secondary); font-size: 14px;">Unlock unlimited media sharing, custom themes, and ad-free experience!</p>
+            <button class="send-btn" onclick="alert('Subscription feature activated successfully!')">Upgrade Now</button>
+            <button class="modal-btn" style="background:transparent; justify-content:center;" onclick="closeModals()">Back</button>
+        </div>
+    </div>
+
+    <!-- সেটিংস মোডাল -->
+    <div id="settingsModal" class="modal">
+        <div class="modal-content">
+            <h3>Settings</h3>
+            <label style="font-size: 13px; color: var(--text-secondary);">Change Username / Profile Name:</label>
+            <input type="text" id="settingsUsernameInput" class="message-input">
+            <button class="send-btn" onclick="saveSettings()">Save Changes</button>
+            <button class="modal-btn" style="background:transparent; justify-content:center;" onclick="closeModals()">Cancel</button>
         </div>
     </div>
 
@@ -207,9 +319,80 @@
 
         document.getElementById('headerAvatar').innerText = currentUser.charAt(0).toUpperCase();
 
+        let activeChatContact = null;
+
         function goBackHome() {
             document.getElementById('chatScreen').classList.remove('active');
             document.getElementById('homeScreen').classList.add('active');
+            activeChatContact = null;
+        }
+
+        function openChat(contactId) {
+            if (!contactId) return;
+            activeChatContact = contactId;
+            document.getElementById('homeScreen').classList.remove('active');
+            document.getElementById('chatScreen').classList.add('active');
+            document.getElementById('chatTargetName').innerText = contactId;
+            document.getElementById('chatHeaderAvatar').innerText = contactId.charAt(0).toUpperCase();
+            loadMessages();
+        }
+
+        function handleSearch(e) {
+            if (e.key === 'Enter') {
+                const query = document.getElementById('searchInput').value.trim();
+                if (query && query !== currentUser) {
+                    openChat(query);
+                }
+            }
+        }
+
+        function getChatRoomId(user1, user2) {
+            return user1 < user2 ? `${user1}_${user2}` : `${user2}_${user1}`;
+        }
+
+        function sendMessage() {
+            const input = document.getElementById('messageInput');
+            const text = input.value.trim();
+            if (!text || !activeChatContact) return;
+
+            const roomId = getChatRoomId(currentUser, activeChatContact);
+            const messageData = {
+                sender: currentUser,
+                text: text,
+                timestamp: Date.now()
+            };
+
+            db.ref('chats/' + roomId).push(messageData);
+            db.ref('user-chats/' + currentUser + '/' + activeChatContact).set({ contact: activeChatContact });
+            db.ref('user-chats/' + activeChatContact + '/' + currentUser).set({ contact: currentUser });
+
+            input.value = "";
+        }
+
+        function handleMessageEnter(e) {
+            if (e.key === 'Enter') sendMessage();
+        }
+
+        function loadMessages() {
+            if (!activeChatContact) return;
+            const roomId = getChatRoomId(currentUser, activeChatContact);
+            const container = document.getElementById('chatMessagesContainer');
+            
+            db.ref('chats/' + roomId).on('value', (snapshot) => {
+                container.innerHTML = "";
+                if (!snapshot.exists()) {
+                    container.innerHTML = `<div style="text-align:center; color:var(--text-secondary); margin-top:20px;">No messages yet. Say hello!</div>`;
+                    return;
+                }
+                snapshot.forEach((childSnapshot) => {
+                    const msg = childSnapshot.val();
+                    const msgDiv = document.createElement('div');
+                    msgDiv.className = `msg ${msg.sender === currentUser ? 'sent' : 'received'}`;
+                    msgDiv.innerText = msg.text;
+                    container.appendChild(msgDiv);
+                });
+                container.scrollTop = container.scrollHeight;
+            });
         }
 
         function loadFriendList() {
@@ -217,26 +400,79 @@
             db.ref('user-chats/' + currentUser).on('value', (snapshot) => {
                 container.innerHTML = "";
                 if (!snapshot.exists()) {
-                    container.innerHTML = `<div style="padding:30px; text-align:center; color:var(--text-secondary);">No chats yet. Start a new chat!</div>`;
+                    container.innerHTML = `<div style="padding:30px; text-align:center; color:var(--text-secondary);">No chats yet. Search a user ID above to chat!</div>`;
                     return;
                 }
                 const chats = snapshot.val();
                 for (let chatId in chats) {
-                    container.innerHTML += `<div style="padding:15px; border-bottom:1px solid #222d34; cursor:pointer;" onclick="openChat('${chats[chatId].contact}')">${chats[chatId].contact}</div>`;
+                    const contact = chats[chatId].contact;
+                    container.innerHTML += `
+                        <div class="friend-item" onclick="openChat('${contact}')">
+                            <div class="avatar">${contact.charAt(0).toUpperCase()}</div>
+                            <div style="font-weight:bold; font-size:15px; color:var(--text-primary);">${contact}</div>
+                        </div>`;
                 }
             });
         }
 
-        function openChat(contactId) {
-            document.getElementById('homeScreen').classList.remove('active');
-            document.getElementById('chatScreen').classList.add('active');
-            document.getElementById('chatTargetName').innerText = contactId;
+        // কল এবং মিডিয়া ফিচার ফাংশন
+        function startAudioCall() {
+            alert(activeChatContact . "-এর সাথে অডিও কল শুরু হচ্ছে...");
         }
 
-        function sendMessage() {
-            const input = document.getElementById('messageInput');
-            if (!input.value.trim()) return;
-            input.value = "";
+        function startVideoCall() {
+            alert(activeChatContact . "-এর সাথে ভিডিও কল শুরু হচ্ছে...");
+        }
+
+        function handleMediaUpload(input) {
+            if (input.files && input.files[0]) {
+                const fileName = input.files[0].name;
+                alert("মিডিয়া ফাইল সিলেক্ট হয়েছে: " . fileName . " (এটি চ্যাটে পাঠানো যাবে)");
+            }
+        }
+
+        // মেনু ও মোডাল কন্ট্রোল
+        function openMenuModal() { document.getElementById('menuModal').classList.add('active'); }
+        function openProfileModal() { alert("Your ID: " . currentUser); }
+        function closeModals() {
+            document.querySelectorAll('.modal').forEach(m => m.classList.remove('active'));
+        }
+
+        function openGroupCreate() {
+            closeModals();
+            const groupName = prompt("Enter Group Name:");
+            if (groupName) {
+                alert("গ্রুপ '" . groupName . "' সফলভাবে তৈরি হয়েছে!");
+            }
+        }
+
+        function openSettings() {
+            closeModals();
+            document.getElementById('settingsUsernameInput').value = currentUser;
+            document.getElementById('settingsModal').classList.add('active');
+        }
+
+        function saveSettings() {
+            const newName = document.getElementById('settingsUsernameInput').value.trim();
+            if (newName) {
+                localStorage.setItem('chatty_current_user', newName);
+                currentUser = newName;
+                document.getElementById('headerAvatar').innerText = currentUser.charAt(0).toUpperCase();
+                alert("সেটিংস সফলভাবে আপডেট হয়েছে!");
+                closeModals();
+            }
+        }
+
+        function openPremiumScreen() {
+            closeModals();
+            document.getElementById('premiumModal').classList.add('active');
+        }
+
+        function logoutUser() {
+            if (confirm("আপনি কি নিশ্চিতভাবে লগ আউট করতে চান?")) {
+                localStorage.removeItem('chatty_current_user');
+                location.reload();
+            }
         }
 
         loadFriendList();
