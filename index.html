@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="bn">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -45,15 +45,72 @@
             display: flex;
         }
 
-        .home-header, .chat-header {
-            background: var(--bg-header);
-            padding: 12px 16px;
-            display: flex;
+        .auth-container {
+            background: #ffffff;
+            color: #111;
+            justify-content: center;
             align-items: center;
-            gap: 14px;
+            padding: 20px;
         }
 
-        .my-profile-avatar, .avatar {
+        .auth-card {
+            width: 100%;
+            max-width: 380px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .auth-title {
+            text-align: center;
+            color: var(--accent);
+            font-size: 28px;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-size: 15px;
+            outline: none;
+        }
+
+        .form-control:focus {
+            border-color: var(--accent);
+        }
+
+        .btn-primary-custom {
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+        }
+
+        .link-text {
+            color: var(--accent);
+            cursor: pointer;
+            font-weight: bold;
+            text-align: center;
+            margin-top: 10px;
+        }
+
+        .home-header, .chat-header {
+            background: var(--bg-header);
+            padding: 10px 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .profile-avatar, .avatar {
             width: 42px;
             height: 42px;
             border-radius: 50%;
@@ -64,6 +121,13 @@
             justify-content: center;
             font-weight: bold;
             cursor: pointer;
+            overflow: hidden;
+        }
+
+        .profile-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
         }
 
         .app-title {
@@ -72,13 +136,13 @@
             flex: 1;
         }
 
-        .menu-icon-btn, .action-icon-btn {
+        .action-icon-btn, .menu-icon-btn {
             background: none;
             border: none;
             color: var(--text-secondary);
             font-size: 20px;
             cursor: pointer;
-            padding: 8px;
+            padding: 6px;
         }
 
         .search-container {
@@ -86,7 +150,7 @@
             background: var(--bg-main);
         }
 
-        .search-box, .message-input {
+        .search-box {
             width: 100%;
             padding: 10px 14px;
             background: var(--bg-input);
@@ -135,7 +199,6 @@
             display: flex;
             flex-direction: column;
             gap: 8px;
-            background: #0b141a;
         }
 
         .msg {
@@ -166,6 +229,17 @@
             gap: 10px;
         }
 
+        .message-input {
+            flex: 1;
+            background: var(--bg-input);
+            border: none;
+            padding: 10px 14px;
+            border-radius: 8px;
+            color: var(--text-primary);
+            outline: none;
+            font-size: 14px;
+        }
+
         .send-btn {
             background: var(--accent);
             border: none;
@@ -176,305 +250,432 @@
             font-weight: bold;
         }
 
-        .modal {
+        .imo-menu {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.6);
+            z-index: 1000;
+        }
+
+        .imo-menu.active {
+            display: flex;
+        }
+
+        .imo-menu-content {
+            background: var(--bg-header);
+            width: 80%;
+            max-width: 320px;
+            height: 100%;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            box-shadow: 4px 0 15px rgba(0,0,0,0.5);
+            overflow-y: auto;
+        }
+
+        .imo-profile-header {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #2a3942;
+        }
+
+        .imo-menu-btn {
+            background: none;
+            border: none;
+            color: var(--text-primary);
+            padding: 12px;
+            text-align: left;
+            font-size: 15px;
+            cursor: pointer;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .imo-menu-btn:hover {
+            background: var(--bg-input);
+        }
+
+        .logout-menu-btn {
+            color: #ef4444;
+            background: rgba(239, 68, 68, 0.1);
+        }
+
+        .sub-modal {
             display: none;
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.7);
             justify-content: center;
             align-items: center;
-            z-index: 9999;
+            z-index: 2000;
         }
 
-        .modal.active {
+        .sub-modal.active {
             display: flex;
         }
 
-        .modal-content {
+        .sub-modal-content {
             background: var(--bg-header);
-            padding: 24px;
+            padding: 20px;
             border-radius: 12px;
             width: 90%;
-            max-width: 400px;
+            max-width: 350px;
             display: flex;
             flex-direction: column;
-            gap: 15px;
-        }
-
-        .modal-btn {
-            background: var(--bg-input);
-            border: none;
-            color: var(--text-primary);
-            padding: 12px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 15px;
-            text-align: left;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .modal-btn:hover {
-            background: #374248;
-        }
-
-        .logout-btn {
-            background: rgba(239, 68, 68, 0.15);
-            color: #ef4444;
-            border: 1px solid #ef4444;
+            gap: 12px;
         }
     </style>
 </head>
 <body>
 
-    <!-- হোম স্ক্রিন -->
-    <div id="homeScreen" class="screen active">
+    <div id="loginScreen" class="screen auth-container active">
+        <div class="auth-card">
+            <h2 class="auth-title">Chatty Login</h2>
+            <input type="text" id="loginEmail" class="form-control" placeholder="Enter Gmail or Phone">
+            <input type="password" id="loginPass" class="form-control" placeholder="Enter Password">
+            <button class="btn-primary-custom" onclick="handleLogin()">Login</button>
+            <div class="link-text" onclick="switchToRegister()">Don't have an account? Register</div>
+        </div>
+    </div>
+
+    <div id="registerScreen" class="screen auth-container">
+        <div class="auth-card">
+            <h2 class="auth-title">Create Account</h2>
+            <input type="text" id="regEmail" class="form-control" placeholder="Enter Gmail or Phone">
+            <input type="password" id="regPass" class="form-control" placeholder="Enter Password">
+            <button class="btn-primary-custom" onclick="handleRegister()">Register</button>
+            <div class="link-text" onclick="switchToLogin()">Already have an account? Login</div>
+        </div>
+    </div>
+
+    <div id="homeScreen" class="screen">
         <div class="home-header">
-            <div class="my-profile-avatar" id="headerAvatar">0</div>
+            <div class="profile-avatar" id="headerAvatar" onclick="openImoMenu()">
+                <span id="avatarText">C</span>
+            </div>
             <div class="app-title">Chatty</div>
-            <button class="menu-icon-btn" id="menuBtn">⋮</button>
+            <button class="menu-icon-btn" onclick="openImoMenu()">⋮</button>
         </div>
         <div class="search-container">
-            <input type="text" id="searchInput" class="search-box" placeholder="Search or enter user ID to chat...">
+            <input type="text" id="searchInput" class="search-box" placeholder="Search or enter user ID..." onkeypress="handleSearch(event)">
         </div>
         <div id="friendListContainer" class="friend-list"></div>
     </div>
 
-    <!-- চ্যাট স্ক্রিন -->
     <div id="chatScreen" class="screen chat-screen">
         <div class="chat-header">
-            <button class="back-btn" id="backBtn">←</button>
+            <button class="back-btn" onclick="goBackHome()">←</button>
             <div class="avatar" id="chatHeaderAvatar">U</div>
             <div style="flex: 1;">
                 <div id="chatTargetName" style="font-weight: bold; font-size: 15px;">Chat</div>
-                <div id="typingStatus" style="font-size: 10px; color: var(--accent);">online</div>
+                <div style="font-size: 11px; color: var(--accent);">online</div>
             </div>
-            <button class="action-icon-btn" id="audioCallBtn" title="Audio Call">📞</button>
-            <button class="action-icon-btn" id="videoCallBtn" title="Video Call">📹</button>
-            <button class="action-icon-btn" id="attachBtn" title="Share Media">📎</button>
-            <input type="file" id="mediaFileInput" style="display: none;">
+            <button class="action-icon-btn" onclick="startAudioCall()" title="Audio Call">📞</button>
+            <button class="action-icon-btn" onclick="startVideoCall()" title="Video Call">📹</button>
+            <button class="action-icon-btn" onclick="document.getElementById('mediaFileInput').click()" title="Share Media">📎</button>
+            <input type="file" id="mediaFileInput" style="display: none;" onchange="handleMediaUpload(this)">
         </div>
         <div id="chatMessagesContainer" class="chat-messages"></div>
         <div class="chat-input-area">
-            <input type="text" id="messageInput" class="message-input" placeholder="Type a message...">
-            <button class="send-btn" id="sendBtn">Send</button>
+            <input type="text" id="messageInput" class="message-input" placeholder="Type a message..." onkeypress="handleMessageEnter(event)">
+            <button class="send-btn" onclick="sendMessage()">Send</button>
         </div>
     </div>
 
-    <!-- মেনু মোডাল -->
-    <div id="menuModal" class="modal">
-        <div class="modal-content">
-            <h3 style="margin-bottom: 5px;">Menu & Options</h3>
-            <button class="modal-btn" id="groupCreateBtn">👥 Create New Group</button>
-            <button class="modal-btn" id="settingsBtn">⚙️ Settings</button>
-            <button class="modal-btn" id="premiumBtn">⭐ Go Premium</button>
-            <button class="modal-btn logout-btn" id="logoutBtn">🚪 Logout</button>
-            <button class="modal-btn" style="background:transparent; text-align:center; justify-content:center;" id="closeMenuBtn">Close</button>
+    <div id="imoMenuModal" class="imo-menu" onclick="closeImoMenu(event)">
+        <div class="imo-menu-content" onclick="event.stopPropagation()">
+            <div class="imo-profile-header">
+                <div class="profile-avatar" style="width: 60px; height: 60px; font-size: 22px;" id="menuAvatar">C</div>
+                <div id="menuUsername" style="font-weight: bold; font-size: 16px;">User</div>
+                <div style="font-size: 12px; color: var(--text-secondary);" id="menuUserEmail">email@gmail.com</div>
+            </div>
+            <button class="imo-menu-btn" onclick="openSettingsModal()">⚙️ Settings & Profile</button>
+            <button class="imo-menu-btn" onclick="openPremiumModal()">⭐ Premium Login / Features</button>
+            <button class="imo-menu-btn" onclick="alert('Share feature activated!')">📤 Share App</button>
+            <div style="flex: 1;"></div>
+            <button class="imo-menu-btn logout-menu-btn" onclick="logoutUser()">🚪 Logout</button>
         </div>
     </div>
 
-    <!-- প্রিমিয়াম স্ক্রিন মোডাল -->
-    <div id="premiumModal" class="modal">
-        <div class="modal-content" style="text-align: center;">
+    <div id="settingsModal" class="sub-modal">
+        <div class="sub-modal-content">
+            <h3>Profile & Settings</h3>
+            <label style="font-size: 12px; color: var(--text-secondary);">Display Name:</label>
+            <input type="text" id="editName" class="message-input">
+            <label style="font-size: 12px; color: var(--text-secondary);">Address / Bio:</label>
+            <input type="text" id="editAddress" class="message-input" placeholder="Enter your address">
+            <label style="font-size: 12px; color: var(--text-secondary);">Profile Picture URL:</label>
+            <input type="text" id="editPicUrl" class="message-input" placeholder="Paste image link">
+            <button class="send-btn" onclick="saveProfileSettings()">Save Changes</button>
+            <button class="imo-menu-btn" style="justify-content:center;" onclick="closeSettingsModal()">Cancel</button>
+        </div>
+    </div>
+
+    <div id="premiumModal" class="sub-modal">
+        <div class="sub-modal-content" style="text-align: center;">
             <h2>⭐ Chatty Premium</h2>
-            <p style="color: var(--text-secondary); font-size: 14px;">Unlock unlimited media sharing, custom themes, and ad-free experience!</p>
-            <button class="send-btn" id="upgradeBtn">Upgrade Now</button>
-            <button class="modal-btn" style="background:transparent; justify-content:center;" id="closePremiumBtn">Back</button>
-        </div>
-    </div>
-
-    <!-- সেটিংস মোডাল -->
-    <div id="settingsModal" class="modal">
-        <div class="modal-content">
-            <h3>Settings</h3>
-            <label style="font-size: 13px; color: var(--text-secondary);">Change Username:</label>
-            <input type="text" id="settingsUsernameInput" class="message-input">
-            <button class="send-btn" id="saveSettingsBtn">Save Changes</button>
-            <button class="modal-btn" style="background:transparent; justify-content:center;" id="closeSettingsBtn">Cancel</button>
+            <p style="font-size: 13px; color: var(--text-secondary);">Unlock exclusive features, higher storage, and custom themes!</p>
+            <button class="send-btn" onclick="alert('Premium access activated successfully!')">Activate Premium</button>
+            <button class="imo-menu-btn" style="justify-content:center;" onclick="closePremiumModal()">Close</button>
         </div>
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const firebaseConfig = {
-                apiKey: "AIzaSyA6DsT_8ysdywGF5EkrBQH1FKwFuls0kVA",
-                authDomain: "my-cet-apas.firebaseapp.com",
-                databaseURL: "https://my-cet-apas-default-rtdb.firebaseio.com",
-                projectId: "my-cet-apas",
-                storageBucket: "my-cet-apas.appspot.com",
-                messagingSenderId: "707932206149",
-                appId: "1:707932206149:web:cbe7d8a52f23e488d1df2c"
-            };
+        const firebaseConfig = {
+            apiKey: "AIzaSyA6DsT_8ysdywGF5EkrBQH1FKwFuls0kVA",
+            authDomain: "my-cet-apas.firebaseapp.com",
+            databaseURL: "https://my-cet-apas-default-rtdb.firebaseio.com",
+            projectId: "my-cet-apas",
+            storageBucket: "my-cet-apas.appspot.com",
+            messagingSenderId: "707932206149",
+            appId: "1:707932206149:web:cbe7d8a52f23e488d1df2c"
+        };
 
-            if (!firebase.apps.length) {
-                firebase.initializeApp(firebaseConfig);
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+        const db = firebase.database();
+
+        let currentUser = localStorage.getItem('chatty_current_user');
+
+        window.onload = function() {
+            if (currentUser) {
+                showHomeScreen();
             }
-            const db = firebase.database();
+        };
 
-            let currentUser = localStorage.getItem('chatty_current_user');
-            if (!currentUser) {
-                currentUser = prompt("Enter your phone number or unique ID to login:") || "user_" + Math.floor(Math.random()*1000);
-                localStorage.setItem('chatty_current_user', currentUser);
+        function switchToRegister() {
+            document.getElementById('loginScreen').classList.remove('active');
+            document.getElementById('registerScreen').classList.add('active');
+        }
+
+        function switchToLogin() {
+            document.getElementById('registerScreen').classList.remove('active');
+            document.getElementById('loginScreen').classList.add('active');
+        }
+
+        function handleRegister() {
+            const email = document.getElementById('regEmail').value.trim();
+            const pass = document.getElementById('regPass').value.trim();
+            if (!email || !pass) {
+                alert("Please enter email/phone and password!");
+                return;
             }
+            const safeKey = email.replace(/[.#$\/\[\]]/g, "_");
 
-            document.getElementById('headerAvatar').innerText = currentUser.charAt(0).toUpperCase();
-            let activeChatContact = null;
-
-            window.goBackHome = function() {
-                document.getElementById('chatScreen').classList.remove('active');
-                document.getElementById('homeScreen').classList.add('active');
-                activeChatContact = null;
-            }
-
-            window.openChat = function(contactId) {
-                if (!contactId) return;
-                activeChatContact = contactId;
-                document.getElementById('homeScreen').classList.remove('active');
-                document.getElementById('chatScreen').classList.add('active');
-                document.getElementById('chatTargetName').innerText = contactId;
-                document.getElementById('chatHeaderAvatar').innerText = contactId.charAt(0).toUpperCase();
-                loadMessages();
-            }
-
-            // ইভেন্ট লিসেনার্স
-            document.getElementById('backBtn').addEventListener('click', goBackHome);
-            document.getElementById('menuBtn').addEventListener('click', () => document.getElementById('menuModal').classList.add('active'));
-            document.getElementById('closeMenuBtn').addEventListener('click', () => document.getElementById('menuModal').classList.remove('active'));
-            
-            document.getElementById('headerAvatar').addEventListener('click', () => alert("Your ID: " + currentUser));
-
-            document.getElementById('groupCreateBtn').addEventListener('click', () => {
-                document.getElementById('menuModal').classList.remove('active');
-                const groupName = prompt("Enter Group Name:");
-                if (groupName) alert("গ্রুপ '" + groupName + "' সফলভাবে তৈরি হয়েছে!");
-            });
-
-            document.getElementById('settingsBtn').addEventListener('click', () => {
-                document.getElementById('menuModal').classList.remove('active');
-                document.getElementById('settingsUsernameInput').value = currentUser;
-                document.getElementById('settingsModal').classList.add('active');
-            });
-            document.getElementById('closeSettingsBtn').addEventListener('click', () => document.getElementById('settingsModal').classList.remove('active'));
-            document.getElementById('saveSettingsBtn').addEventListener('click', () => {
-                const newName = document.getElementById('settingsUsernameInput').value.trim();
-                if (newName) {
-                    localStorage.setItem('chatty_current_user', newName);
-                    currentUser = newName;
-                    document.getElementById('headerAvatar').innerText = currentUser.charAt(0).toUpperCase();
-                    alert("সেটিংস সফলভাবে আপডেট হয়েছে!");
-                    document.getElementById('settingsModal').classList.remove('active');
-                }
-            });
-
-            document.getElementById('premiumBtn').addEventListener('click', () => {
-                document.getElementById('menuModal').classList.remove('active');
-                document.getElementById('premiumModal').classList.add('active');
-            });
-            document.getElementById('closePremiumBtn').addEventListener('click', () => document.getElementById('premiumModal').classList.remove('active'));
-            document.getElementById('upgradeBtn').addEventListener('click', () => alert('Subscription feature activated successfully!'));
-
-            document.getElementById('logoutBtn').addEventListener('click', () => {
-                if (confirm("আপনি কি নিশ্চিতভাবে লগ আউট করতে চান?")) {
-                    localStorage.removeItem('chatty_current_user');
-                    location.reload();
-                }
-            });
-
-            document.getElementById('audioCallBtn').addEventListener('click', () => alert(activeChatContact + "-এর সাথে অডিও কল শুরু হচ্ছে..."));
-            document.getElementById('videoCallBtn').addEventListener('click', () => alert(activeChatContact + "-এর সাথে ভিডিও কল শুরু হচ্ছে..."));
-            document.getElementById('attachBtn').addEventListener('click', () => document.getElementById('mediaFileInput').click());
-            
-            document.getElementById('mediaFileInput').addEventListener('change', function() {
-                if (this.files && this.files[0]) {
-                    alert("মিডিয়া ফাইল সিলেক্ট হয়েছে: " + this.files[0].name);
-                }
-            });
-
-            document.getElementById('searchInput').addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') {
-                    const query = this.value.trim();
-                    if (query && query !== currentUser) {
-                        openChat(query);
-                    }
-                }
-            });
-
-            function getChatRoomId(user1, user2) {
-                return user1 < user2 ? `${user1}_${user2}` : `${user2}_${user1}`;
-            }
-
-            function sendMessage() {
-                const input = document.getElementById('messageInput');
-                const text = input.value.trim();
-                if (!text || !activeChatContact) return;
-
-                const roomId = getChatRoomId(currentUser, activeChatContact);
-                const messageData = {
-                    sender: currentUser,
-                    text: text,
-                    timestamp: Date.now()
-                };
-
-                db.ref('chats/' + roomId).push(messageData);
-                db.ref('user-chats/' + currentUser + '/' + activeChatContact).set({ contact: activeChatContact });
-                db.ref('user-chats/' + activeChatContact + '/' + currentUser).set({ contact: currentUser });
-
-                input.value = "";
-            }
-
-            document.getElementById('sendBtn').addEventListener('click', sendMessage);
-            document.getElementById('messageInput').addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') sendMessage();
-            });
-
-            function loadMessages() {
-                if (!activeChatContact) return;
-                const roomId = getChatRoomId(currentUser, activeChatContact);
-                const container = document.getElementById('chatMessagesContainer');
-                
-                db.ref('chats/' + roomId).on('value', (snapshot) => {
-                    container.innerHTML = "";
-                    if (!snapshot.exists()) {
-                        container.innerHTML = `<div style="text-align:center; color:var(--text-secondary); margin-top:20px;">No messages yet. Say hello!</div>`;
-                        return;
-                    }
-                    snapshot.forEach((childSnapshot) => {
-                        const msg = childSnapshot.val();
-                        const msgDiv = document.createElement('div');
-                        msgDiv.className = `msg ${msg.sender === currentUser ? 'sent' : 'received'}`;
-                        msgDiv.innerText = msg.text;
-                        container.appendChild(msgDiv);
+            db.ref('users/' + safeKey).once('value', (snapshot) => {
+                if (snapshot.exists()) {
+                    alert("Account already exists!");
+                } else {
+                    db.ref('users/' + safeKey).set({ email: email, password: pass, name: email, address: "Not set", pic: "" }).then(() => {
+                        alert("Registration successful!");
+                        switchToLogin();
                     });
-                    container.scrollTop = container.scrollHeight;
-                });
-            }
+                }
+            });
+        }
 
-            function loadFriendList() {
-                const container = document.getElementById('friendListContainer');
-                db.ref('user-chats/' + currentUser).on('value', (snapshot) => {
-                    container.innerHTML = "";
-                    if (!snapshot.exists()) {
-                        container.innerHTML = `<div style="padding:30px; text-align:center; color:var(--text-secondary);">No chats yet. Search a user ID above to chat!</div>`;
-                        return;
-                    }
-                    const chats = snapshot.val();
-                    for (let chatId in chats) {
-                        const contact = chats[chatId].contact;
-                        const item = document.createElement('div');
-                        item.className = 'friend-item';
-                        item.innerHTML = `
-                            <div class="avatar">${contact.charAt(0).toUpperCase()}</div>
-                            <div style="font-weight:bold; font-size:15px; color:var(--text-primary);">${contact}</div>
-                        `;
-                        item.addEventListener('click', () => openChat(contact));
-                        container.appendChild(item);
-                    }
-                });
+        function handleLogin() {
+            const email = document.getElementById('loginEmail').value.trim();
+            const pass = document.getElementById('loginPass').value.trim();
+            if (!email || !pass) {
+                alert("Please enter email/phone and password!");
+                return;
             }
+            const safeKey = email.replace(/[.#$\/\[\]]/g, "_");
 
+            db.ref('users/' + safeKey).once('value', (snapshot) => {
+                if (!snapshot.exists()) {
+                    alert("Account not found! Please register first.");
+                } else {
+                    const data = snapshot.val();
+                    if (data.password === pass) {
+                        localStorage.setItem('chatty_current_user', safeKey);
+                        currentUser = safeKey;
+                        showHomeScreen();
+                    } else {
+                        alert("Incorrect password!");
+                    }
+                }
+            });
+        }
+
+        function showHomeScreen() {
+            document.getElementById('loginScreen').classList.remove('active');
+            document.getElementById('registerScreen').classList.remove('active');
+            document.getElementById('homeScreen').classList.add('active');
+            loadUserProfile();
             loadFriendList();
-        });
+        }
+
+        function loadUserProfile() {
+            db.ref('users/' + currentUser).once('value', (snapshot) => {
+                if (snapshot.exists()) {
+                    const data = snapshot.val();
+                    const name = data.name || currentUser;
+                    const pic = data.pic || "";
+                    
+                    document.getElementById('menuUsername').innerText = name;
+                    document.getElementById('menuUserEmail').innerText = data.email || currentUser;
+
+                    if (pic) {
+                        document.getElementById('headerAvatar').innerHTML = `<img src="${pic}">`;
+                        document.getElementById('menuAvatar').innerHTML = `<img src="${pic}">`;
+                    } else {
+                        document.getElementById('headerAvatar').innerText = name.charAt(0).toUpperCase();
+                        document.getElementById('menuAvatar').innerText = name.charAt(0).toUpperCase();
+                    }
+                }
+            });
+        }
+
+        let activeChatContact = null;
+
+        function goBackHome() {
+            document.getElementById('chatScreen').classList.remove('active');
+            document.getElementById('homeScreen').classList.add('active');
+            activeChatContact = null;
+            loadFriendList();
+        }
+
+        function openChat(contactId) {
+            if (!contactId || contactId === currentUser) return;
+            activeChatContact = contactId;
+            document.getElementById('homeScreen').classList.remove('active');
+            document.getElementById('chatScreen').classList.add('active');
+            document.getElementById('chatTargetName').innerText = contactId;
+            document.getElementById('chatHeaderAvatar').innerText = contactId.charAt(0).toUpperCase();
+            loadMessages();
+        }
+
+        function handleSearch(e) {
+            if (e.key === 'Enter') {
+                const query = document.getElementById('searchInput').value.trim();
+                if (query && query !== currentUser) {
+                    openChat(query);
+                }
+            }
+        }
+
+        function getChatRoomId(user1, user2) {
+            return user1 < user2 ? `${user1}_${user2}` : `${user2}_${user1}`;
+        }
+
+        function sendMessage() {
+            const input = document.getElementById('messageInput');
+            const text = input.value.trim();
+            if (!text || !activeChatContact) return;
+
+            const roomId = getChatRoomId(currentUser, activeChatContact);
+            const messageData = { sender: currentUser, text: text, timestamp: Date.now() };
+
+            db.ref('chats/' + roomId).push(messageData);
+            db.ref('user-chats/' + currentUser + '/' + activeChatContact).set({ contact: activeChatContact });
+            db.ref('user-chats/' + activeChatContact + '/' + currentUser).set({ contact: currentUser });
+
+            input.value = "";
+        }
+
+        function handleMessageEnter(e) {
+            if (e.key === 'Enter') sendMessage();
+        }
+
+        function loadMessages() {
+            if (!activeChatContact) return;
+            const roomId = getChatRoomId(currentUser, activeChatContact);
+            const container = document.getElementById('chatMessagesContainer');
+            
+            db.ref('chats/' + roomId).on('value', (snapshot) => {
+                container.innerHTML = "";
+                if (!snapshot.exists()) {
+                    container.innerHTML = `<div style="text-align:center; color:var(--text-secondary); margin-top:20px;">No messages yet. Say hello!</div>`;
+                    return;
+                }
+                snapshot.forEach((child) => {
+                    const msg = child.val();
+                    const div = document.createElement('div');
+                    div.className = `msg ${msg.sender === currentUser ? 'sent' : 'received'}`;
+                    div.innerText = msg.text;
+                    container.appendChild(div);
+                });
+                container.scrollTop = container.scrollHeight;
+            });
+        }
+
+        function loadFriendList() {
+            const container = document.getElementById('friendListContainer');
+            db.ref('user-chats/' + currentUser).on('value', (snapshot) => {
+                container.innerHTML = "";
+                if (!snapshot.exists()) {
+                    container.innerHTML = `<div style="padding:30px; text-align:center; color:var(--text-secondary);">No chats yet. Search user ID above!</div>`;
+                    return;
+                }
+                const chats = snapshot.val();
+                for (let id in chats) {
+                    const contact = chats[id].contact;
+                    const item = document.createElement('div');
+                    item.className = 'friend-item';
+                    item.innerHTML = `<div class="avatar">${contact.charAt(0).toUpperCase()}</div><div style="font-weight:bold; color:var(--text-primary);">${contact}</div>`;
+                    item.onclick = () => openChat(contact);
+                    container.appendChild(item);
+                }
+            });
+        }
+
+        function startAudioCall() { alert("Audio call starting with " + activeChatContact + "..."); }
+        function startVideoCall() { alert("Video call starting with " + activeChatContact + "..."); }
+        function handleMediaUpload(input) {
+            if (input.files && input.files[0]) alert("File selected: " + input.files[0].name);
+        }
+
+        function openImoMenu() { document.getElementById('imoMenuModal').classList.add('active'); }
+        function closeImoMenu(e) { document.getElementById('imoMenuModal').classList.remove('active'); }
+
+        function openSettingsModal() {
+            closeImoMenu();
+            db.ref('users/' + currentUser).once('value', (snapshot) => {
+                if (snapshot.exists()) {
+                    const data = snapshot.val();
+                    document.getElementById('editName').value = data.name || "";
+                    document.getElementById('editAddress').value = data.address || "";
+                    document.getElementById('editPicUrl').value = data.pic || "";
+                }
+            });
+            document.getElementById('settingsModal').classList.add('active');
+        }
+        function closeSettingsModal() { document.getElementById('settingsModal').classList.remove('active'); }
+
+        function saveProfileSettings() {
+            const name = document.getElementById('editName').value.trim();
+            const address = document.getElementById('editAddress').value.trim();
+            const pic = document.getElementById('editPicUrl').value.trim();
+
+            db.ref('users/' + currentUser).update({ name: name, address: address, pic: pic }).then(() => {
+                alert("Profile updated successfully!");
+                closeSettingsModal();
+                loadUserProfile();
+            });
+        }
+
+        function openPremiumModal() {
+            closeImoMenu();
+            document.getElementById('premiumModal').classList.add('active');
+        }
+        function closePremiumModal() { document.getElementById('premiumModal').classList.remove('active'); }
+
+        function logoutUser() {
+            if (confirm("Are you sure you want to logout?")) {
+                localStorage.removeItem('chatty_current_user');
+                location.reload();
+            }
+        }
     </script>
 </body>
 </html>
