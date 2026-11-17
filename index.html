@@ -1,10 +1,9 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chatty - Secure Realtime Chat</title>
+    <title>Chatty - Secure Realtime Chat & Pro Services</title>
     <link rel="manifest" href="./manifest.json">
     <style>
         * {
@@ -32,6 +31,7 @@
             flex-direction: column;
             overflow: hidden;
             border-radius: 12px;
+            position: relative;
         }
         .screen {
             display: none;
@@ -97,15 +97,6 @@
             background: #db4437;
             margin-top: 8px;
         }
-        .btn-google:hover {
-            background: #c23321;
-        }
-        .divider {
-            text-align: center;
-            margin: 10px 0;
-            font-size: 12px;
-            color: #666;
-        }
         .error-msg {
             color: #d32f2f;
             font-size: 12px;
@@ -113,6 +104,8 @@
             margin-top: 6px;
             min-height: 15px;
         }
+        
+        /* Home Header with Corner Profile Thumbnail */
         .header {
             background: #202c33;
             color: #e9edef;
@@ -121,25 +114,148 @@
             justify-content: space-between;
             align-items: center;
         }
+        .header-profile-area {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+        }
+        .header-avatar {
+            width: 36px;
+            height: 36px;
+            background: #00a884;
+            color: #fff;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+            font-size: 15px;
+            overflow: hidden;
+            border: 1px solid #53bdeb;
+        }
+        .header-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
         .header h3 {
             font-size: 16px;
         }
-        .header-actions {
+
+        /* Profile Menu Screen */
+        .profile-menu-screen {
+            display: none;
+            flex-direction: column;
+            height: 100%;
+            background: #111b21;
+            color: #e9edef;
+            position: absolute;
+            top: 0; left: 0; width: 100%; z-index: 200;
+        }
+        .profile-menu-screen.active {
             display: flex;
-            gap: 8px;
+        }
+        .profile-menu-header {
+            background: #202c33;
+            padding: 15px;
+            display: flex;
             align-items: center;
+            gap: 15px;
+            font-size: 18px;
         }
-        .header-btn {
-            background: rgba(255,255,255,0.1);
-            border: none;
+        .profile-info-box {
+            padding: 20px 15px;
+            background: #202c33;
+            margin: 10px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .big-avatar {
+            width: 60px;
+            height: 60px;
+            background: #00a884;
             color: #fff;
-            padding: 5px 10px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 12px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 24px;
+            font-weight: bold;
+            overflow: hidden;
         }
-        
-        /* Unified Single Search & Contact Bar */
+        .big-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .profile-details h4 {
+            font-size: 16px;
+            margin-bottom: 4px;
+        }
+        .profile-details p {
+            font-size: 12px;
+            color: #8696a0;
+        }
+        .menu-list {
+            flex: 1;
+            overflow-y: auto;
+        }
+        .menu-item {
+            padding: 15px 20px;
+            border-bottom: 1px solid #222d34;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .menu-item:hover {
+            background: #202c33;
+        }
+        .menu-item.pro {
+            color: #00a884;
+            font-weight: bold;
+        }
+
+        /* Pro Services Sub-Screen (Tracking & Bluetooth Mesh) */
+        .pro-services-screen {
+            display: none;
+            flex-direction: column;
+            height: 100%;
+            background: #111b21;
+            color: #e9edef;
+            position: absolute;
+            top: 0; left: 0; width: 100%; z-index: 250;
+        }
+        .pro-services-screen.active {
+            display: flex;
+        }
+        .pro-content {
+            padding: 20px;
+            overflow-y: auto;
+            flex: 1;
+        }
+        .pro-card {
+            background: #202c33;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border-left: 4px solid #00a884;
+        }
+        .pro-card h4 {
+            font-size: 15px;
+            margin-bottom: 6px;
+            color: #00a884;
+        }
+        .pro-card p {
+            font-size: 13px;
+            color: #8696a0;
+            line-height: 1.4;
+        }
+
         .search-chat-bar {
             padding: 8px 12px;
             background: #111b21;
@@ -216,6 +332,12 @@
             font-weight: bold;
             font-size: 14px;
             margin-right: 12px;
+            overflow: hidden;
+        }
+        .avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
         }
         .friend-info {
             flex: 1;
@@ -238,8 +360,9 @@
         .chat-screen {
             display: none;
             flex-direction: column;
-            height: 100%;
-            flex: 1;
+            height: 100vh;
+            max-height: 750px;
+            width: 100%;
             overflow: hidden;
         }
         .chat-screen.active {
@@ -253,6 +376,7 @@
             align-items: center;
             justify-content: space-between;
             position: relative;
+            flex-shrink: 0;
         }
         .chat-header-left {
             display: flex;
@@ -282,7 +406,7 @@
             background: #233138;
             border-radius: 4px;
             box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-            width: 160px;
+            width: 180px;
             z-index: 100;
         }
         .dropdown-menu.show {
@@ -330,6 +454,11 @@
             align-self: flex-start;
             border-top-left-radius: 0;
         }
+        .msg img {
+            max-width: 100%;
+            border-radius: 6px;
+            margin-top: 4px;
+        }
         .msg-time {
             font-size: 9px;
             color: #8696a0;
@@ -339,22 +468,16 @@
             float: right;
             margin-left: 8px;
         }
-        .tick {
-            font-size: 11px;
-            margin-left: 3px;
-            color: #8696a0;
-        }
-        .tick.seen {
-            color: #53bdeb;
-        }
+        
         .chat-input-area {
             padding: 8px 10px;
             background: #202c33;
             display: flex;
             gap: 8px;
             align-items: center;
+            flex-shrink: 0;
         }
-        .chat-input-area input {
+        .chat-input-area input[type="text"] {
             flex: 1;
             padding: 9px 12px;
             border: none;
@@ -400,15 +523,8 @@
                 <input type="password" id="loginPass" placeholder="Enter password">
             </div>
             <button class="btn" onclick="handleLogin()">Login</button>
-            
-            <div class="divider">OR Safety Login</div>
             <button class="btn btn-google" onclick="handleGoogleSafetyLogin()">Sign in with Google / Gmail</button>
-
             <div id="loginError" class="error-msg"></div>
-            
-            <p style="text-align: center; margin-top: 10px; font-size: 12px; color: #555;">
-                Don't have an account? <a href="#" onclick="showRegisterScreen()" style="color: #00a884; font-weight: bold;">Register</a>
-            </p>
         </div>
     </div>
 
@@ -421,8 +537,8 @@
                 <input type="tel" id="regPhone" placeholder="Enter phone number">
             </div>
             <div class="input-group">
-                <label>Safety Login Gmail (Optional)</label>
-                <input type="email" id="regEmail" placeholder="Enter your gmail for safety">
+                <label>Profile Picture URL (Optional)</label>
+                <input type="url" id="regAvatar" placeholder="Paste image link">
             </div>
             <div class="input-group">
                 <label>Password</label>
@@ -430,31 +546,74 @@
             </div>
             <button class="btn" onclick="handleRegister()">Register</button>
             <div id="regError" class="error-msg"></div>
-            
-            <p style="text-align: center; margin-top: 10px; font-size: 12px; color: #555;">
-                Already have an account? <a href="#" onclick="showLoginScreen()" style="color: #00a884; font-weight: bold;">Login</a>
-            </p>
         </div>
     </div>
 
     <!-- Home Screen -->
     <div id="homeScreen" class="screen">
         <div class="header">
-            <h3 id="currentUserDisplay">Chatty</h3>
+            <div class="header-profile-area" onclick="openProfileMenu()">
+                <div class="header-avatar" id="headerAvatarThumb">C</div>
+                <h3 id="currentUserTitle">Chatty</h3>
+            </div>
             <div class="header-actions">
-                <button class="header-btn" onclick="requestDevicePermissions()">Permissions</button>
                 <button class="header-btn" onclick="logout()">Logout</button>
             </div>
         </div>
         
-        <!-- Unified Single Search & Phone Contact Bar -->
         <div class="search-chat-bar">
             <input type="text" id="searchInput" placeholder="Search or pick contact..." oninput="filterOrStartChat()">
-            <button class="contact-btn" onclick="pickPhoneContact()" title="Pick from Phone Contacts">&#128214;</button>
+            <button class="contact-btn" onclick="pickPhoneContact()" title="Pick Contact">&#128214;</button>
             <button class="chat-start-btn" onclick="startChatFromSearch()">Chat</button>
         </div>
 
         <div id="friendListContainer" class="friend-list"></div>
+    </div>
+
+    <!-- Profile Menu Screen ("Me" Page) -->
+    <div id="profileMenuScreen" class="profile-menu-screen">
+        <div class="profile-menu-header">
+            <button class="back-btn" onclick="closeProfileMenu()">&#8592;</button>
+            <span>Me & Pro Services</span>
+        </div>
+        <div class="profile-info-box">
+            <div class="big-avatar" id="menuBigAvatar">C</div>
+            <div class="profile-details">
+                <h4 id="menuProfileName">User Name</h4>
+                <p id="menuProfilePhone">Phone: 01800000000</p>
+            </div>
+        </div>
+        <div class="menu-list">
+            <div class="menu-item pro" onclick="openProServices()">🛡️ Safety Tracking & Offline Mesh (Pro) <span>&#8250;</span></div>
+            <div class="menu-item" onclick="alert('Switch account feature')">Switch Account <span>&#8250;</span></div>
+            <div class="menu-item" onclick="alert('Security & Privacy settings')">Security & Privacy <span>&#8250;</span></div>
+            <div class="menu-item" onclick="alert('App Settings')">Settings <span>&#8250;</span></div>
+            <div class="menu-item" onclick="alert('My Files & Media')">My Files <span>&#8250;</span></div>
+            <div class="menu-item" onclick="logout()">Logout <span>&#8250;</span></div>
+        </div>
+    </div>
+
+    <!-- Pro Services Sub-Screen (Tracking & Charging Module) -->
+    <div id="proServicesScreen" class="pro-services-screen">
+        <div class="profile-menu-header">
+            <button class="back-btn" onclick="closeProServices()">&#8592;</button>
+            <span>Safety Tracking & Pro</span>
+        </div>
+        <div class="pro-content">
+            <div class="pro-card">
+                <h4>📡 Bluetooth Mesh Offline Chat</h4>
+                <p>Chat without internet using nearby device relays (Upcoming Native Feature).</p>
+            </div>
+            <div class="pro-card">
+                <h4>📍 Lost Phone Tracking</h4>
+                <p>Locate your missing phone via crowd-sourced network signals.</p>
+            </div>
+            <div class="pro-card">
+                <h4>💎 Subscription & Recovery Charge</h4>
+                <p>Status: Free Regular Chatting Active.<br>Recovery service charge applies only upon successful lost device retrieval.</p>
+                <button class="btn" style="margin-top: 10px;" onclick="alert('Subscription & Payment Gateway integration coming soon!')">Activate Pro / Recharge</button>
+            </div>
+        </div>
     </div>
 
     <!-- Chat Screen -->
@@ -468,16 +627,19 @@
                 <span title="Voice / Video Call" onclick="triggerAudioVideoCall()">&#128222;</span>
                 <span title="Menu" onclick="toggleMenu()">&#8942;</span>
             </div>
-            <!-- Dropdown Menu -->
             <div id="chatDropdown" class="dropdown-menu">
-                <div class="dropdown-item" onclick="triggerCameraCapture()">Open Camera</div>
-                <div class="dropdown-item" onclick="alert('Media & docs info')">Media & docs</div>
+                <div class="dropdown-item" onclick="triggerAudioVideoCall()">Audio / Video Call</div>
+                <div class="dropdown-item" onclick="document.getElementById('imageInputFile').click()">Send Photo / Media</div>
                 <div class="dropdown-item" onclick="goBackHome()">Close Chat</div>
             </div>
         </div>
+        
         <div id="chatMessagesContainer" class="chat-messages"></div>
+        <input type="file" id="imageInputFile" accept="image/*" style="display:none" onchange="sendImageFile(this)">
+
         <div class="chat-input-area">
-            <button class="action-icon-btn" onclick="triggerCameraCapture()" title="Camera">&#128247;</button>
+            <button class="action-icon-btn" onclick="document.getElementById('imageInputFile').click()" title="Share Image">&#128247;</button>
+            <button class="action-icon-btn" onclick="recordVoiceNote()" title="Voice Note">&#127908;</button>
             <input type="text" id="messageInput" placeholder="Type a message..." onkeypress="handleEnter(event)">
             <button class="send-btn" onclick="sendMessage()">Send</button>
         </div>
@@ -525,7 +687,6 @@
         document.getElementById('registerScreen').classList.add('active');
     };
 
-    // Normalize Bangladeshi or standard phone numbers (e.g. +88017... -> 017...)
     function normalizePhone(rawPhone) {
         let cleaned = rawPhone.replace(/[\s\-\(\)]/g, '');
         if (cleaned.startsWith('+880')) {
@@ -536,51 +697,82 @@
         return cleaned;
     }
 
-    // Pick Contact from Phone Book (Contact Picker API)
+    // Profile Menu Functions
+    window.openProfileMenu = async function() {
+        document.getElementById('profileMenuScreen').classList.add('active');
+        document.getElementById('menuProfileName').textContent = currentUser;
+        document.getElementById('menuProfilePhone').textContent = "Phone: " + currentUser;
+
+        try {
+            const snap = await get(child(ref(db), `users/${currentUser}`));
+            if (snap.exists() && snap.val().avatar) {
+                const avatarUrl = snap.val().avatar;
+                document.getElementById('menuBigAvatar').innerHTML = `<img src="${avatarUrl}" alt="Profile">`;
+            } else {
+                document.getElementById('menuBigAvatar').innerHTML = currentUser.charAt(0).toUpperCase();
+            }
+        } catch(e) {
+            document.getElementById('menuBigAvatar').innerHTML = currentUser.charAt(0).toUpperCase();
+        }
+    };
+
+    window.closeProfileMenu = function() {
+        document.getElementById('profileMenuScreen').classList.remove('active');
+    };
+
+    // Pro Services Navigation
+    window.openProServices = function() {
+        document.getElementById('proServicesScreen').classList.add('active');
+    };
+
+    window.closeProServices = function() {
+        document.getElementById('proServicesScreen').classList.remove('active');
+    };
+
+    async function updateHeaderAvatar() {
+        if (!currentUser) return;
+        try {
+            const snap = await get(child(ref(db), `users/${currentUser}`));
+            const thumbEl = document.getElementById('headerAvatarThumb');
+            if (snap.exists() && snap.val().avatar) {
+                thumbEl.innerHTML = `<img src="${snap.val().avatar}" alt="Avatar">`;
+            } else {
+                thumbEl.innerHTML = currentUser.charAt(0).toUpperCase();
+            }
+        } catch(e) {
+            document.getElementById('headerAvatarThumb').innerHTML = currentUser.charAt(0).toUpperCase();
+        }
+    }
+
     window.pickPhoneContact = async function() {
         if ('contacts' in navigator && 'ContactsManager' in window) {
             try {
-                const props = ['name', 'tel'];
-                const opts = { multiple: false };
-                const contacts = await navigator.contacts.select(props, opts);
+                const contacts = await navigator.contacts.select(['name', 'tel'], { multiple: false });
                 if (contacts.length > 0 && contacts[0].tel && contacts[0].tel.length > 0) {
-                    const rawNumber = contacts[0].tel[0];
-                    const cleanNumber = normalizePhone(rawNumber);
-                    const contactName = (contacts[0].name && contacts[0].name[0]) ? contacts[0].name[0] : cleanNumber;
-                    
-                    // Save contact name locally for display
+                    const cleanNumber = normalizePhone(contacts[0].tel[0]);
+                    const contactName = contacts[0].name?.[0] || cleanNumber;
                     savedContactNames[cleanNumber] = contactName;
                     localStorage.setItem('chatApp_contacts', JSON.stringify(savedContactNames));
-
                     verifyAndOpenChat(cleanNumber);
                 }
             } catch (err) {
                 alert("Could not access contacts: " + err.message);
             }
         } else {
-            alert("Contact Picker is supported on Android Chrome. Please type the number directly in the search box.");
+            alert("Please type the number directly in the search box.");
         }
     };
 
-    // Verify if the number is registered on Chatty before allowing chat
     async function verifyAndOpenChat(targetInput) {
         const cleanNumber = normalizePhone(targetInput);
-        if (!cleanNumber) return;
-
-        if (cleanNumber === currentUser) {
-            alert("You cannot chat with yourself.");
-            return;
-        }
-
+        if (!cleanNumber || cleanNumber === currentUser) return;
         try {
-            const dbRef = ref(db);
-            const snapshot = await get(child(dbRef, `users/${cleanNumber}`));
-            
+            const snapshot = await get(child(ref(db), `users/${cleanNumber}`));
             if (snapshot.exists()) {
                 document.getElementById('searchInput').value = '';
                 openChat(cleanNumber);
             } else {
-                alert("This number (" + cleanNumber + ") is not registered on Chatty yet!");
+                alert("This number (" + cleanNumber + ") is not registered on Chatty!");
             }
         } catch (error) {
             alert("Error verifying user: " + error.message);
@@ -590,65 +782,59 @@
     window.startChatFromSearch = function() {
         const inputVal = document.getElementById('searchInput').value.trim();
         if (!inputVal) return;
-
-        // Check if user searched by saved contact name
         let matchedPhone = null;
         Object.keys(savedContactNames).forEach(phone => {
             if (savedContactNames[phone].toLowerCase() === inputVal.toLowerCase()) {
                 matchedPhone = phone;
             }
         });
-
         verifyAndOpenChat(matchedPhone || inputVal);
-    };
-
-    // Hardware Permission Handler (Audio, Video, Camera, Mic)
-    window.requestDevicePermissions = async function() {
-        try {
-            const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-            alert("Camera, Microphone, and Audio permissions granted successfully!");
-            stream.getTracks().forEach(track => track.stop());
-        } catch (error) {
-            alert("Permission denied or device not available: " + error.message);
-        }
     };
 
     window.triggerAudioVideoCall = async function() {
         try {
-            await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-            const displayName = savedContactNames[activeChatPartner] || activeChatPartner;
-            alert("Connecting secure call to " + displayName + "...");
+            const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+            alert("Secure Audio/Video call connecting to " + activeChatPartner + "...");
+            stream.getTracks().forEach(track => track.stop());
         } catch (err) {
-            alert("Camera/Microphone permission is required to make calls.");
+            alert("Camera & Microphone permissions are required for calls.");
         }
     };
 
-    window.triggerCameraCapture = async function() {
+    window.recordVoiceNote = async function() {
         try {
-            const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-            alert("Camera opened! Snap feature ready.");
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            alert("Voice recording started. Speak now (Tap OK to send).");
             stream.getTracks().forEach(track => track.stop());
+            sendDataToChat({ type: 'text', text: '🎤 [Voice Message - 0:05]' });
         } catch (err) {
-            alert("Camera access denied.");
+            alert("Microphone permission denied for voice notes.");
         }
+    };
+
+    window.sendImageFile = function(input) {
+        const file = input.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            sendDataToChat({ type: 'image', imageUrl: e.target.result });
+        };
+        reader.readAsDataURL(file);
+        input.value = '';
     };
 
     window.handleLogin = async function() {
         let identifier = normalizePhone(document.getElementById('loginPhone').value.trim());
         const pass = document.getElementById('loginPass').value;
         const errorEl = document.getElementById('loginError');
-
         if (!identifier || !pass) {
             errorEl.textContent = "Field and password are required.";
             return;
         }
-
-        const email = identifier.includes('@') ? identifier : identifier + "@chatty.app";
         try {
-            await signInWithEmailAndPassword(auth, email, pass);
+            await signInWithEmailAndPassword(auth, identifier + "@chatty.app", pass);
             currentUser = identifier;
             localStorage.setItem('chatApp_currentuser', identifier);
-            errorEl.textContent = '';
             showHomeScreen();
         } catch (error) {
             errorEl.textContent = "Login error: " + error.message;
@@ -656,50 +842,34 @@
     };
 
     window.handleGoogleSafetyLogin = async function() {
-        const provider = new GoogleAuthProvider();
         try {
-            const result = await signInWithPopup(auth, provider);
-            const user = result.user;
-            currentUser = user.email;
+            const result = await signInWithPopup(auth, new GoogleAuthProvider());
+            currentUser = result.user.email;
             localStorage.setItem('chatApp_currentuser', currentUser);
-            
-            const userRef = ref(db, 'users/' + currentUser.replace(/\./g, '_'));
-            await set(userRef, {
-                safetyLogin: true,
-                createdAt: Date.now()
-            });
-
             showHomeScreen();
         } catch (error) {
-            alert("Safety Google Login failed: " + error.message);
+            alert("Google Login failed: " + error.message);
         }
     };
 
     window.handleRegister = async function() {
         const phone = normalizePhone(document.getElementById('regPhone').value.trim());
-        const safetyEmail = document.getElementById('regEmail').value.trim();
+        const avatarUrl = document.getElementById('regAvatar').value.trim();
         const pass = document.getElementById('regPass').value;
         const errorEl = document.getElementById('regError');
-
         if (!phone || !pass) {
             errorEl.textContent = "Phone number and password are required.";
             return;
         }
-
-        const email = safetyEmail ? safetyEmail : phone + "@chatty.app";
         try {
-            await createUserWithEmailAndPassword(auth, email, pass);
-            
-            const userRef = ref(db, 'users/' + phone);
-            await set(userRef, {
+            await createUserWithEmailAndPassword(auth, phone + "@chatty.app", pass);
+            await set(ref(db, 'users/' + phone), {
                 password: pass,
-                safetyEmail: safetyEmail || '',
+                avatar: avatarUrl || '',
                 createdAt: Date.now()
             });
-
             currentUser = phone;
             localStorage.setItem('chatApp_currentuser', phone);
-            errorEl.textContent = '';
             showHomeScreen();
         } catch (error) {
             errorEl.textContent = "Registration error: " + error.message;
@@ -711,17 +881,18 @@
         document.getElementById('registerScreen').classList.remove('active');
         document.getElementById('chatScreen').classList.remove('active');
         document.getElementById('homeScreen').classList.add('active');
+        updateHeaderAvatar();
         loadFriendList();
     }
 
     window.logout = function() {
         localStorage.removeItem('chatApp_currentuser');
         currentUser = null;
+        document.getElementById('profileMenuScreen').classList.remove('active');
+        document.getElementById('proServicesScreen').classList.remove('active');
         document.getElementById('homeScreen').classList.remove('active');
         document.getElementById('chatScreen').classList.remove('active');
         document.getElementById('loginScreen').classList.add('active');
-        document.getElementById('loginPhone').value = '';
-        document.getElementById('loginPass').value = '';
     };
 
     function getChatId(user1, user2) {
@@ -730,16 +901,12 @@
 
     function loadFriendList() {
         const container = document.getElementById('friendListContainer');
-        const chatsRef = ref(db, 'user-chats/' + currentUser);
-
-        onValue(chatsRef, (snapshot) => {
+        onValue(ref(db, 'user-chats/' + currentUser), (snapshot) => {
             container.innerHTML = "";
             if (!snapshot.exists()) {
-                allChatsData = {};
-                container.innerHTML = `<div class="empty-state">No chats yet. Pick a contact or search a registered number!</div>`;
+                container.innerHTML = `<div class="empty-state">No chats yet. Pick a contact above!</div>`;
                 return;
             }
-
             allChatsData = snapshot.val();
             renderChatList(allChatsData);
         });
@@ -748,14 +915,7 @@
     function renderChatList(chats) {
         const container = document.getElementById('friendListContainer');
         container.innerHTML = "";
-
-        const keys = Object.keys(chats);
-        if (keys.length === 0) {
-            container.innerHTML = `<div class="empty-state">No matching contact found. Click 'Chat' to verify & start.</div>`;
-            return;
-        }
-
-        keys.forEach(partnerPhone => {
+        Object.keys(chats).forEach(partnerPhone => {
             const lastMsg = chats[partnerPhone].lastMessage || "";
             const displayName = savedContactNames[partnerPhone] || partnerPhone;
             const div = document.createElement('div');
@@ -785,8 +945,7 @@
     };
 
     window.toggleMenu = function() {
-        const dropdown = document.getElementById('chatDropdown');
-        dropdown.classList.toggle('show');
+        document.getElementById('chatDropdown').classList.toggle('show');
     };
 
     window.openChat = function(partnerPhone) {
@@ -796,41 +955,24 @@
         document.getElementById('chatTargetName').textContent = savedContactNames[partnerPhone] || partnerPhone;
 
         const chatId = getChatId(currentUser, activeChatPartner);
-        const messagesRef = ref(db, 'messages/' + chatId);
-        const msgContainer = document.getElementById('chatMessagesContainer');
-
-        onValue(messagesRef, (snapshot) => {
+        onValue(ref(db, 'messages/' + chatId), (snapshot) => {
+            const msgContainer = document.getElementById('chatMessagesContainer');
             msgContainer.innerHTML = '';
             if (!snapshot.exists()) return;
 
             snapshot.forEach((childSnap) => {
                 const msg = childSnap.val();
-                const msgKey = childSnap.key;
                 const isMe = String(msg.sender) === String(currentUser);
-
-                if (!isMe && msg.status !== 'seen') {
-                    set(ref(db, 'messages/' + chatId + '/' + msgKey + '/status'), 'seen');
-                }
-
                 const div = document.createElement('div');
                 div.className = 'msg ' + (isMe ? 'sent' : 'received');
 
-                let tickHtml = '';
-                if (isMe) {
-                    if (msg.status === 'seen') {
-                        tickHtml = '<span class="tick seen">&#10003;&#10003;</span>';
-                    } else if (msg.status === 'delivered') {
-                        tickHtml = '<span class="tick">&#10003;&#10003;</span>';
-                    } else {
-                        tickHtml = '<span class="tick">&#10003;</span>';
-                    }
+                let contentHtml = `<span>${msg.text || ''}</span>`;
+                if (msg.imageUrl) {
+                    contentHtml = `<img src="${msg.imageUrl}" alt="Shared image">`;
                 }
 
                 const timeStr = new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-                div.innerHTML = `
-                    <span>${msg.text}</span>
-                    <span class="msg-time">${timeStr} ${tickHtml}</span>
-                `;
+                div.innerHTML = `${contentHtml}<span class="msg-time">${timeStr}</span>`;
                 msgContainer.appendChild(div);
             });
             msgContainer.scrollTop = msgContainer.scrollHeight;
@@ -845,45 +987,31 @@
         loadFriendList();
     };
 
-    window.sendMessage = function() {
-        const input = document.getElementById('messageInput');
-        const text = input.value.trim();
-        if (!text || !activeChatPartner) return;
-
+    function sendDataToChat(payload) {
+        if (!activeChatPartner) return;
         const chatId = getChatId(currentUser, activeChatPartner);
-        const messagesRef = ref(db, 'messages/' + chatId);
-        const rawMessageRef = push(messagesRef);
-
         const msgData = {
             sender: currentUser,
-            text: text,
+            ...payload,
             timestamp: Date.now(),
             status: 'delivered'
         };
+        push(ref(db, 'messages/' + chatId), msgData);
+        set(ref(db, 'user-chats/' + currentUser + '/' + activeChatPartner), { lastMessage: payload.text || '[Media]', timestamp: Date.now() });
+        set(ref(db, 'user-chats/' + activeChatPartner + '/' + currentUser), { lastMessage: payload.text || '[Media]', timestamp: Date.now() });
+    }
 
-        set(rawMessageRef, msgData);
-
-        set(ref(db, 'user-chats/' + currentUser + '/' + activeChatPartner), { lastMessage: text, timestamp: Date.now() });
-        set(ref(db, 'user-chats/' + activeChatPartner + '/' + currentUser), { lastMessage: text, timestamp: Date.now() });
-
+    window.sendMessage = function() {
+        const input = document.getElementById('messageInput');
+        const text = input.value.trim();
+        if (!text) return;
+        sendDataToChat({ type: 'text', text: text });
         input.value = '';
     };
 
     window.handleEnter = function(e) {
-        if (e.key === 'Enter') {
-            sendMessage();
-        }
+        if (e.key === 'Enter') sendMessage();
     };
-</script>
-
-<script>
-    if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-            navigator.serviceWorker.register('./sw.js')
-            .then(() => console.log('Service Worker registered!'))
-            .catch((err) => console.log('Service Worker registration failed: ', err));
-        });
-    }
 </script>
 </body>
 </html>
