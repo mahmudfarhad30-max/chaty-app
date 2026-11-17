@@ -8,7 +8,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
 <script src="https://download.agora.io/sdk/release/AgoraRTC_N-4.17.0.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
-   
+    
     <style>
         :root {
             --bg-main: #111b21;
@@ -707,26 +707,39 @@
                     container.appendChild(item);
                 }
             });
-        }
+    const agoraOptions = {
+    appId: "ebbb0fef7s934bdf33fc3cb057ee0c",
+    channel: "chatycall",
+    token: null,
+    uid: null
+};
 
-        function startAudioCall() { alert("Audio call starting with " + activeChatContact + "..."); }
-        function startVideoCall() { alert("Video call starting with " + activeChatContact + "..."); }
-        function handleMediaUpload(input) {
-            if (input.files && input.files[0]) alert("File selected: " + input.files[0].name);
-        }
-        function toggleVoiceRecord() {
-            alert("Voice recording started... (Hold/Tap to record like WhatsApp)");
-        }
+async function startAudioCall() {
+    try {
+        await client.join(agoraOptions.appId, agoraOptions.channel, agoraOptions.token, agoraOptions.uid);
+        localAudioTrack = await AgoraRTC.createMicrophoneAudioTrack();
+        await client.publish([localAudioTrack]);
+        alert("Audio call started successfully!");
+    } catch (error) {
+        console.error(error);
+        alert("Failed to start audio call.");
+    }
+}
 
-        function openImoMenu() { document.getElementById('imoMenuModal').classList.add('active'); }
-        function closeImoMenu(e) { document.getElementById('imoMenuModal').classList.remove('active'); }
-
-        function openSettingsModal() {
-            closeImoMenu();
-            db.ref('users/' + currentUser).once('value', (snapshot) => {
-                if (snapshot.exists()) {
-                    const data = snapshot.val();
-                    document.getElementById('editName').value = data.name || "";
+async function startVideoCall() {
+    try {
+        await client.join(agoraOptions.appId, agoraOptions.channel, agoraOptions.token, agoraOptions.uid);
+        const localAudioTrack = await AgoraRTC.createMicrophoneAudioTrack();
+        const localVideoTrack = await AgoraRTC.createCameraVideoTrack();
+        localVideoTrack.play("chatMessagesContainer");
+        await client.publish([localAudioTrack, localVideoTrack]);
+        alert("Video call started successfully!");
+    } catch (error) {
+        console.error(error);
+        alert("Failed to start video call.");
+    }
+}
+            document.getElementById('editName').value = data.name || "";
                     document.getElementById('editAddress').value = data.address || "";
                     document.getElementById('editPicUrl').value = data.pic || "";
                 }
@@ -759,40 +772,39 @@
                 location.reload();
             }
         const client = AgoraRTC.createClient({ mode: "rtc", codec: "vp8" });
+
 const agoraOptions = {
-  appId: "ebbb8f9f7e9846d8bf33fc3cb057ee8c",
-  channel: "chatycall",
-  token: null,
-  uid: null
+    appId: "ebbb9f7e934bdf33fc3cb057ee0c",
+    channel: "chatycall",
+    token: null,
+    uid: null
 };
 
 async function startAudioCall() {
-  try {
-    await client.join(agoraOptions.appId, agoraOptions.channel, agoraOptions.token, agoraOptions.uid);
-    const localAudioTrack = await AgoraRTC.createMicrophoneAudioTrack();
-    await client.publish([localAudioTrack]);
-    alert("Audio call started successfully!");
-  } catch (error) {
-    console.error(error);
-    alert("Failed to start audio call.");
-  }
+    try {
+        await client.join(agoraOptions.appId, agoraOptions.channel, agoraOptions.token, agoraOptions.uid);
+        const localAudioTrack = await AgoraRTC.createMicrophoneAudioTrack();
+        await client.publish([localAudioTrack]);
+        alert("Audio call started successfully!");
+    } catch (error) {
+        console.error(error);
+        alert("Failed to start audio call.");
+    }
 }
 
 async function startVideoCall() {
-  try {
-    await client.join(agoraOptions.appId, agoraOptions.channel, agoraOptions.token, agoraOptions.uid);
-    const localAudioTrack = await AgoraRTC.createMicrophoneAudioTrack();
-    const localVideoTrack = await AgoraRTC.createCameraVideoTrack();
-    
-    localVideoTrack.play("chatMessagesContainer");
-    await client.publish([localAudioTrack, localVideoTrack]);
-    alert("Video call started successfully!");
-  } catch (error) {
-    console.error(error);
-    alert("Failed to start video call.");
-  }
-}    
-        }
+    try {
+        await client.join(agoraOptions.appId, agoraOptions.channel, agoraOptions.token, agoraOptions.uid);
+        const localAudioTrack = await AgoraRTC.createMicrophoneAudioTrack();
+        const localVideoTrack = await AgoraRTC.createCameraVideoTrack();
+        localVideoTrack.play("chatMessagesContainer");
+        await client.publish([localAudioTrack, localVideoTrack]);
+        alert("Video call started successfully!");
+    } catch (error) {
+        console.error(error);
+        alert("Failed to start video call.");
+    }
+}
     </script>
 </body>
 </html>
