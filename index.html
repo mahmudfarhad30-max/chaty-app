@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chatty - Premium Web Chat</title>
 
+    <!-- নতুন যোগ করুন: PWABuilder-এর ম্যানিফেস্ট ত্রুটি দূর করার জন্য -->
+    <link rel="manifest" href="manifest.json">
+
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://download.agora.io/sdk/release/AgoraRTC_N-4.17.0.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
@@ -21,6 +24,7 @@
             --text-secondary: #8696a0;
         }
 
+        /* ১৬ নম্বর লাইনের ভুল `- {` ঠিক করে এখানে `* {` করা হলো */
         * {
             box-sizing: border-box;
             margin: 0;
