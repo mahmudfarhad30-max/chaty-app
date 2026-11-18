@@ -834,7 +834,7 @@
                 alert("Audio call started successfully!");
             } catch (error) {
                 console.error(error);
-                alert("Failed to start audio call. Please allow microphone permission.");
+        alert("Error: " + error.name + "\nDetails: " + error.message);
             }
         }
 
