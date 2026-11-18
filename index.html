@@ -819,8 +819,14 @@
         const agoraOptions = {
            appId: "ebbb8f9f7e9846d8bf33fc3cb057ee8c",
             channel: "chatycall",
-            token: null,
-            uid: null
+            token: 
+        const client = AgoraRTC.createClient({ mode: "rtc", codec: "vp8" });
+
+        const agoraOptions = {
+           appId: "ebbb8f9f7e9846d8bf33fc3cb057ee8c",
+            channel: "chatycall",
+            token: "007eJxTYFhgFpC+kjXG00dA/6xtFtc9d4aqTDe5F1weS5hupIU+3KzAkJqUlGSRZplmnmppYWKWYpGUZmyclmycnGRgap6aapEsMf1vVkMgI0Pzy91MjAwQCOJzMiRnJJZUJifm5DAwAAAW2SAN" ,
+            uid: null,
         };
 
         async function startAudioCall() {
