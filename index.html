@@ -952,44 +952,44 @@
         });
 
         async function initiateCall(type) {
-            if (!activeChatContact || isCallInProgress) return;
-            isCallInProgress = true;
-
-            const callId = getChatRoomId(currentUser, activeChatContact);
-            currentCallData = {
-                callId: callId,
-                caller: currentUser,
-                receiver: activeChatContact,
-                type: type,
-                status: "ringing",
-                timestamp: Date.now()
-            };
-
-            showActiveCallUI(activeChatContact, type, "Ringing...");
-
-            outgoingCallRef = db.ref('calls/' + activeChatContact);
-            await outgoingCallRef.set(currentCallData);
-
-            outgoingCallRef.on('value', async (snapshot) => {
-                if (!snapshot.exists()) return;
-                const data = snapshot.val();
-
-                if (data.status === "accepted" && !callStartTime) {
-                    document.getElementById('callStatusText').innerText = "Connecting...";
-                    const joined = await joinAgoraChannel(type);
-                    if (joined) {
-                        startCallTimer();
-                    }
-                } else if (data.status === "rejected") {
-                    const missedText = type === "video" ? "Missed Video Call" : "Missed Audio Call";
-                    logCallHistory(currentUser, activeChatContact, missedText);
-                    await cleanupCall();
-                    alert("Call declined.");
-                } else if (data.status === "ended") {
-                    await cleanupCall();
-                }
-            });
+    if (!activeChatContact || isCallInProgress) return;
+    isCallInProgress = true;
+    
+    const callId = getChatRoomId(currentUser, activeChatContact);
+    currentCallData = {
+        callId: callId,
+        caller: currentUser,
+        receiver: activeChatContact,
+        type: type,
+        status: "ringing",
+        timestamp: Date.now()
+    };
+    
+    showActiveCallUI(activeChatContact, type, "Ringing...");
+    
+    outgoingCallRef = db.ref('calls/' + activeChatContact);
+    await outgoingCallRef.set(currentCallData);
+    
+    outgoingCallRef.on('value', async (snapshot) => {
+        if (!snapshot.exists()) return;
+        const data = snapshot.val();
+        
+        if (data.status === "accepted" && !callStartTimer) {
+            document.getElementById('callStatusText').innerText = "Connected";
+            const joined = await joinAgoraChannel(type);
+            if (joined) {
+                startCallTimer();
+            }
+        } else if (data.status === "rejected") {
+            const missedText = type === "video" ? "Missed Video Call" : "Missed Audio Call";
+            logCallHistory(currentUser, activeChatContact, missedText);
+            await cleanupCall();
+            alert("Call declined.");
+        } else if (data.status === "ended") {
+            await cleanupCall();
         }
+    });
+}
 
         function listenForIncomingCalls() {
             db.ref('calls/' + currentUser).on('value', async (snapshot) => {
@@ -1023,6 +1023,7 @@
             
             const joined = await joinAgoraChannel(currentCallData.type);
             if (joined) {
+                document.getElementById('callStatusText').innerText = "Connected";
                 startCallTimer();
             }
         }
