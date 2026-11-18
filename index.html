@@ -378,6 +378,78 @@
             flex-direction: column;
             gap: 12px;
         }
+
+        /* Call Screens & Modals */
+        .call-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: #0b141a;
+            z-index: 3000;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            padding: 40px 20px;
+        }
+
+        .call-overlay.active {
+            display: flex;
+        }
+
+        .video-grid {
+            position: relative;
+            width: 100%;
+            height: 75%;
+            background: #000;
+            border-radius: 12px;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #remoteVideoContainer {
+            width: 100%;
+            height: 100%;
+        }
+
+        #localVideoContainer {
+            position: absolute;
+            bottom: 15px;
+            right: 15px;
+            width: 110px;
+            height: 150px;
+            background: #202c33;
+            border: 2px solid var(--accent);
+            border-radius: 10px;
+            overflow: hidden;
+            z-index: 10;
+        }
+
+        .call-controls {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            justify-content: center;
+            z-index: 20;
+        }
+
+        .call-btn {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            border: none;
+            color: white;
+            font-size: 22px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-accept { background: #22c55e; }
+        .btn-reject, .btn-end { background: #ef4444; }
+        .btn-mute { background: #2a3942; }
     </style>
 </head>
 <body>
@@ -429,8 +501,8 @@
                 <div id="chatTargetName" style="font-weight: bold; font-size: 15px;">Chat</div>
                 <div style="font-size: 11px; color: var(--accent);">online</div>
             </div>
-            <button class="action-icon-btn" onclick="startAudioCall()" title="Audio Call">📞</button>
-            <button class="action-icon-btn" onclick="startVideoCall()" title="Video Call">📹</button>
+            <button class="action-icon-btn" onclick="initiateCall('audio')" title="Audio Call">📞</button>
+            <button class="action-icon-btn" onclick="initiateCall('video')" title="Video Call">📹</button>
         </div>
         <div id="chatMessagesContainer" class="chat-messages"></div>
         <div class="chat-input-area">
@@ -439,6 +511,41 @@
             
             <input type="text" id="messageInput" class="message-input" placeholder="Type a message..." onkeypress="handleMessageEnter(event)">
             <button class="send-btn" onclick="sendMessage()" title="Send">➤</button>
+        </div>
+    </div>
+
+    <!-- Incoming Call Modal -->
+    <div id="incomingCallModal" class="call-overlay" style="background: rgba(11, 20, 26, 0.96); justify-content: center; gap: 30px;">
+        <div style="text-align: center;">
+            <div class="profile-avatar" style="width: 85px; height: 85px; font-size: 32px; margin: 0 auto 15px;" id="incomingCallerAvatar">U</div>
+            <h2 id="incomingCallerName" style="margin-bottom: 8px;">Caller Name</h2>
+            <p id="incomingCallType" style="color: var(--accent); font-size: 15px;">Incoming Audio Call...</p>
+        </div>
+        <div class="call-controls" style="gap: 40px;">
+            <button class="call-btn btn-reject" onclick="rejectIncomingCall()" title="Decline">✖</button>
+            <button class="call-btn btn-accept" onclick="acceptIncomingCall()" title="Accept">📞</button>
+        </div>
+    </div>
+
+    <!-- Active Call Screen (Audio & Video) -->
+    <div id="activeCallScreen" class="call-overlay">
+        <div style="text-align: center; z-index: 20;">
+            <h3 id="activeCallPartner">User</h3>
+            <p id="callStatusText" style="color: var(--accent); font-size: 14px; margin-top: 4px;">Calling...</p>
+        </div>
+
+        <div id="videoArea" class="video-grid" style="display: none;">
+            <div id="remoteVideoContainer"></div>
+            <div id="localVideoContainer"></div>
+        </div>
+
+        <div id="audioAvatarArea" style="text-align: center;">
+            <div class="profile-avatar" style="width: 110px; height: 110px; font-size: 42px; margin: 0 auto;" id="activeCallAvatar">U</div>
+        </div>
+
+        <div class="call-controls">
+            <button class="call-btn btn-mute" id="muteAudioBtn" onclick="toggleMuteAudio()" title="Mute/Unmute">🎤</button>
+            <button class="call-btn btn-end" onclick="endActiveCall()" title="End Call">📵</button>
         </div>
     </div>
 
@@ -568,6 +675,7 @@
             document.getElementById('homeScreen').classList.add('active');
             loadUserProfile();
             loadFriendList();
+            listenForIncomingCalls();
         }
 
         function loadUserProfile() {
@@ -735,6 +843,12 @@
             return user1 < user2 ? `${user1}_${user2}` : `${user2}_${user1}`;
         }
 
+        function formatTime(timestamp) {
+            if (!timestamp) return "";
+            const date = new Date(timestamp);
+            return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        }
+
         function sendMessage() {
             const input = document.getElementById('messageInput');
             const text = input.value.trim();
@@ -784,7 +898,7 @@
                     div.innerHTML = `
                         <div>${msg.text}</div>
                         <div class="msg-footer">
-                            <span>12:00 PM</span>
+                            <span>${formatTime(msg.timestamp)}</span>
                             ${tickHTML}
                         </div>
                     `;
@@ -814,45 +928,260 @@
             });
         }
 
+        // ================= AGORA & FIREBASE CALL SYSTEM =================
         const client = AgoraRTC.createClient({ mode: "rtc", codec: "vp8" });
 
         const agoraOptions = {
-           appId: "ebbb8f9f7e9846d8bf33fc3cb057ee8c",
+            appId: "ebbb8f9f7e9846d8bf33fc3cb057ee8c",
             channel: "chatycall",
-            token: "007eJxTYNjs9DT13/uPk+t+KPX9sd+vtv/Q1E+5cUnSLOutVix5W1SiwJCalJRkkWaZZp5qaWFilmKRlGZsnJZsnJxkYGqemmqRbDv3b1ZDICPD7bvNzIwMEAjiczIkZySWVCYn5uQwMAAAT4wmQw==" ,
-            uid: null,
+            token: "007eJxTYNjs9DT13/uPk+t+KPX9sd+vtv/Q1E+5cUnSLOutVix5W1SiwJCalJRkkWaZZp5qaWFilmKRlGZsnJZsnJxkYGqemmqRbDv3b1ZDICPD7tvNzIwMEAjiczIkZySWVCYn5uQwMAAAT4wmQw==",
+            uid: null
         };
 
-        async function startAudioCall() {
-            try {
-                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                stream.getTracks().forEach(track => track.stop());
+        let localAudioTrack = null;
+        let localVideoTrack = null;
+        let currentCallData = null;
+        let callStartTime = null;
+        let callTimerInterval = null;
+        let isAudioMuted = false;
 
-                await client.join(agoraOptions.appId, agoraOptions.channel, agoraOptions.token, agoraOptions.uid);
-                const localAudioTrack = await AgoraRTC.createMicrophoneAudioTrack();
-                await client.publish([localAudioTrack]);
-                alert("Audio call started successfully!");
+        // Remote user publishes audio/video
+        client.on("user-published", async (user, mediaType) => {
+            await client.subscribe(user, mediaType);
+            if (mediaType === "video") {
+                user.videoTrack.play("remoteVideoContainer");
+            }
+            if (mediaType === "audio") {
+                user.audioTrack.play();
+            }
+        });
+
+        client.on("user-unpublished", (user, mediaType) => {
+            if (mediaType === "video") {
+                document.getElementById("remoteVideoContainer").innerHTML = "";
+            }
+        });
+
+        // 1. Initiate Call (Audio or Video)
+        async function initiateCall(type) {
+            if (!activeChatContact) return;
+
+            const callId = getChatRoomId(currentUser, activeChatContact);
+            currentCallData = {
+                callId: callId,
+                caller: currentUser,
+                receiver: activeChatContact,
+                type: type,
+                status: "ringing",
+                timestamp: Date.now()
+            };
+
+            // Show Active Call Screen
+            showActiveCallUI(activeChatContact, type, "Ringing...");
+
+            // Save call signal in Firebase
+            await db.ref('calls/' + activeChatContact).set(currentCallData);
+
+            // Listen for receiver's response
+            db.ref('calls/' + activeChatContact).on('value', async (snapshot) => {
+                if (!snapshot.exists()) return;
+                const data = snapshot.val();
+
+                if (data.status === "accepted") {
+                    document.getElementById('callStatusText').innerText = "Connecting...";
+                    await joinAgoraChannel(type);
+                    startCallTimer();
+                } else if (data.status === "rejected") {
+                    logCallHistory(currentUser, activeChatContact, type, "কল প্রত্যাখ্যান করা হয়েছে");
+                    cleanupCall();
+                    alert("Call declined.");
+                } else if (data.status === "ended") {
+                    cleanupCall();
+                }
+            });
+        }
+
+        // 2. Listen for Incoming Calls
+        function listenForIncomingCalls() {
+            db.ref('calls/' + currentUser).on('value', (snapshot) => {
+                if (!snapshot.exists()) {
+                    document.getElementById('incomingCallModal').classList.remove('active');
+                    return;
+                }
+                const data = snapshot.val();
+                if (data.status === "ringing" && data.receiver === currentUser) {
+                    currentCallData = data;
+                    document.getElementById('incomingCallerName').innerText = data.caller;
+                    document.getElementById('incomingCallerAvatar').innerText = data.caller.charAt(0).toUpperCase();
+                    document.getElementById('incomingCallType').innerText = data.type === 'video' ? "Incoming Video Call..." : "Incoming Audio Call...";
+                    document.getElementById('incomingCallModal').classList.add('active');
+                } else if (data.status === "cancelled" || data.status === "ended") {
+                    document.getElementById('incomingCallModal').classList.remove('active');
+                    cleanupCall();
+                }
+            });
+        }
+
+        // 3. Accept Incoming Call
+        async function acceptIncomingCall() {
+            if (!currentCallData) return;
+            document.getElementById('incomingCallModal').classList.remove('active');
+
+            await db.ref('calls/' + currentUser).update({ status: "accepted" });
+            showActiveCallUI(currentCallData.caller, currentCallData.type, "Connected");
+            await joinAgoraChannel(currentCallData.type);
+            startCallTimer();
+
+            // Listen if caller ends call
+            db.ref('calls/' + currentUser).on('value', (snapshot) => {
+                if (!snapshot.exists() || snapshot.val().status === "ended") {
+                    cleanupCall();
+                }
+            });
+        }
+
+        // 4. Reject Incoming Call
+        async function rejectIncomingCall() {
+            if (!currentCallData) return;
+            document.getElementById('incomingCallModal').classList.remove('active');
+            await db.ref('calls/' + currentUser).update({ status: "rejected" });
+            setTimeout(() => {
+                db.ref('calls/' + currentUser).remove();
+            }, 1500);
+            currentCallData = null;
+        }
+
+        // 5. Join Agora Channel & Publish Tracks
+        async function joinAgoraChannel(type) {
+            try {
+                if (client.connectionState === "DISCONNECTED") {
+                    await client.join(agoraOptions.appId, agoraOptions.channel, agoraOptions.token, agoraOptions.uid);
+                }
+
+                localAudioTrack = await AgoraRTC.createMicrophoneAudioTrack();
+                if (type === "video") {
+                    localVideoTrack = await AgoraRTC.createCameraVideoTrack();
+                    localVideoTrack.play("localVideoContainer");
+                    await client.publish([localAudioTrack, localVideoTrack]);
+                } else {
+                    await client.publish([localAudioTrack]);
+                }
             } catch (error) {
-                console.error(error);
-        alert("Error: " + error.name + "\nDetails: " + error.message);
+                console.error("Agora Error:", error);
+                alert("Microphone/Camera error: " + error.message);
+                endActiveCall();
             }
         }
 
-        async function startVideoCall() {
-            try {
-                const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: true });
-                stream.getTracks().forEach(track => track.stop());
-
-                await client.join(agoraOptions.appId, agoraOptions.channel, agoraOptions.token, agoraOptions.uid);
-                const localAudioTrack = await AgoraRTC.createMicrophoneAudioTrack();
-                const localVideoTrack = await AgoraRTC.createCameraVideoTrack();
-                localVideoTrack.play("chatMessagesContainer");
-                await client.publish([localAudioTrack, localVideoTrack]);
-                alert("Video call started successfully!");
-            } catch (error) {
-                console.error(error);
-                alert("Failed to start video call. Please allow camera/microphone permission.");
+        // 6. End / Cancel Call & Save History
+        async function endActiveCall() {
+            if (!currentCallData) {
+                cleanupCall();
+                return;
             }
+
+            const targetNode = currentCallData.receiver;
+            const callType = currentCallData.type;
+            const wasConnected = callStartTime !== null;
+
+            if (wasConnected) {
+                const durationSec = Math.floor((Date.now() - callStartTime) / 1000);
+                const mins = Math.floor(durationSec / 60);
+                const secs = durationSec % 60;
+                const durationText = mins > 0 ? `${mins} মিনিট ${secs} সেকেন্ড` : `${secs} সেকেন্ড`;
+                const label = callType === "video" ? `📹 ভিডিও কল · ${durationText}` : `📞 অডিও কল · ${durationText}`;
+                logCallHistory(currentCallData.caller, currentCallData.receiver, callType, label);
+            } else if (currentCallData.caller === currentUser) {
+                // Caller cancelled before answer
+                logCallHistory(currentCallData.caller, currentCallData.receiver, callType, "বাতিল করা কল / মিসড কল");
+            }
+
+            await db.ref('calls/' + targetNode).update({ status: "ended" });
+            setTimeout(() => {
+                db.ref('calls/' + targetNode).remove();
+            }, 1000);
+
+            cleanupCall();
+        }
+
+        function logCallHistory(caller, receiver, type, statusText) {
+            const roomId = getChatRoomId(caller, receiver);
+            db.ref('chats/' + roomId).push({
+                sender: caller,
+                text: `<i>${statusText}</i>`,
+                timestamp: Date.now(),
+                status: "sent"
+            });
+            db.ref('user-chats/' + caller + '/' + receiver).set({ contact: receiver });
+            db.ref('user-chats/' + receiver + '/' + caller).set({ contact: caller });
+        }
+
+        function showActiveCallUI(partnerName, type, statusText) {
+            document.getElementById('activeCallPartner').innerText = partnerName;
+            document.getElementById('activeCallAvatar').innerText = partnerName.charAt(0).toUpperCase();
+            document.getElementById('callStatusText').innerText = statusText;
+
+            if (type === "video") {
+                document.getElementById('videoArea').style.display = "flex";
+                document.getElementById('audioAvatarArea').style.display = "none";
+            } else {
+                document.getElementById('videoArea').style.display = "none";
+                document.getElementById('audioAvatarArea').style.display = "block";
+            }
+
+            document.getElementById('activeCallScreen').classList.add('active');
+        }
+
+        function startCallTimer() {
+            if (callStartTime) return;
+            callStartTime = Date.now();
+            callTimerInterval = setInterval(() => {
+                const elapsed = Math.floor((Date.now() - callStartTime) / 1000);
+                const mins = String(Math.floor(elapsed / 60)).padStart(2, '0');
+                const secs = String(elapsed % 60).padStart(2, '0');
+                document.getElementById('callStatusText').innerText = `${mins}:${secs}`;
+            }, 1000);
+        }
+
+        function toggleMuteAudio() {
+            if (!localAudioTrack) return;
+            isAudioMuted = !isAudioMuted;
+            localAudioTrack.setEnabled(!isAudioMuted);
+            document.getElementById('muteAudioBtn').innerText = isAudioMuted ? "🔇" : "🎤";
+            document.getElementById('muteAudioBtn').style.background = isAudioMuted ? "#ef4444" : "#2a3942";
+        }
+
+        async function cleanupCall() {
+            clearInterval(callTimerInterval);
+            callTimerInterval = null;
+            callStartTime = null;
+            isAudioMuted = false;
+            document.getElementById('muteAudioBtn').innerText = "🎤";
+            document.getElementById('muteAudioBtn').style.background = "#2a3942";
+
+            if (localAudioTrack) {
+                localAudioTrack.stop();
+                localAudioTrack.close();
+                localAudioTrack = null;
+            }
+            if (localVideoTrack) {
+                localVideoTrack.stop();
+                localVideoTrack.close();
+                localVideoTrack = null;
+            }
+            if (client.connectionState !== "DISCONNECTED") {
+                await client.leave();
+            }
+
+            document.getElementById('remoteVideoContainer').innerHTML = "";
+            document.getElementById('localVideoContainer').innerHTML = "";
+            document.getElementById('activeCallScreen').classList.remove('active');
+            document.getElementById('incomingCallModal').classList.remove('active');
+
+            if (currentCallData && currentCallData.receiver) {
+                db.ref('calls/' + currentCallData.receiver).off();
+            }
+            currentCallData = null;
         }
     </script>
 </body>
