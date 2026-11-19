@@ -1038,7 +1038,7 @@
         }
         
    async function joinAgoraChannel(type, channelName) {
-        try {
+    try {
         if (localAudioTrack) {
             localAudioTrack.stop();
             localAudioTrack.close();
@@ -1049,10 +1049,6 @@
             localVideoTrack.close();
             localVideoTrack = null;
         }
-
-        const constraints = type === "video" ? { audio: true, video: true } : { audio: true };
-        const tempStream = await navigator.mediaDevices.getUserMedia(constraints);
-        tempStream.getTracks().forEach(track => track.stop());
 
         if (client.connectionState !== "DISCONNECTED") {
             await client.leave();
