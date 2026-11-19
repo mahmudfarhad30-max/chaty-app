@@ -976,7 +976,7 @@
 
         if (data.status === "accepted" && !callStartTimer) {
             document.getElementById('callStatusText').innerText = "Connecting...";
-            const joined = await joinAgoraChannel(type, data.callId || callId);
+            const joined = await joinAgoraChannel(type, agoraOptions.channel);
             if (joined) {
                 document.getElementById('callStatusText').innerText = "Connected";
                 startCallTimer();
@@ -1012,24 +1012,21 @@
                 }
             });
         }
-
-    async function acceptIncomingCall() {
+        
+   async function acceptIncomingCall() {
     if (!currentCallData || isCallInProgress) return;
     isCallInProgress = true;
     document.getElementById('incomingCallModal').classList.remove('active');
 
-    const callChannelId = currentCallData.callId;
-
     await db.ref('calls/' + currentUser).update({ status: "accepted" });
     showActiveCallUI(currentCallData.caller, currentCallData.type, "Connecting...");
 
-    const joined = await joinAgoraChannel(currentCallData.type, callChannelId);
+    const joined = await joinAgoraChannel(currentCallData.type, agoraOptions.channel);
     if (joined) {
         document.getElementById('callStatusText').innerText = "Connected";
         startCallTimer();
     }
 }
-
         async function rejectIncomingCall() {
             if (!currentCallData) return;
             document.getElementById('incomingCallModal').classList.remove('active');
@@ -1039,8 +1036,8 @@
             }, 1500);
             currentCallData = null;
         }
-
-    async function joinAgoraChannel(type, channelName) {
+        
+   async function joinAgoraChannel(type, channelName) {
         try {
         if (localAudioTrack) {
             localAudioTrack.stop();
@@ -1052,6 +1049,10 @@
             localVideoTrack.close();
             localVideoTrack = null;
         }
+
+        const constraints = type === "video" ? { audio: true, video: true } : { audio: true };
+        const tempStream = await navigator.mediaDevices.getUserMedia(constraints);
+        tempStream.getTracks().forEach(track => track.stop());
 
         if (client.connectionState !== "DISCONNECTED") {
             await client.leave();
@@ -1076,7 +1077,7 @@
         return false;
     }
 }
-
+        
         async function endActiveCall() {
             if (!currentCallData) {
                 await cleanupCall();
