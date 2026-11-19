@@ -991,6 +991,7 @@
         }
     });
 }
+        
         function listenForIncomingCalls() {
             db.ref('calls/' + currentUser).on('value', async (snapshot) => {
                 if (!snapshot.exists()) {
@@ -1027,6 +1028,7 @@
         startCallTimer();
     }
 }
+   
         async function rejectIncomingCall() {
             if (!currentCallData) return;
             document.getElementById('incomingCallModal').classList.remove('active');
@@ -1036,7 +1038,9 @@
             }, 1500);
             currentCallData = null;
         }
-        
+      
+    }
+           
    async function joinAgoraChannel(type, channelName) {
     try {
         if (localAudioTrack) {
