@@ -975,8 +975,9 @@
     outgoingCallRef.on('value', async (snapshot) => {
         if (!snapshot.exists()) return;
         const data = snapshot.val();
+        console.log("CALL STATUS UPDATE:", data.status, data);
 
-        if (data.status === "accepted" && !callStartTimer) {
+       if (data.status === "accepted" && !callStartTime)  {
             document.getElementById('callStatusText').innerText = "Connecting...";
             const joined = await joinAgoraChannel(type, agoraOptions.channel);
             if (joined) {
@@ -1025,7 +1026,7 @@
     await db.ref('calls/' + currentUser).update({ status: "accepted" });
     showActiveCallUI(currentCallData.caller, currentCallData.type, "Connecting...");
 
-    const joined = await joinAgoraChannel(currentCallData.type, agoraOptions.channel);
+       const joined = await joinAgoraChannel(currentCallData.type, agoraOptions.channel);
     if (joined) {
         document.getElementById('callStatusText').innerText = "Connected";
         startCallTimer();
