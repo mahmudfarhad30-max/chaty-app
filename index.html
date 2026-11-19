@@ -951,10 +951,10 @@
             }
         });
 
-        async function initiateCall(type) {
+    async function initiateCall(type) {
     if (!activeChatContact || isCallInProgress) return;
     isCallInProgress = true;
-    
+
     const callId = getChatRoomId(currentUser, activeChatContact);
     currentCallData = {
         callId: callId,
@@ -964,20 +964,21 @@
         status: "ringing",
         timestamp: Date.now()
     };
-    
+
     showActiveCallUI(activeChatContact, type, "Ringing...");
-    
+
     outgoingCallRef = db.ref('calls/' + activeChatContact);
     await outgoingCallRef.set(currentCallData);
-    
+
     outgoingCallRef.on('value', async (snapshot) => {
         if (!snapshot.exists()) return;
         const data = snapshot.val();
-        
+
         if (data.status === "accepted" && !callStartTimer) {
-            document.getElementById('callStatusText').innerText = "Connected";
-            const joined = await joinAgoraChannel(type);
+            document.getElementById('callStatusText').innerText = "Connecting...";
+            const joined = await joinAgoraChannel(type, data.callId || callId);
             if (joined) {
+                document.getElementById('callStatusText').innerText = "Connected";
                 startCallTimer();
             }
         } else if (data.status === "rejected") {
@@ -990,7 +991,6 @@
         }
     });
 }
-
         function listenForIncomingCalls() {
             db.ref('calls/' + currentUser).on('value', async (snapshot) => {
                 if (!snapshot.exists()) {
@@ -1013,20 +1013,22 @@
             });
         }
 
-        async function acceptIncomingCall() {
-            if (!currentCallData || isCallInProgress) return;
-            isCallInProgress = true;
-            document.getElementById('incomingCallModal').classList.remove('active');
+    async function acceptIncomingCall() {
+    if (!currentCallData || isCallInProgress) return;
+    isCallInProgress = true;
+    document.getElementById('incomingCallModal').classList.remove('active');
 
-            await db.ref('calls/' + currentUser).update({ status: "accepted" });
-            showActiveCallUI(currentCallData.caller, currentCallData.type, "Connecting...");
-            
-            const joined = await joinAgoraChannel(currentCallData.type);
-            if (joined) {
-                document.getElementById('callStatusText').innerText = "Connected";
-                startCallTimer();
-            }
-        }
+    const callChannelId = currentCallData.callId;
+
+    await db.ref('calls/' + currentUser).update({ status: "accepted" });
+    showActiveCallUI(currentCallData.caller, currentCallData.type, "Connecting...");
+
+    const joined = await joinAgoraChannel(currentCallData.type, callChannelId);
+    if (joined) {
+        document.getElementById('callStatusText').innerText = "Connected";
+        startCallTimer();
+    }
+}
 
         async function rejectIncomingCall() {
             if (!currentCallData) return;
@@ -1038,45 +1040,42 @@
             currentCallData = null;
         }
 
-        async function joinAgoraChannel(type) {
-            try {
-                if (localAudioTrack) {
-                    localAudioTrack.stop();
-                    localAudioTrack.close();
-                    localAudioTrack = null;
-                }
-                if (localVideoTrack) {
-                    localVideoTrack.stop();
-                    localVideoTrack.close();
-                    localVideoTrack = null;
-                }
-
-                const constraints = type === "video" ? { audio: true, video: true } : { audio: true };
-                const tempStream = await navigator.mediaDevices.getUserMedia(constraints);
-                tempStream.getTracks().forEach(track => track.stop());
-
-                if (client.connectionState !== "DISCONNECTED") {
-                    await client.leave();
-                }
-
-                await client.join(agoraOptions.appId, agoraOptions.channel, agoraOptions.token, agoraOptions.uid);
-
-                localAudioTrack = await AgoraRTC.createMicrophoneAudioTrack();
-                if (type === "video") {
-                    localVideoTrack = await AgoraRTC.createCameraVideoTrack();
-                    localVideoTrack.play("localVideoContainer");
-                    await client.publish([localAudioTrack, localVideoTrack]);
-                } else {
-                    await client.publish([localAudioTrack]);
-                }
-                return true;
-            } catch (error) {
-                console.error("Agora Error:", error);
-                alert("Device Error: " + error.message + "\nPlease make sure camera/mic permissions are allowed and no other app is using them.");
-                await endActiveCall();
-                return false;
-            }
+    async function joinAgoraChannel(type, channelName) {
+        try {
+        if (localAudioTrack) {
+            localAudioTrack.stop();
+            localAudioTrack.close();
+            localAudioTrack = null;
         }
+        if (localVideoTrack) {
+            localVideoTrack.stop();
+            localVideoTrack.close();
+            localVideoTrack = null;
+        }
+
+        if (client.connectionState !== "DISCONNECTED") {
+            await client.leave();
+        }
+
+        const targetChannel = channelName || agoraOptions.channel;
+        await client.join(agoraOptions.appId, targetChannel, agoraOptions.token, agoraOptions.uid);
+
+        localAudioTrack = await AgoraRTC.createMicrophoneAudioTrack();
+        if (type === "video") {
+            localVideoTrack = await AgoraRTC.createCameraVideoTrack();
+            localVideoTrack.play("localVideoContainer");
+            await client.publish([localAudioTrack, localVideoTrack]);
+        } else {
+            await client.publish([localAudioTrack]);
+        }
+        return true;
+    } catch (error) {
+        console.error("Agora Error:", error);
+        alert("Device Error: " + error.message + "\nPlease make sure camera/mic permissions are allowed and no other app is using them.");
+        await endActiveCall();
+        return false;
+    }
+}
 
         async function endActiveCall() {
             if (!currentCallData) {
