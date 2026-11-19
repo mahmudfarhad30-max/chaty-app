@@ -829,8 +829,10 @@
         }
 
         function getChatRoomId(user1, user2) {
-            return user1 < user2 ? `${user1}_${user2}` : `${user2}_${user1}`;
-        }
+    const u1 = String(user1 || "").trim().toLowerCase();
+    const u2 = String(user2 || "").trim().toLowerCase();
+    return u1 < u2 ? `${u1}_${u2}` : `${u2}_${u1}`;
+}
 
         function formatTime(timestamp) {
             if (!timestamp) return "";
@@ -993,26 +995,27 @@
 }
         
         function listenForIncomingCalls() {
-            db.ref('calls/' + currentUser).on('value', async (snapshot) => {
-                if (!snapshot.exists()) {
-                    document.getElementById('incomingCallModal').classList.remove('active');
-                    return;
-                }
-                const data = snapshot.val();
-                if (data.status === "ringing" && data.receiver === currentUser && !isCallInProgress) {
-                    currentCallData = data;
-                    document.getElementById('incomingCallerName').innerText = data.caller;
-                    document.getElementById('incomingCallerAvatar').innerText = data.caller.charAt(0).toUpperCase();
-                    document.getElementById('incomingCallType').innerText = data.type === 'video' ? "Incoming Video Call..." : "Incoming Audio Call...";
-                    document.getElementById('incomingCallModal').classList.add('active');
-                } else if (data.status === "ended") {
-                    document.getElementById('incomingCallModal').classList.remove('active');
-                    if (isCallInProgress) {
-                        await cleanupCall();
-                    }
-                }
-            });
+    if (!currentUser) return;
+    db.ref('calls/' + currentUser).on('value', async (snapshot) => {
+        if (!snapshot.exists()) {
+            document.getElementById('incomingCallModal').classList.remove('active');
+            return;
         }
+        const data = snapshot.val();
+        if (data.status === "ringing" && data.receiver === currentUser && !isCallInProgress) {
+            currentCallData = data;
+            document.getElementById('incomingCallerName').innerText = data.caller;
+            document.getElementById('incomingCallerAvatar').innerText = data.caller.charAt(0).toUpperCase();
+            document.getElementById('incomingCallType').innerText = data.type === 'video' ? "Incoming Video Call..." : "Incoming Audio Call...";
+            document.getElementById('incomingCallModal').classList.add('active');
+        } else if (data.status === "ended" || data.status === "rejected") {
+            document.getElementById('incomingCallModal').classList.remove('active');
+            if (isCallInProgress) {
+                await cleanupCall();
+            }
+        }
+    });
+}
         
    async function acceptIncomingCall() {
     if (!currentCallData || isCallInProgress) return;
