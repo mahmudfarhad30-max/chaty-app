@@ -1042,8 +1042,8 @@
             }, 1500);
             currentCallData = null;
         }      
-           
-     async function joinAgoraChannel(type, channelName) {
+          
+        async function joinAgoraChannel(type, channelName) {
     try {
         if (localAudioTrack) {
             localAudioTrack.stop();
@@ -1060,20 +1060,6 @@
             await client.leave();
         }
 
-        alert(
-    "Secure Context: " + window.isSecureContext +
-    "\nMediaDevices: " + !!navigator.mediaDevices +
-    "\nPermissions API: " + !!navigator.permissions
-);
-     
-    try {
-        
-    const testStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-    alert("MICROPHONE TEST: SUCCESS");
-    testStream.getTracks().forEach(track => track.stop());
-} catch (error) {
-    alert("MICROPHONE TEST FAILED: " + error.name + "\n" + error.message);
-}
         localAudioTrack = await AgoraRTC.createMicrophoneAudioTrack();
         if (type === "video") {
             localVideoTrack = await AgoraRTC.createCameraVideoTrack();
@@ -1096,7 +1082,7 @@
         return false;
     }
 }
-        
+     
         async function endActiveCall() {
             if (!currentCallData) {
                 await cleanupCall();
