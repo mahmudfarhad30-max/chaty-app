@@ -1065,8 +1065,10 @@
     "\nMediaDevices: " + !!navigator.mediaDevices +
     "\nPermissions API: " + !!navigator.permissions
 );
-      
-        try {
+     
+    try {
+     alert("BEFORE MICROPHONE REQUEST");
+        
     const testStream = await navigator.mediaDevices.getUserMedia({ audio: true });
     alert("MICROPHONE TEST: SUCCESS");
     testStream.getTracks().forEach(track => track.stop());
