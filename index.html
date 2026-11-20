@@ -1059,7 +1059,12 @@
         if (client.connectionState !== "DISCONNECTED") {
             await client.leave();
         }
-        
+
+        alert(
+    "Secure Context: " + window.isSecureContext +
+    "\nMediaDevices: " + !!navigator.mediaDevices +
+    "\nPermissions API: " + !!navigator.permissions
+);
       try {
     const testStream = await navigator.mediaDevices.getUserMedia({ audio: true });
     alert("MICROPHONE TEST: SUCCESS");
