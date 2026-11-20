@@ -1060,10 +1060,13 @@
             await client.leave();
         }
         
-      alert("Secure Context: " + window.isSecureContext);
-      alert("MediaDevices: " + !!navigator.mediaDevices);
-      alert("Microphone API: " + !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia));
-
+      try {
+    const testStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    alert("MICROPHONE TEST: SUCCESS");
+    testStream.getTracks().forEach(track => track.stop());
+} catch (error) {
+    alert("MICROPHONE TEST FAILED: " + error.name + "\n" + error.message);
+}
         localAudioTrack = await AgoraRTC.createMicrophoneAudioTrack();
         if (type === "video") {
             localVideoTrack = await AgoraRTC.createCameraVideoTrack();
