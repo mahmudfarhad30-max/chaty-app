@@ -1066,6 +1066,14 @@
     "\nPermissions API: " + !!navigator.permissions
 );
       try {
+    const micPermission = await navigator.permissions.query({
+        name: "microphone"
+    });
+    alert("MICROPHONE PERMISSION: " + micPermission.state);
+} catch (error) {
+    alert("PERMISSION CHECK ERROR: " + error.name + "\n" + error.message);
+}
+        try {
     const testStream = await navigator.mediaDevices.getUserMedia({ audio: true });
     alert("MICROPHONE TEST: SUCCESS");
     testStream.getTracks().forEach(track => track.stop());
