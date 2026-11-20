@@ -1043,7 +1043,8 @@
             currentCallData = null;
         }      
           
-        async function joinAgoraChannel(type, channelName) {
+        
+     async function joinAgoraChannel(type, channelName) {
     try {
         if (localAudioTrack) {
             localAudioTrack.stop();
@@ -1082,7 +1083,6 @@
         return false;
     }
 }
-     
         async function endActiveCall() {
             if (!currentCallData) {
                 await cleanupCall();
