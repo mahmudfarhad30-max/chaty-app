@@ -1060,7 +1060,9 @@
             await client.leave();
         }
         
-      alert("TEST 123 - CHATTY");
+      alert("Secure Context: " + window.isSecureContext);
+      alert("MediaDevices: " + !!navigator.mediaDevices);
+      alert("Microphone API: " + !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia));
 
         localAudioTrack = await AgoraRTC.createMicrophoneAudioTrack();
         if (type === "video") {
