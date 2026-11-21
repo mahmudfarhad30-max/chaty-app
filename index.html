@@ -10,7 +10,6 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://download.agora.io/sdk/release/AgoraRTC_N-4.17.0.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
 
     <style>
         :root {
@@ -198,7 +197,7 @@
             gap: 12px;
         }
 
-        .friend-item:hover {
+.friend-item:hover {
             background: #202c33;
         }
 
@@ -261,20 +260,9 @@
             color: var(--text-secondary);
         }
 
-        .tick.delivered { color: var(--text-secondary); }
-        .tick.seen { color: #53bdeb; }
-        .unread-badge {
-            margin-left: auto; min-width: 22px; height: 22px; padding: 0 6px;
-            border-radius: 12px; background: #00a884; color: #fff;
-            display: inline-flex; align-items: center; justify-content: center;
-            font-size: 11px; font-weight: bold;
+        .tick.seen {
+            color: #53bdeb;
         }
-        .friend-main { flex: 1; min-width: 0; }
-        .friend-preview { color: var(--text-secondary); font-size: 12px; margin-top: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .voice-message { display: flex; flex-direction: column; gap: 6px; min-width: 190px; }
-        .voice-message audio { width: 100%; max-width: 250px; height: 36px; }
-        .recording-indicator { color: #ff6b6b; font-size: 12px; min-width: 48px; text-align: center; }
-        .recording-active { background: #ef4444 !important; }
 
         .chat-input-area {
             background: var(--bg-header);
@@ -505,7 +493,7 @@
             <div class="avatar" id="chatHeaderAvatar">U</div>
             <div style="flex: 1;">
                 <div id="chatTargetName" style="font-weight: bold; font-size: 15px;">Chat</div>
-                <div id="chatPresenceStatus" style="font-size: 11px; color: var(--text-secondary);">offline</div>
+                <div style="font-size: 11px; color: var(--accent);">online</div>
             </div>
             <button class="action-icon-btn" onclick="initiateCall('audio')" title="Audio Call">📞</button>
             <button class="action-icon-btn" onclick="initiateCall('video')" title="Video Call">📹</button>
@@ -516,8 +504,6 @@
             <input type="file" id="imageInput" accept="image/*" style="display: none;" onchange="handleImageUpload(event)">
             
             <input type="text" id="messageInput" class="message-input" placeholder="Type a message..." onkeypress="handleMessageEnter(event)">
-            <span id="recordingTimer" class="recording-indicator"></span>
-            <button class="send-btn" id="voiceRecordBtn" onclick="toggleVoiceRecording()" title="Record voice message">🎤</button>
             <button class="send-btn" onclick="sendMessage()" title="Send">➤</button>
         </div>
     </div>
@@ -608,18 +594,8 @@
             firebase.initializeApp(firebaseConfig);
         }
         const db = firebase.database();
-        const storage = firebase.storage();
 
         let currentUser = localStorage.getItem('chatty_current_user');
-        let activeContactOnline = false;
-        let currentMessagesRef = null;
-        let currentMessagesSnapshot = null;
-        let currentPresenceRef = null;
-        let voiceRecorder = null;
-        let voiceChunks = [];
-        let voiceStartedAt = 0;
-        let voiceTimerInterval = null;
-        let remoteAudioTrack = null;
 
         window.onload = function() {
             if (currentUser) {
@@ -688,7 +664,6 @@
             document.getElementById('homeScreen').classList.add('active');
             loadUserProfile();
             loadFriendList();
-            setUserOnlinePresence();
             listenForIncomingCalls();
         }
 
@@ -757,36 +732,9 @@
 
         function logoutUser() {
             if (confirm("Are you sure you want to logout?")) {
-                if (currentUser) db.ref('status/' + currentUser).set({ state: 'offline', lastChanged: firebase.database.ServerValue.TIMESTAMP });
                 localStorage.removeItem('chatty_current_user');
                 location.reload();
             }
-        }
-
-        function setUserOnlinePresence() {
-            if (!currentUser) return;
-            const connectedRef = db.ref('.info/connected');
-            connectedRef.on('value', (snapshot) => {
-                if (snapshot.val() === true) {
-                    const statusRef = db.ref('status/' + currentUser);
-                    statusRef.onDisconnect().set({ state: 'offline', lastChanged: firebase.database.ServerValue.TIMESTAMP });
-                    statusRef.set({ state: 'online', lastChanged: firebase.database.ServerValue.TIMESTAMP });
-                }
-            });
-        }
-
-        function watchContactPresence(contactId) {
-            if (currentPresenceRef) currentPresenceRef.off();
-            currentPresenceRef = db.ref('status/' + contactId);
-            currentPresenceRef.on('value', (snapshot) => {
-                activeContactOnline = !!(snapshot.exists() && snapshot.val().state === 'online');
-                const statusEl = document.getElementById('chatPresenceStatus');
-                if (statusEl) {
-                    statusEl.innerText = activeContactOnline ? 'online' : 'offline';
-                    statusEl.style.color = activeContactOnline ? 'var(--accent)' : 'var(--text-secondary)';
-                }
-                if (currentMessagesSnapshot) renderMessages(currentMessagesSnapshot);
-            });
         }
 
         function shareAppMenu() {
@@ -836,15 +784,14 @@
                 const roomId = getChatRoomId(currentUser, activeChatContact);
                 const messageData = {
                     sender: currentUser,
-                    receiver: activeChatContact,
-                    type: 'image',
-                    text: imageUrl,
+                    text: `<img src="${imageUrl}" style="max-width:100%; border-radius:8px;">`,
                     timestamp: Date.now(),
                     status: "sent"
                 };
 
                 db.ref('chats/' + roomId).push(messageData);
-                updateChatSummary(currentUser, activeChatContact, 'Photo', messageData.timestamp, true);
+                db.ref('user-chats/' + currentUser + '/' + activeChatContact).set({ contact: activeChatContact });
+                db.ref('user-chats/' + activeChatContact + '/' + currentUser).set({ contact: currentUser });
             };
             reader.readAsDataURL(file);
         }
@@ -855,8 +802,6 @@
             document.getElementById('chatScreen').classList.remove('active');
             document.getElementById('homeScreen').classList.add('active');
             activeChatContact = null;
-            if (currentPresenceRef) { currentPresenceRef.off(); currentPresenceRef = null; }
-            activeContactOnline = false;
             loadFriendList();
         }
 
@@ -867,8 +812,6 @@
             document.getElementById('chatScreen').classList.add('active');
             document.getElementById('chatTargetName').innerText = contactId;
             document.getElementById('chatHeaderAvatar').innerText = contactId.charAt(0).toUpperCase();
-            watchContactPresence(contactId);
-            db.ref('user-chats/' + currentUser + '/' + contactId + '/unreadCount').set(0);
             loadMessages();
         }
 
@@ -897,191 +840,83 @@
             return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
         }
 
-        function updateChatSummary(sender, receiver, messageText, timestamp, unreadForReceiver) {
-            const preview = String(messageText || '').replace(/<[^>]*>/g, '').slice(0, 70);
-            db.ref('user-chats/' + sender + '/' + receiver).update({
-                contact: receiver, lastMessage: preview, lastMessageAt: timestamp
-            });
-            const receiverRef = db.ref('user-chats/' + receiver + '/' + sender);
-            receiverRef.update({ contact: sender, lastMessage: preview, lastMessageAt: timestamp });
-            if (unreadForReceiver) {
-                receiverRef.child('unreadCount').transaction(value => (Number(value) || 0) + 1);
-            }
-        }
-
         function sendMessage() {
             const input = document.getElementById('messageInput');
             const text = input.value.trim();
             if (!text || !activeChatContact) return;
+
             const roomId = getChatRoomId(currentUser, activeChatContact);
-            const timestamp = Date.now();
             const messageData = {
-                sender: currentUser, receiver: activeChatContact, text: text,
-                timestamp: timestamp, status: 'sent', type: 'text'
+                sender: currentUser,
+                text: text,
+                timestamp: Date.now(),
+                status: "sent"
             };
+
             db.ref('chats/' + roomId).push(messageData);
-            updateChatSummary(currentUser, activeChatContact, text, timestamp, true);
-            input.value = '';
+            db.ref('user-chats/' + currentUser + '/' + activeChatContact).set({ contact: activeChatContact });
+            db.ref('user-chats/' + activeChatContact + '/' + currentUser).set({ contact: currentUser });
+
+            input.value = "";
         }
 
         function handleMessageEnter(e) {
             if (e.key === 'Enter') sendMessage();
         }
 
-        function renderMessages(snapshot) {
-            const container = document.getElementById('chatMessagesContainer');
-            if (!container) return;
-            container.innerHTML = '';
-            if (!snapshot || !snapshot.exists()) {
-                container.innerHTML = `<div style="text-align:center;color:var(--text-secondary);margin-top:20px;">No messages yet. Start chatting!</div>`;
-                return;
-            }
-            snapshot.forEach((child) => {
-                const msg = child.val();
-                const isSent = msg.sender === currentUser;
-                const div = document.createElement('div');
-                div.className = `msg ${isSent ? 'sent' : 'received'}`;
-                let contentHTML = '';
-                if (msg.type === 'audio' && msg.audioUrl) {
-                    contentHTML = `<div class="voice-message"><audio controls preload="none" src="${msg.audioUrl}"></audio><small>Voice message</small></div>`;
-                } else if (msg.type === 'image' && msg.text) {
-                    contentHTML = `<img src="${msg.text}" style="max-width:100%;border-radius:8px;">`;
-                } else {
-                    const content = document.createElement('div');
-                    content.textContent = msg.text || '';
-                    contentHTML = content.outerHTML;
-                }
-                let tickHTML = '';
-                if (isSent) {
-                    const read = msg.status === 'read';
-                    const delivered = msg.status === 'delivered' || msg.status === 'read' || activeContactOnline;
-                    tickHTML = read
-                        ? `<span class="tick seen">✓✓</span>`
-                        : delivered ? `<span class="tick delivered">✓✓</span>` : `<span class="tick">✓</span>`;
-                }
-                div.innerHTML = `${contentHTML}<div class="msg-footer"><span>${formatTime(msg.timestamp)}</span>${tickHTML}</div>`;
-                container.appendChild(div);
-            });
-            container.scrollTop = container.scrollHeight;
-        }
-
         function loadMessages() {
             if (!activeChatContact) return;
             const roomId = getChatRoomId(currentUser, activeChatContact);
-            if (currentMessagesRef) currentMessagesRef.off();
-            currentMessagesRef = db.ref('chats/' + roomId);
-            currentMessagesRef.on('value', (snapshot) => {
-                currentMessagesSnapshot = snapshot;
-                // Mark messages from the other person as read while this chat is open.
-                let hasIncomingMessage = false;
+            const container = document.getElementById('chatMessagesContainer');
+
+            db.ref('chats/' + roomId).on('value', (snapshot) => {
+                container.innerHTML = "";
+                if (!snapshot.exists()) {
+                    container.innerHTML = `<div style="text-align: center; color: var(--text-secondary); margin-top: 20px;">No messages yet. Start chatting!</div>`;
+                    return;
+                }
                 snapshot.forEach((child) => {
                     const msg = child.val();
-                    if (msg.sender !== currentUser) {
-                        hasIncomingMessage = true;
-                        if (msg.status !== 'read') child.ref.update({ status: 'read' });
-                    } else if (activeContactOnline && msg.status === 'sent') {
-                        child.ref.update({ status: 'delivered' });
+                    const isSent = msg.sender === currentUser;
+                    const div = document.createElement('div');
+                    div.className = `msg ${isSent ? 'sent' : 'received'}`;
+                    
+                    let tickHTML = "";
+                    if (isSent) {
+                        tickHTML = `<span class="tick">✓</span>`;
                     }
+
+                    div.innerHTML = `
+                        <div>${msg.text}</div>
+                        <div class="msg-footer">
+                            <span>${formatTime(msg.timestamp)}</span>
+                            ${tickHTML}
+                        </div>
+                    `;
+                    container.appendChild(div);
                 });
-                if (hasIncomingMessage && activeChatContact) {
-                    db.ref('user-chats/' + currentUser + '/' + activeChatContact + '/unreadCount').set(0);
-                }
-                renderMessages(snapshot);
+                container.scrollTop = container.scrollHeight;
             });
         }
 
         function loadFriendList() {
             const container = document.getElementById('friendListContainer');
             db.ref('user-chats/' + currentUser).on('value', (snapshot) => {
-                container.innerHTML = '';
+                container.innerHTML = "";
                 if (!snapshot.exists()) {
-                    container.innerHTML = `<div style="padding:30px;text-align:center;color:var(--text-secondary);">No chats yet. Search a user ID or import contacts!</div>`;
+                    container.innerHTML = `<div style="padding: 30px; text-align: center; color: var(--text-secondary);">No chats yet. Search a user ID or import contacts!</div>`;
                     return;
                 }
-                const chats = [];
-                snapshot.forEach(child => {
-                    const data = child.val() || {};
-                    chats.push({ contact: data.contact || child.key, lastMessage: data.lastMessage || '', lastMessageAt: Number(data.lastMessageAt) || 0, unreadCount: Number(data.unreadCount) || 0 });
-                });
-                chats.sort((a, b) => b.lastMessageAt - a.lastMessageAt);
-                chats.forEach(chat => {
+                const chats = snapshot.val();
+                for (let id in chats) {
+                    const contact = chats[id].contact;
                     const item = document.createElement('div');
                     item.className = 'friend-item';
-                    const avatar = document.createElement('div');
-                    avatar.className = 'avatar';
-                    avatar.textContent = chat.contact.charAt(0).toUpperCase();
-                    const main = document.createElement('div');
-                    main.className = 'friend-main';
-                    const name = document.createElement('div');
-                    name.style.fontWeight = 'bold';
-                    name.textContent = chat.contact;
-                    const preview = document.createElement('div');
-                    preview.className = 'friend-preview';
-                    preview.textContent = chat.lastMessage || 'Start chatting';
-                    main.append(name, preview);
-                    item.append(avatar, main);
-                    if (chat.unreadCount > 0) {
-                        const badge = document.createElement('span');
-                        badge.className = 'unread-badge';
-                        badge.textContent = chat.unreadCount > 99 ? '99+' : String(chat.unreadCount);
-                        item.appendChild(badge);
-                    }
-                    item.onclick = () => openChat(chat.contact);
+                    item.innerHTML = `<div class="avatar">${contact.charAt(0).toUpperCase()}</div><div style="font-weight: bold;">${contact}</div>`;
+                    item.onclick = () => openChat(contact);
                     container.appendChild(item);
-                });
+                }
             });
-        }
-
-        async function toggleVoiceRecording() {
-            const btn = document.getElementById('voiceRecordBtn');
-            if (voiceRecorder && voiceRecorder.state === 'recording') {
-                voiceRecorder.stop();
-                return;
-            }
-            if (!activeChatContact) return;
-            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia || !window.MediaRecorder) {
-                alert('Voice recording is not supported in this browser.');
-                return;
-            }
-            try {
-                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                voiceChunks = [];
-                voiceRecorder = new MediaRecorder(stream);
-                voiceRecorder.ondataavailable = event => { if (event.data && event.data.size) voiceChunks.push(event.data); };
-                voiceRecorder.onstop = async () => {
-                    clearInterval(voiceTimerInterval);
-                    document.getElementById('recordingTimer').textContent = '';
-                    btn.classList.remove('recording-active');
-                    btn.textContent = '🎤';
-                    stream.getTracks().forEach(track => track.stop());
-                    const duration = Math.max(1, Math.round((Date.now() - voiceStartedAt) / 1000));
-                    const blob = new Blob(voiceChunks, { type: voiceRecorder.mimeType || 'audio/webm' });
-                    if (!blob.size) return;
-                    try {
-                        const roomId = getChatRoomId(currentUser, activeChatContact);
-                        const fileName = 'voice_' + Date.now() + '.webm';
-                        const uploadRef = storage.ref('chat-audio/' + roomId + '/' + fileName);
-                        const upload = await uploadRef.put(blob);
-                        const audioUrl = await upload.ref.getDownloadURL();
-                        const timestamp = Date.now();
-                        db.ref('chats/' + roomId).push({ sender: currentUser, receiver: activeChatContact, type: 'audio', audioUrl, duration, timestamp, status: 'sent' });
-                        updateChatSummary(currentUser, activeChatContact, 'Voice message', timestamp, true);
-                    } catch (uploadError) {
-                        console.error(uploadError);
-                        alert('Voice upload failed. Check Firebase Storage setup and rules.');
-                    }
-                };
-                voiceStartedAt = Date.now();
-                voiceRecorder.start();
-                btn.classList.add('recording-active');
-                btn.textContent = '■';
-                voiceTimerInterval = setInterval(() => {
-                    const seconds = Math.floor((Date.now() - voiceStartedAt) / 1000);
-                    document.getElementById('recordingTimer').textContent = `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, '0')}`;
-                }, 500);
-            } catch (error) {
-                alert('Microphone permission denied: ' + error.name);
-            }
         }
 
         const client = AgoraRTC.createClient({ mode: "rtc", codec: "vp8" });
@@ -1108,7 +943,6 @@
                 user.videoTrack.play("remoteVideoContainer");
             }
             if (mediaType === "audio") {
-                remoteAudioTrack = user.audioTrack;
                 user.audioTrack.play();
             }
         });
@@ -1117,7 +951,6 @@
             if (mediaType === "video") {
                 document.getElementById("remoteVideoContainer").innerHTML = "";
             }
-            if (mediaType === "audio") remoteAudioTrack = null;
         });
 
     async function initiateCall(type) {
@@ -1184,7 +1017,7 @@
         }
     });
 }
-        
+  
    async function acceptIncomingCall() {
     if (!currentCallData || isCallInProgress) return;
     isCallInProgress = true;
@@ -1361,7 +1194,6 @@
             document.getElementById('activeCallScreen').classList.remove('active');
             document.getElementById('incomingCallModal').classList.remove('active');
             currentCallData = null;
-            remoteAudioTrack = null;
         }
     </script>
 </body>
