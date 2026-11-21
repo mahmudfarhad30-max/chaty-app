@@ -16,7 +16,8 @@
             --bg-main: #111b21;
             --bg-header: #202c33;
             --bg-input: #2a3942;
-            --accent: #008884;
+            --accent: #00a884;
+            --accent-dark: #008884;
             --msg-sent: #005c4b;
             --msg-received: #202c33;
             --text-primary: #e9edef;
@@ -68,7 +69,7 @@
 
         .auth-title {
             text-align: center;
-            color: var(--accent);
+            color: var(--accent-dark);
             font-size: 28px;
             font-weight: bold;
             margin-bottom: 20px;
@@ -84,11 +85,11 @@
         }
 
         .form-control:focus {
-            border-color: var(--accent);
+            border-color: var(--accent-dark);
         }
 
         .btn-primary-custom {
-            background: var(--accent);
+            background: var(--accent-dark);
             color: white;
             border: none;
             padding: 12px;
@@ -100,7 +101,7 @@
         }
 
         .link-text {
-            color: var(--accent);
+            color: var(--accent-dark);
             cursor: pointer;
             font-weight: bold;
             text-align: center;
@@ -120,7 +121,7 @@
             width: 42px;
             height: 42px;
             border-radius: 50%;
-            background: var(--accent);
+            background: var(--accent-dark);
             color: #fff;
             display: flex;
             align-items: center;
@@ -201,6 +202,67 @@
             background: #202c33;
         }
 
+        .friend-meta {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .friend-top-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 3px;
+        }
+
+        .friend-name {
+            font-weight: bold;
+            font-size: 15px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .friend-time {
+            font-size: 11px;
+            color: var(--text-secondary);
+        }
+
+        .friend-time.unread {
+            color: var(--accent);
+            font-weight: bold;
+        }
+
+        .friend-bottom-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .friend-last-msg {
+            font-size: 13px;
+            color: var(--text-secondary);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            flex: 1;
+        }
+
+        .unread-badge {
+            background: var(--accent);
+            color: #0b141a;
+            font-size: 11px;
+            font-weight: bold;
+            min-width: 20px;
+            height: 20px;
+            padding: 0 6px;
+            border-radius: 999px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
         .chat-screen {
             background: #0b141a;
         }
@@ -224,7 +286,7 @@
         }
 
         .msg {
-            max-width: 75%;
+            max-width: 78%;
             padding: 9px 13px;
             border-radius: 8px;
             font-size: 14px;
@@ -251,25 +313,43 @@
             display: flex;
             align-items: center;
             justify-content: flex-end;
-            gap: 3px;
+            gap: 4px;
         }
 
         .tick {
-            font-size: 12px;
+            font-size: 13px;
             font-weight: bold;
-            color: var(--text-secondary);
+            color: #8696a0;
+            letter-spacing: -2px;
+            transition: color 0.2s ease;
+        }
+
+        .tick.delivered {
+            color: #b0bec5;
         }
 
         .tick.seen {
             color: #53bdeb;
         }
 
-        .chat-input-area {
-            background: var(--bg-header);
-            padding: 10px 10px;
+        .voice-note-box {
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 8px;
+            min-width: 190px;
+        }
+
+        .voice-note-box audio {
+            height: 32px;
+            max-width: 210px;
+        }
+
+        .chat-input-area {
+            background: var(--bg-header);
+            padding: 8px 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
             flex-shrink: 0;
             width: 100%;
         }
@@ -279,25 +359,52 @@
             background: var(--bg-input);
             border: none;
             padding: 10px 14px;
-            border-radius: 8px;
+            border-radius: 20px;
             color: var(--text-primary);
             outline: none;
             font-size: 14px;
         }
 
-        .send-btn, .attachment-btn {
+        .send-btn, .attachment-btn, .mic-btn {
             background: var(--accent);
             border: none;
-            color: white;
-            width: 40px;
-            height: 40px;
+            color: #0b141a;
+            width: 42px;
+            height: 42px;
             border-radius: 50%;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 16px;
+            font-size: 17px;
+            font-weight: bold;
             flex-shrink: 0;
+        }
+
+        .attachment-btn {
+            background: transparent;
+            color: var(--text-secondary);
+            width: 36px;
+            height: 36px;
+        }
+
+        .mic-btn.recording {
+            background: #ef4444;
+            color: #fff;
+            animation: pulseRecord 1s infinite;
+        }
+
+        @keyframes pulseRecord {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.08); }
+            100% { transform: scale(1); }
+        }
+
+        .recording-indicator {
+            font-size: 12px;
+            color: #ef4444;
+            font-weight: bold;
+            padding: 0 6px;
         }
 
         .imo-menu {
@@ -378,6 +485,72 @@
             gap: 12px;
         }
 
+        .perm-modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.78);
+            justify-content: center;
+            align-items: center;
+            z-index: 4000;
+            padding: 20px;
+        }
+
+        .perm-modal.active {
+            display: flex;
+        }
+
+        .perm-card {
+            background: #202c33;
+            color: #e9edef;
+            width: 100%;
+            max-width: 340px;
+            border-radius: 14px;
+            padding: 22px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .perm-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #ffffff;
+        }
+
+        .perm-desc {
+            font-size: 13px;
+            line-height: 1.5;
+            color: #b0bec5;
+        }
+
+        .perm-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            margin-top: 6px;
+        }
+
+        .perm-btn {
+            border: none;
+            border-radius: 8px;
+            padding: 10px 18px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .perm-btn-cancel {
+            background: #2a3942;
+            color: #e9edef;
+        }
+
+        .perm-btn-ok {
+            background: var(--accent);
+            color: #0b141a;
+        }
+
         .call-overlay {
             display: none;
             position: fixed;
@@ -397,7 +570,7 @@
         .video-grid {
             position: relative;
             width: 100%;
-            height: 75%;
+            height: 70%;
             background: #000;
             border-radius: 12px;
             overflow: hidden;
@@ -426,10 +599,11 @@
 
         .call-controls {
             display: flex;
-            gap: 20px;
+            gap: 18px;
             align-items: center;
             justify-content: center;
             z-index: 20;
+            flex-wrap: wrap;
         }
 
         .call-btn {
@@ -438,19 +612,47 @@
             border-radius: 50%;
             border: none;
             color: white;
-            font-size: 22px;
+            font-size: 20px;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
         }
 
+        .call-btn-label {
+            font-size: 11px;
+            color: var(--text-secondary);
+            text-align: center;
+            margin-top: 5px;
+        }
+
+        .call-action-group {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
         .btn-accept { background: #22c55e; }
         .btn-reject, .btn-end { background: #ef4444; }
         .btn-mute { background: #2a3942; }
+        .btn-speaker { background: #2a3942; }
+        .btn-speaker.active-mode { background: var(--accent); color: #0b141a; }
     </style>
 </head>
 <body>
+
+    <div id="mediaPermissionModal" class="perm-modal">
+        <div class="perm-card" onclick="event.stopPropagation()">
+            <div class="perm-title">Microphone & Camera Permission</div>
+            <div class="perm-desc">
+                Chatty requests access to your microphone and camera for voice notes, audio calls, and video calls.
+            </div>
+            <div class="perm-actions">
+                <button class="perm-btn perm-btn-cancel" onclick="handlePermissionChoice(false)">Cancel</button>
+                <button class="perm-btn perm-btn-ok" onclick="handlePermissionChoice(true)">OK</button>
+            </div>
+        </div>
+    </div>
 
     <div id="loginScreen" class="screen auth-container active">
         <div class="auth-card">
@@ -493,7 +695,7 @@
             <div class="avatar" id="chatHeaderAvatar">U</div>
             <div style="flex: 1;">
                 <div id="chatTargetName" style="font-weight: bold; font-size: 15px;">Chat</div>
-                <div style="font-size: 11px; color: var(--accent);">online</div>
+                <div id="chatTargetStatus" style="font-size: 11px; color: var(--text-secondary);">offline</div>
             </div>
             <button class="action-icon-btn" onclick="initiateCall('audio')" title="Audio Call">📞</button>
             <button class="action-icon-btn" onclick="initiateCall('video')" title="Video Call">📹</button>
@@ -502,9 +704,12 @@
         <div class="chat-input-area">
             <button class="attachment-btn" onclick="openGallery()" title="Attach Image">📎</button>
             <input type="file" id="imageInput" accept="image/*" style="display: none;" onchange="handleImageUpload(event)">
-            
-            <input type="text" id="messageInput" class="message-input" placeholder="Type a message..." onkeypress="handleMessageEnter(event)">
-            <button class="send-btn" onclick="sendMessage()" title="Send">➤</button>
+
+            <input type="text" id="messageInput" class="message-input" placeholder="Message" oninput="toggleInputActionBtn()" onkeypress="handleMessageEnter(event)">
+            <span id="recordingTimer" class="recording-indicator" style="display: none;">00:00</span>
+
+            <button id="micActionBtn" class="mic-btn" onclick="toggleVoiceRecording()" title="Record Voice">🎤</button>
+            <button id="sendActionBtn" class="send-btn" style="display: none;" onclick="sendMessage()" title="Send">➤</button>
         </div>
     </div>
 
@@ -515,8 +720,14 @@
             <p id="incomingCallType" style="color: var(--accent); font-size: 15px;">Incoming Call...</p>
         </div>
         <div class="call-controls" style="gap: 40px;">
-            <button class="call-btn btn-reject" onclick="rejectIncomingCall()" title="Decline">✖</button>
-            <button class="call-btn btn-accept" onclick="acceptIncomingCall()" title="Accept">📞</button>
+            <div class="call-action-group">
+                <button class="call-btn btn-reject" onclick="rejectIncomingCall()" title="Decline">✖</button>
+                <span class="call-btn-label">Decline</span>
+            </div>
+            <div class="call-action-group">
+                <button class="call-btn btn-accept" onclick="acceptIncomingCall()" title="Accept">📞</button>
+                <span class="call-btn-label">Accept</span>
+            </div>
         </div>
     </div>
 
@@ -536,8 +747,20 @@
         </div>
 
         <div class="call-controls">
-            <button class="call-btn btn-mute" id="muteAudioBtn" onclick="toggleMuteAudio()" title="Mute/Unmute">🎤</button>
-            <button class="call-btn btn-end" onclick="endActiveCall()" title="End Call">📵</button>
+            <div class="call-action-group">
+                <button class="call-btn btn-speaker" id="speakerToggleBtn" onclick="toggleSpeakerMode()" title="Speaker / Earpiece">🔊</button>
+                <span class="call-btn-label" id="speakerModeLabel">Speaker</span>
+            </div>
+
+            <div class="call-action-group">
+                <button class="call-btn btn-mute" id="muteAudioBtn" onclick="toggleMuteAudio()" title="Mic On/Off">🎤</button>
+                <span class="call-btn-label" id="micModeLabel">Mic On</span>
+            </div>
+
+            <div class="call-action-group">
+                <button class="call-btn btn-end" onclick="endActiveCall()" title="End Call">📵</button>
+                <span class="call-btn-label">End</span>
+            </div>
         </div>
     </div>
 
@@ -548,7 +771,7 @@
                 <div id="menuUsername" style="font-weight: bold; font-size: 16px;">User</div>
                 <div style="font-size: 12px; color: var(--text-secondary);" id="menuUserEmail">email@gmail.com</div>
             </div>
-            
+
             <button class="imo-menu-btn" onclick="shareAppMenu()">🔗 Share App</button>
             <button class="imo-menu-btn" onclick="openSettingsModal()">⚙️ Settings & Profile</button>
             <button class="imo-menu-btn" onclick="openPremiumModal()">⭐ Premium Login / Features</button>
@@ -560,11 +783,11 @@
         <div class="sub-modal-content">
             <h3>Profile & Settings</h3>
             <label style="font-size: 12px; color: var(--text-secondary);">Display Name:</label>
-            <input type="text" id="editName" class="message-input" style="width: 100%; background: var(--bg-main);">
+            <input type="text" id="editName" class="message-input" style="width: 100%; background: var(--bg-main); border-radius: 8px;">
             <label style="font-size: 12px; color: var(--text-secondary);">Address / Bio:</label>
-            <input type="text" id="editAddress" class="message-input" style="width: 100%; background: var(--bg-main);">
+            <input type="text" id="editAddress" class="message-input" style="width: 100%; background: var(--bg-main); border-radius: 8px;">
             <label style="font-size: 12px; color: var(--text-secondary);">Profile Picture URL:</label>
-            <input type="text" id="editPicUrl" class="message-input" style="width: 100%; background: var(--bg-main);">
+            <input type="text" id="editPicUrl" class="message-input" style="width: 100%; background: var(--bg-main); border-radius: 8px;">
             <button class="btn-primary-custom" style="height: 45px;" onclick="saveProfileSettings()">Save Changes</button>
             <button class="btn-primary-custom" style="height: 45px; background: #555;" onclick="closeSettingsModal()">Cancel</button>
         </div>
@@ -596,8 +819,154 @@
         const db = firebase.database();
 
         let currentUser = localStorage.getItem('chatty_current_user');
+        let activeChatContact = null;
+        let messagesRefListener = null;
+        let targetStatusListener = null;
+        let friendListListener = null;
+        let incomingCallListener = null;
+        let unreadWatchers = {};
+        let hasPromptedInitialMedia = false;
+
+        // Ringtone & Notification state
+        let ringtoneCtx = null;
+        let ringtoneInterval = null;
+        let isRingingSoundActive = false;
+        let lastNotifiedMsgKey = null;
+
+        function openInitialMediaPermissionModal() {
+            if (hasPromptedInitialMedia) return;
+            hasPromptedInitialMedia = true;
+            document.getElementById('mediaPermissionModal').classList.add('active');
+        }
+
+        async function handlePermissionChoice(isOk) {
+            document.getElementById('mediaPermissionModal').classList.remove('active');
+            if (!isOk) return;
+
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                alert("Microphone/Camera API is not available in this browser.");
+                return;
+            }
+
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: true });
+                stream.getTracks().forEach(track => track.stop());
+            } catch (err) {
+                try {
+                    const audioOnlyStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    audioOnlyStream.getTracks().forEach(track => track.stop());
+                } catch (audioErr) {
+                    console.warn("Permission prompt dismissed or denied:", audioErr);
+                }
+            }
+        }
+
+        function requestNotificationPermission() {
+            if ("Notification" in window && Notification.permission === "default") {
+                Notification.requestPermission().catch(() => {});
+            }
+        }
+
+        function triggerSystemNotification(title, body, onClickAction) {
+            if (!("Notification" in window) || Notification.permission !== "granted") return;
+            try {
+                const n = new Notification(title, {
+                    body: body,
+                    icon: "icon-192.png",
+                    tag: title,
+                    renotify: true
+                });
+                n.onclick = function() {
+                    window.focus();
+                    if (typeof onClickAction === "function") onClickAction();
+                    n.close();
+                };
+            } catch (e) {
+                console.warn("Notification error:", e);
+            }
+        }
+
+        function startRingtone() {
+            if (isRingingSoundActive) return;
+            isRingingSoundActive = true;
+            try {
+                const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                ringtoneCtx = new AudioCtx();
+                const playToneBurst = () => {
+                    if (!isRingingSoundActive || !ringtoneCtx) return;
+                    const now = ringtoneCtx.currentTime;
+                    const osc = ringtoneCtx.createOscillator();
+                    const gain = ringtoneCtx.createGain();
+                    osc.type = "sine";
+                    osc.frequency.setValueAtTime(587.33, now);
+                    osc.frequency.setValueAtTime(783.99, now + 0.18);
+                    gain.gain.setValueAtTime(0.001, now);
+                    gain.gain.exponentialRampToValueAtTime(0.15, now + 0.05);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.45);
+                    osc.connect(gain);
+                    gain.connect(ringtoneCtx.destination);
+                    osc.start(now);
+                    osc.stop(now + 0.46);
+                };
+                playToneBurst();
+                ringtoneInterval = setInterval(playToneBurst, 1200);
+            } catch (err) {
+                console.warn("Ringtone audio error:", err);
+            }
+        }
+
+        function stopRingtone() {
+            isRingingSoundActive = false;
+            if (ringtoneInterval) {
+                clearInterval(ringtoneInterval);
+                ringtoneInterval = null;
+            }
+            if (ringtoneCtx) {
+                ringtoneCtx.close().catch(() => {});
+                ringtoneCtx = null;
+            }
+        }
+
+        function setupPresenceSystem() {
+            if (!currentUser) return;
+            const userStatusRef = db.ref('status/' + currentUser);
+            const connectedRef = db.ref('.info/connected');
+
+            const setOnline = () => {
+                userStatusRef.set({
+                    state: "online",
+                    lastChanged: firebase.database.ServerValue.TIMESTAMP
+                });
+            };
+
+            connectedRef.on('value', (snap) => {
+                if (snap.val() === true) {
+                    userStatusRef.onDisconnect().set({
+                        state: "offline",
+                        lastChanged: firebase.database.ServerValue.TIMESTAMP
+                    }).then(setOnline);
+                }
+            });
+
+            document.addEventListener("visibilitychange", () => {
+                if (!currentUser) return;
+                if (document.visibilityState === "visible") {
+                    setOnline();
+                    if (activeChatContact) {
+                        markMessagesAsSeen(activeChatContact);
+                    }
+                } else {
+                    userStatusRef.update({
+                        state: "offline",
+                        lastChanged: firebase.database.ServerValue.TIMESTAMP
+                    });
+                }
+            });
+        }
 
         window.onload = function() {
+            requestNotificationPermission();
+            openInitialMediaPermissionModal();
             if (currentUser) {
                 showHomeScreen();
             }
@@ -662,6 +1031,9 @@
             document.getElementById('loginScreen').classList.remove('active');
             document.getElementById('registerScreen').classList.remove('active');
             document.getElementById('homeScreen').classList.add('active');
+            requestNotificationPermission();
+            openInitialMediaPermissionModal();
+            setupPresenceSystem();
             loadUserProfile();
             loadFriendList();
             listenForIncomingCalls();
@@ -684,7 +1056,7 @@
                         document.getElementById('headerAvatar').innerText = name.charAt(0).toUpperCase();
                         document.getElementById('menuAvatar').innerText = name.charAt(0).toUpperCase();
                     }
-                    
+
                     document.getElementById('editName').value = data.name || "";
                     document.getElementById('editAddress').value = data.address || "";
                     document.getElementById('editPicUrl').value = data.pic || "";
@@ -696,7 +1068,7 @@
             document.getElementById('imoMenu').classList.add('active');
         }
 
-        function closeImoMenu(event) {
+        function closeImoMenu() {
             document.getElementById('imoMenu').classList.remove('active');
         }
 
@@ -732,6 +1104,13 @@
 
         function logoutUser() {
             if (confirm("Are you sure you want to logout?")) {
+                stopRingtone();
+                if (currentUser) {
+                    db.ref('status/' + currentUser).set({
+                        state: "offline",
+                        lastChanged: firebase.database.ServerValue.TIMESTAMP
+                    });
+                }
                 localStorage.removeItem('chatty_current_user');
                 location.reload();
             }
@@ -781,28 +1160,39 @@
             const reader = new FileReader();
             reader.onload = function(e) {
                 const imageUrl = e.target.result;
-                const roomId = getChatRoomId(currentUser, activeChatContact);
-                const messageData = {
-                    sender: currentUser,
-                    text: `<img src="${imageUrl}" style="max-width:100%; border-radius:8px;">`,
-                    timestamp: Date.now(),
-                    status: "sent"
-                };
-
-                db.ref('chats/' + roomId).push(messageData);
-                db.ref('user-chats/' + currentUser + '/' + activeChatContact).set({ contact: activeChatContact });
-                db.ref('user-chats/' + activeChatContact + '/' + currentUser).set({ contact: currentUser });
+                const imgHtml = `<img src="${imageUrl}" style="max-width:100%; border-radius:8px;">`;
+                pushChatMessage(activeChatContact, imgHtml, "Photo", "image");
             };
             reader.readAsDataURL(file);
+            event.target.value = "";
         }
 
-        let activeChatContact = null;
-
         function goBackHome() {
+            stopVoiceRecordingIfActive();
+            if (messagesRefListener && activeChatContact) {
+                db.ref('chats/' + getChatRoomId(currentUser, activeChatContact)).off('value', messagesRefListener);
+                messagesRefListener = null;
+            }
+            if (targetStatusListener && activeChatContact) {
+                db.ref('status/' + activeChatContact).off('value', targetStatusListener);
+                targetStatusListener = null;
+            }
             document.getElementById('chatScreen').classList.remove('active');
             document.getElementById('homeScreen').classList.add('active');
             activeChatContact = null;
             loadFriendList();
+        }
+
+        function listenTargetPresence(contactId) {
+            const statusEl = document.getElementById('chatTargetStatus');
+            if (targetStatusListener) {
+                db.ref('status/' + contactId).off('value', targetStatusListener);
+            }
+            targetStatusListener = db.ref('status/' + contactId).on('value', (snap) => {
+                const isOnline = snap.exists() && snap.val().state === "online";
+                statusEl.innerText = isOnline ? "online" : "offline";
+                statusEl.style.color = isOnline ? "var(--accent)" : "var(--text-secondary)";
+            });
         }
 
         function openChat(contactId) {
@@ -812,7 +1202,12 @@
             document.getElementById('chatScreen').classList.add('active');
             document.getElementById('chatTargetName').innerText = contactId;
             document.getElementById('chatHeaderAvatar').innerText = contactId.charAt(0).toUpperCase();
+
+            db.ref('user-chats/' + currentUser + '/' + contactId).update({ unreadCount: 0 });
+            markMessagesAsSeen(contactId);
+            listenTargetPresence(contactId);
             loadMessages();
+            toggleInputActionBtn();
         }
 
         function triggerSearch() {
@@ -829,10 +1224,10 @@
         }
 
         function getChatRoomId(user1, user2) {
-    const u1 = String(user1 || "").trim().toLowerCase();
-    const u2 = String(user2 || "").trim().toLowerCase();
-    return u1 < u2 ? `${u1}_${u2}` : `${u2}_${u1}`;
-}
+            const u1 = String(user1 || "").trim().toLowerCase();
+            const u2 = String(user2 || "").trim().toLowerCase();
+            return u1 < u2 ? `${u1}_${u2}` : `${u2}_${u1}`;
+        }
 
         function formatTime(timestamp) {
             if (!timestamp) return "";
@@ -840,28 +1235,89 @@
             return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
         }
 
+        function toggleInputActionBtn() {
+            const val = document.getElementById('messageInput').value.trim();
+            const sendBtn = document.getElementById('sendActionBtn');
+            const micBtn = document.getElementById('micActionBtn');
+            if (val.length > 0) {
+                sendBtn.style.display = "flex";
+                micBtn.style.display = "none";
+            } else {
+                sendBtn.style.display = "none";
+                micBtn.style.display = "flex";
+            }
+        }
+
+        async function pushChatMessage(targetContact, htmlContent, previewText, msgType = "text") {
+            const roomId = getChatRoomId(currentUser, targetContact);
+            const now = Date.now();
+
+            const statusSnap = await db.ref('status/' + targetContact).once('value');
+            const receiverOnline = statusSnap.exists() && statusSnap.val().state === "online";
+            const initialStatus = receiverOnline ? "delivered" : "sent";
+
+            const messageData = {
+                sender: currentUser,
+                receiver: targetContact,
+                text: htmlContent,
+                preview: previewText,
+                type: msgType,
+                timestamp: now,
+                status: initialStatus
+            };
+
+            await db.ref('chats/' + roomId).push(messageData);
+
+            await db.ref('user-chats/' + currentUser + '/' + targetContact).update({
+                contact: targetContact,
+                lastMessage: previewText,
+                lastMessageTime: now,
+                unreadCount: 0
+            });
+
+            const receiverChatRef = db.ref('user-chats/' + targetContact + '/' + currentUser);
+            const receiverSnap = await receiverChatRef.once('value');
+            const currentUnread = (receiverSnap.exists() && receiverSnap.val().unreadCount) ? receiverSnap.val().unreadCount : 0;
+
+            await receiverChatRef.update({
+                contact: currentUser,
+                lastMessage: previewText,
+                lastMessageTime: now,
+                unreadCount: currentUnread + 1
+            });
+        }
+
         function sendMessage() {
             const input = document.getElementById('messageInput');
             const text = input.value.trim();
             if (!text || !activeChatContact) return;
 
-            const roomId = getChatRoomId(currentUser, activeChatContact);
-            const messageData = {
-                sender: currentUser,
-                text: text,
-                timestamp: Date.now(),
-                status: "sent"
-            };
+            const escapedText = text
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;");
 
-            db.ref('chats/' + roomId).push(messageData);
-            db.ref('user-chats/' + currentUser + '/' + activeChatContact).set({ contact: activeChatContact });
-            db.ref('user-chats/' + activeChatContact + '/' + currentUser).set({ contact: currentUser });
-
+            pushChatMessage(activeChatContact, escapedText, text, "text");
             input.value = "";
+            toggleInputActionBtn();
         }
 
         function handleMessageEnter(e) {
             if (e.key === 'Enter') sendMessage();
+        }
+
+        function markMessagesAsSeen(contactId) {
+            if (!currentUser || !contactId) return;
+            const roomId = getChatRoomId(currentUser, contactId);
+            db.ref('chats/' + roomId).once('value', (snapshot) => {
+                if (!snapshot.exists()) return;
+                snapshot.forEach((child) => {
+                    const msg = child.val();
+                    if (msg.sender === contactId && msg.status !== "seen") {
+                        child.ref.update({ status: "seen" });
+                    }
+                });
+            });
         }
 
         function loadMessages() {
@@ -869,21 +1325,50 @@
             const roomId = getChatRoomId(currentUser, activeChatContact);
             const container = document.getElementById('chatMessagesContainer');
 
-            db.ref('chats/' + roomId).on('value', (snapshot) => {
+            if (messagesRefListener) {
+                db.ref('chats/' + roomId).off('value', messagesRefListener);
+            }
+
+            messagesRefListener = db.ref('chats/' + roomId).on('value', async (snapshot) => {
                 container.innerHTML = "";
                 if (!snapshot.exists()) {
                     container.innerHTML = `<div style="text-align: center; color: var(--text-secondary); margin-top: 20px;">No messages yet. Start chatting!</div>`;
                     return;
                 }
+
+                const statusSnap = await db.ref('status/' + activeChatContact).once('value');
+                const receiverOnline = statusSnap.exists() && statusSnap.val().state === "online";
+
+                let hasUnseenFromPartner = false;
+
                 snapshot.forEach((child) => {
                     const msg = child.val();
                     const isSent = msg.sender === currentUser;
+
+                    if (!isSent && msg.status !== "seen") {
+                        hasUnseenFromPartner = true;
+                        if (document.visibilityState === "visible") {
+                            child.ref.update({ status: "seen" });
+                        }
+                    }
+
                     const div = document.createElement('div');
                     div.className = `msg ${isSent ? 'sent' : 'received'}`;
-                    
+
                     let tickHTML = "";
                     if (isSent) {
-                        tickHTML = `<span class="tick">✓</span>`;
+                        let tickState = msg.status || "sent";
+                        if (tickState === "sent" && receiverOnline) {
+                            tickState = "delivered";
+                        }
+
+                        if (tickState === "seen") {
+                            tickHTML = `<span class="tick seen">✓✓</span>`;
+                        } else if (tickState === "delivered") {
+                            tickHTML = `<span class="tick delivered">✓✓</span>`;
+                        } else {
+                            tickHTML = `<span class="tick">✓</span>`;
+                        }
                     }
 
                     div.innerHTML = `
@@ -895,306 +1380,149 @@
                     `;
                     container.appendChild(div);
                 });
+
+                if (hasUnseenFromPartner) {
+                    db.ref('user-chats/' + currentUser + '/' + activeChatContact).update({ unreadCount: 0 });
+                }
+
                 container.scrollTop = container.scrollHeight;
             });
         }
 
-        function loadFriendList() {
-            const container = document.getElementById('friendListContainer');
-            db.ref('user-chats/' + currentUser).on('value', (snapshot) => {
-                container.innerHTML = "";
-                if (!snapshot.exists()) {
-                    container.innerHTML = `<div style="padding: 30px; text-align: center; color: var(--text-secondary);">No chats yet. Search a user ID or import contacts!</div>`;
-                    return;
-                }
-                const chats = snapshot.val();
-                for (let id in chats) {
-                    const contact = chats[id].contact;
-                    const item = document.createElement('div');
-                    item.className = 'friend-item';
-                    item.innerHTML = `<div class="avatar">${contact.charAt(0).toUpperCase()}</div><div style="font-weight: bold;">${contact}</div>`;
-                    item.onclick = () => openChat(contact);
-                    container.appendChild(item);
-                }
-            });
-        }
+        let mediaRecorder = null;
+        let recordedChunks = [];
+        let isRecordingVoice = false;
+        let recordStartTime = null;
+        let recordTimerInterval = null;
 
-        const client = AgoraRTC.createClient({ mode: "rtc", codec: "vp8" });
-
-        const agoraOptions = {
-            appId: "ebbb8f9f7e9846d8bf33fc3cb057ee8c",
-            channel: "chatycall",
-            token: "007eJxTYJiQubw8qdYlvWoT/9VNkZ/4g6e/7nt8UOGgq89vqcWpp84rMKQmJSVZpFmmmadaWpiYpVgkpRkbpyUbJycZmJqnplokm7AzZDcEMjI82nuKkZEBAkF8TobkjMSSyuTEnBwGBgB/vCNu",
-            uid: null
-        };
-
-        let localAudioTrack = null;
-        let localVideoTrack = null;
-        let currentCallData = null;
-        let callStartTime = null;
-        let callTimerInterval = null;
-        let isAudioMuted = false;
-        let isCallInProgress = false;
-        let outgoingCallRef = null;
-
-        client.on("user-published", async (user, mediaType) => {
-            await client.subscribe(user, mediaType);
-            if (mediaType === "video") {
-                user.videoTrack.play("remoteVideoContainer");
-            }
-            if (mediaType === "audio") {
-                user.audioTrack.play();
-            }
-        });
-
-        client.on("user-unpublished", (user, mediaType) => {
-            if (mediaType === "video") {
-                document.getElementById("remoteVideoContainer").innerHTML = "";
-            }
-        });
-
-    async function initiateCall(type) {
-    if (!activeChatContact || isCallInProgress) return;
-    isCallInProgress = true;
-
-    const callId = getChatRoomId(currentUser, activeChatContact);
-    currentCallData = {
-        callId: callId,
-        caller: currentUser,
-        receiver: activeChatContact,
-        type: type,
-        status: "ringing",
-        timestamp: Date.now()
-    };
-
-    showActiveCallUI(activeChatContact, type, "Ringing...");
-
-    outgoingCallRef = db.ref('calls/' + activeChatContact);
-    await outgoingCallRef.set(currentCallData);
-
-    outgoingCallRef.on('value', async (snapshot) => {
-        if (!snapshot.exists()) return;
-        const data = snapshot.val();
-        console.log("CALL STATUS UPDATE:", data.status, data);
-
-       if (data.status === "accepted" && !callStartTime)  {
-            document.getElementById('callStatusText').innerText = "Connecting...";
-            const joined = await joinAgoraChannel(type, agoraOptions.channel);
-            if (joined) {
-                document.getElementById('callStatusText').innerText = "Connected";
-                startCallTimer();
-            }
-        } else if (data.status === "rejected") {
-            const missedText = type === "video" ? "Missed Video Call" : "Missed Audio Call";
-            logCallHistory(currentUser, activeChatContact, missedText);
-            await cleanupCall();
-            alert("Call declined.");
-        } else if (data.status === "ended") {
-            await cleanupCall();
-        }
-    });
-}
-        
-        function listenForIncomingCalls() {
-    if (!currentUser) return;
-    db.ref('calls/' + currentUser).on('value', async (snapshot) => {
-        if (!snapshot.exists()) {
-            document.getElementById('incomingCallModal').classList.remove('active');
-            return;
-        }
-        const data = snapshot.val();
-        if (data.status === "ringing" && data.receiver === currentUser && !isCallInProgress) {
-            currentCallData = data;
-            document.getElementById('incomingCallerName').innerText = data.caller;
-            document.getElementById('incomingCallerAvatar').innerText = data.caller.charAt(0).toUpperCase();
-            document.getElementById('incomingCallType').innerText = data.type === 'video' ? "Incoming Video Call..." : "Incoming Audio Call...";
-            document.getElementById('incomingCallModal').classList.add('active');
-        } else if (data.status === "ended" || data.status === "rejected") {
-            document.getElementById('incomingCallModal').classList.remove('active');
-            if (isCallInProgress) {
-                await cleanupCall();
+        async function toggleVoiceRecording() {
+            if (!activeChatContact) return;
+            if (!isRecordingVoice) {
+                await startVoiceRecording();
+            } else {
+                stopVoiceRecordingAndSend();
             }
         }
-    });
-}
-        
-   async function acceptIncomingCall() {
-    if (!currentCallData || isCallInProgress) return;
-    isCallInProgress = true;
-    document.getElementById('incomingCallModal').classList.remove('active');
 
-    await db.ref('calls/' + currentUser).update({ status: "accepted" });
-    showActiveCallUI(currentCallData.caller, currentCallData.type, "Connecting...");
-
-       const joined = await joinAgoraChannel(currentCallData.type, agoraOptions.channel);
-    if (joined) {
-        document.getElementById('callStatusText').innerText = "Connected";
-        startCallTimer();
-    }
-}
-   
-        async function rejectIncomingCall() {
-            if (!currentCallData) return;
-            document.getElementById('incomingCallModal').classList.remove('active');
-            await db.ref('calls/' + currentUser).update({ status: "rejected" });
-            setTimeout(() => {
-                db.ref('calls/' + currentUser).remove();
-            }, 1500);
-            currentCallData = null;
-        }      
-          
-        
-     async function joinAgoraChannel(type, channelName) {
-    try {
-        if (localAudioTrack) {
-            localAudioTrack.stop();
-            localAudioTrack.close();
-            localAudioTrack = null;
-        }
-        if (localVideoTrack) {
-            localVideoTrack.stop();
-            localVideoTrack.close();
-            localVideoTrack = null;
-        }
-
-        if (client.connectionState !== "DISCONNECTED") {
-            await client.leave();
-        }
-
-        localAudioTrack = await AgoraRTC.createMicrophoneAudioTrack();
-        if (type === "video") {
-            localVideoTrack = await AgoraRTC.createCameraVideoTrack();
-            localVideoTrack.play("localVideoContainer");
-        }
-
-        const targetChannel = channelName || agoraOptions.channel;
-        await client.join(agoraOptions.appId, targetChannel, agoraOptions.token, agoraOptions.uid);
-
-        if (type === "video" && localVideoTrack) {
-            await client.publish([localAudioTrack, localVideoTrack]);
-        } else {
-            await client.publish([localAudioTrack]);
-        }
-        return true;
-    } catch (error) {
-        console.error("Agora Error:", error);
-        alert("Device Error: " + error.message + "\nPlease make sure camera/mic permissions are allowed and no other app is using them.");
-        await endActiveCall();
-        return false;
-    }
-}
-        async function endActiveCall() {
-            if (!currentCallData) {
-                await cleanupCall();
+        async function startVoiceRecording() {
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                alert("Microphone recording is not supported on this device/browser.");
                 return;
             }
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                recordedChunks = [];
+                mediaRecorder = new MediaRecorder(stream);
 
-            const targetNode = currentCallData.receiver;
-            const callType = currentCallData.type;
-            const wasConnected = callStartTime !== null;
+                mediaRecorder.ondataavailable = (e) => {
+                    if (e.data && e.data.size > 0) {
+                        recordedChunks.push(e.data);
+                    }
+                };
 
-            if (wasConnected) {
-                const durationSec = Math.floor((Date.now() - callStartTime) / 1000);
-                const mins = Math.floor(durationSec / 60);
-                const secs = durationSec % 60;
-                const durationText = mins > 0 ? `${mins}m ${secs}s` : `${secs}s`;
-                const label = callType === "video" ? `📹 Video Call · ${durationText}` : `📞 Audio Call · ${durationText}`;
-                logCallHistory(currentCallData.caller, currentCallData.receiver, label);
-            } else if (currentCallData.caller === currentUser) {
-                const missedLabel = callType === "video" ? "Missed Video Call" : "Missed Audio Call";
-                logCallHistory(currentCallData.caller, currentCallData.receiver, missedLabel);
+                mediaRecorder.onstop = () => {
+                    stream.getTracks().forEach(track => track.stop());
+                    const blob = new Blob(recordedChunks, { type: mediaRecorder.mimeType || 'audio/webm' });
+                    const reader = new FileReader();
+                    reader.onloadend = () => {
+                        const base64Audio = reader.result;
+                        const audioHtml = `
+                            <div class="voice-note-box">
+                                <audio controls src="${base64Audio}"></audio>
+                            </div>
+                        `;
+                        pushChatMessage(activeChatContact, audioHtml, "🎤 Voice message", "audio");
+                    };
+                    reader.readAsDataURL(blob);
+                };
+
+                mediaRecorder.start();
+                isRecordingVoice = true;
+                recordStartTime = Date.now();
+
+                const micBtn = document.getElementById('micActionBtn');
+                const timerEl = document.getElementById('recordingTimer');
+                micBtn.classList.add('recording');
+                micBtn.innerText = "⏹";
+                timerEl.style.display = "inline";
+                timerEl.innerText = "00:00";
+
+                recordTimerInterval = setInterval(() => {
+                    const sec = Math.floor((Date.now() - recordStartTime) / 1000);
+                    const m = String(Math.floor(sec / 60)).padStart(2, '0');
+                    const s = String(sec % 60).padStart(2, '0');
+                    timerEl.innerText = `${m}:${s}`;
+                }, 1000);
+            } catch (err) {
+                alert("Microphone permission denied or unavailable.");
             }
-
-            await db.ref('calls/' + targetNode).update({ status: "ended" });
-            setTimeout(() => {
-                db.ref('calls/' + targetNode).remove();
-            }, 1000);
-
-            await cleanupCall();
         }
 
-        function logCallHistory(caller, receiver, statusText) {
-            const roomId = getChatRoomId(caller, receiver);
-            db.ref('chats/' + roomId).push({
-                sender: caller,
-                text: `<i>${statusText}</i>`,
-                timestamp: Date.now(),
-                status: "sent"
+        function stopVoiceRecordingAndSend() {
+            if (mediaRecorder && isRecordingVoice) {
+                mediaRecorder.stop();
+            }
+            resetRecordingUI();
+        }
+
+        function stopVoiceRecordingIfActive() {
+            if (isRecordingVoice && mediaRecorder) {
+                mediaRecorder.ondataavailable = null;
+                mediaRecorder.onstop = null;
+                try {
+                    mediaRecorder.stop();
+                } catch (e) {}
+            }
+            resetRecordingUI();
+        }
+
+        function resetRecordingUI() {
+            isRecordingVoice = false;
+            mediaRecorder = null;
+            recordedChunks = [];
+            if (recordTimerInterval) {
+                clearInterval(recordTimerInterval);
+                recordTimerInterval = null;
+            }
+            const micBtn = document.getElementById('micActionBtn');
+            const timerEl = document.getElementById('recordingTimer');
+            micBtn.classList.remove('recording');
+            micBtn.innerText = "🎤";
+            timerEl.style.display = "none";
+            timerEl.innerText = "00:00";
+        }
+
+        function attachIncomingMessageNotificationWatcher(contactId) {
+            if (unreadWatchers[contactId]) return;
+            const roomId = getChatRoomId(currentUser, contactId);
+            const ref = db.ref('chats/' + roomId).limitToLast(1);
+            const listener = ref.on('child_added', (snap) => {
+                const msg = snap.val();
+                if (!msg || msg.sender === currentUser) return;
+                const key = contactId + "_" + snap.key;
+                if (key === lastNotifiedMsgKey) return;
+                lastNotifiedMsgKey = key;
+
+                if (msg.status === "sent") {
+                    snap.ref.update({ status: "delivered" });
+                }
+
+                const isViewingSameChat = (activeChatContact === contactId && document.visibilityState === "visible");
+                if (!isViewingSameChat) {
+                    triggerSystemNotification(
+                        contactId,
+                        msg.preview || "New message",
+                        () => openChat(contactId)
+                    );
+                }
             });
-            db.ref('user-chats/' + caller + '/' + receiver).set({ contact: receiver });
-            db.ref('user-chats/' + receiver + '/' + caller).set({ contact: caller });
+            unreadWatchers[contactId] = { ref, listener };
         }
 
-        function showActiveCallUI(partnerName, type, statusText) {
-            document.getElementById('activeCallPartner').innerText = partnerName;
-            document.getElementById('activeCallAvatar').innerText = partnerName.charAt(0).toUpperCase();
-            document.getElementById('callStatusText').innerText = statusText;
-
-            if (type === "video") {
-                document.getElementById('videoArea').style.display = "flex";
-                document.getElementById('audioAvatarArea').style.display = "none";
-            } else {
-                document.getElementById('videoArea').style.display = "none";
-                document.getElementById('audioAvatarArea').style.display = "block";
+        function loadFriendList() {
+            const container = document.getElementById('friendListContainer');
+            if (friendListListener) {
+                db.ref('user-chats/' + currentUser).off('value', friendListListener);
             }
 
-            document.getElementById('activeCallScreen').classList.add('active');
-        }
-
-        function startCallTimer() {
-            if (callStartTime) return;
-            callStartTime = Date.now();
-            callTimerInterval = setInterval(() => {
-                const elapsed = Math.floor((Date.now() - callStartTime) / 1000);
-                const mins = String(Math.floor(elapsed / 60)).padStart(2, '0');
-                const secs = String(elapsed % 60).padStart(2, '0');
-                document.getElementById('callStatusText').innerText = `${mins}:${secs}`;
-            }, 1000);
-        }
-
-        function toggleMuteAudio() {
-            if (!localAudioTrack) return;
-            isAudioMuted = !isAudioMuted;
-            localAudioTrack.setEnabled(!isAudioMuted);
-            document.getElementById('muteAudioBtn').innerText = isAudioMuted ? "🔇" : "🎤";
-            document.getElementById('muteAudioBtn').style.background = isAudioMuted ? "#ef4444" : "#2a3942";
-        }
-
-        async function cleanupCall() {
-            clearInterval(callTimerInterval);
-            callTimerInterval = null;
-            callStartTime = null;
-            isAudioMuted = false;
-            isCallInProgress = false;
-
-            document.getElementById('muteAudioBtn').innerText = "🎤";
-            document.getElementById('muteAudioBtn').style.background = "#2a3942";
-
-            if (outgoingCallRef) {
-                outgoingCallRef.off();
-                outgoingCallRef = null;
-            }
-
-            if (localAudioTrack) {
-                localAudioTrack.stop();
-                localAudioTrack.close();
-                localAudioTrack = null;
-            }
-            if (localVideoTrack) {
-                localVideoTrack.stop();
-                localVideoTrack.close();
-                localVideoTrack = null;
-            }
-            if (client.connectionState !== "DISCONNECTED") {
-                await client.leave();
-            }
-
-            document.getElementById('remoteVideoContainer').innerHTML = "";
-            document.getElementById('localVideoContainer').innerHTML = "";
-            document.getElementById('activeCallScreen').classList.remove('active');
-            document.getElementById('incomingCallModal').classList.remove('active');
-            currentCallData = null;
-        }
-    </script>
-</body>
-</html>
+            friendListListener = db.ref('user
