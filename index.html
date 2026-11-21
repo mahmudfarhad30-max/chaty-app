@@ -737,19 +737,31 @@
             }
         }
 
-        function shareAppMenu() {
-            closeImoMenu();
-            if (navigator.share) {
-                navigator.share({
-                    title: 'Chatty Messaging App',
-                    text: 'Check out my real-time chat app!',
-                    url: window.location.href,
-                }).catch(console.error);
-            } else {
-                alert("Share link copied: " + window.location.href);
-            }
-        }
+       
+function shareAppMenu() {
+    closeImoMenu();
 
+    const appUrl = "https://mahmudfarhad30-max.github.io/chaty-app/";
+
+    const chromeUrl =
+        "intent://mahmudfarhad30-max.github.io/chaty-app/#Intent;" +
+        "scheme=https;" +
+        "package=com.android.chrome;" +
+        "end";
+
+    if (navigator.share) {
+        navigator.share({
+            title: 'Chatty Messaging App',
+            text: 'Check out my real-time chat app!',
+            url: chromeUrl
+        }).catch(console.error);
+    } else {
+        navigator.clipboard.writeText(chromeUrl)
+            .then(() => alert("Share link copied!"))
+            .catch(() => alert("Please copy this link: " + appUrl));
+    }
+}
+        
         async function importPhoneContacts() {
             if ('contacts' in navigator && 'Picker' in navigator.contacts) {
                 try {
