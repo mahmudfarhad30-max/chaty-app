@@ -491,11 +491,12 @@
 </head>
 <body>
 
-    <div id="inAppBrowserBanner" class="in-app-banner">
-        <span>Microphone may be blocked inside in-app browsers. Open in Chrome or your main browser for calls.</span>
+     <div id="inAppBrowserBanner" class="in-app-banner">
+        <span>Microphone may be blocked here. Open in Chrome for calls.</span>
         <div class="in-app-actions">
-            <button class="in-app-btn" onclick="copyAppLink()">Copy Link</button>
-            <button class="in-app-btn" onclick="document.getElementById('inAppBrowserBanner').classList.remove('active')">OK</button>
+            <button class="in-app-btn" onclick="openInChrome()">Open in Chrome</button>
+            <button class="in-app-btn" onclick="copyAppLink()">Copy</button>
+            <button class="in-app-btn" onclick="document.getElementById('inAppBrowserBanner').classList.remove('active')">✕</button>
         </div>
     </div>
 
@@ -659,7 +660,14 @@
                 }
             }
         }
-
+      function openInChrome() {
+            const currentUrl = window.location.href;
+            const cleanUrl = currentUrl.replace(/^https?:\/\//i, "");
+            const scheme = window.location.protocol === "https:" ? "https" : "http";
+            const intentUrl = `intent://${cleanUrl}#Intent;scheme=${scheme};package=com.android.chrome;end`;
+            window.location.href = intentUrl;
+        }
+        
         function copyAppLink() {
             const url = window.location.href;
             if (navigator.clipboard && navigator.clipboard.writeText) {
