@@ -1160,41 +1160,46 @@
             document.getElementById('muteAudioBtn').style.background = isAudioMuted ? "#ef4444" : "#2a3942";
         }
 
-        async function cleanupCall() {
-            clearInterval(callTimerInterval);
-            callTimerInterval = null;
-            callStartTime = null;
-            isAudioMuted = false;
-            isCallInProgress = false;
+      
+async function cleanupCall() {
+    clearInterval(callTimerInterval);
+    callTimerInterval = null;
+    callStartTime = null;
+    isAudioMuted = false;
 
-            document.getElementById('muteAudioBtn').innerText = "🎤";
-            document.getElementById('muteAudioBtn').style.background = "#2a3942";
+    document.getElementById('muteAudioBtn').innerText = "🎤";
+    document.getElementById('muteAudioBtn').style.background = "#2a3942";
 
-            if (outgoingCallRef) {
-                outgoingCallRef.off();
-                outgoingCallRef = null;
-            }
+    if (outgoingCallRef) {
+        outgoingCallRef.off();
+        outgoingCallRef = null;
+    }
 
-            if (localAudioTrack) {
-                localAudioTrack.stop();
-                localAudioTrack.close();
-                localAudioTrack = null;
-            }
-            if (localVideoTrack) {
-                localVideoTrack.stop();
-                localVideoTrack.close();
-                localVideoTrack = null;
-            }
-            if (client.connectionState !== "DISCONNECTED") {
-                await client.leave();
-            }
+    if (localAudioTrack) {
+        localAudioTrack.stop();
+        localAudioTrack.close();
+        localAudioTrack = null;
+    }
 
-            document.getElementById('remoteVideoContainer').innerHTML = "";
-            document.getElementById('localVideoContainer').innerHTML = "";
-            document.getElementById('activeCallScreen').classList.remove('active');
-            document.getElementById('incomingCallModal').classList.remove('active');
-            currentCallData = null;
-        }
+    if (localVideoTrack) {
+        localVideoTrack.stop();
+        localVideoTrack.close();
+        localVideoTrack = null;
+    }
+
+    if (client.connectionState !== "DISCONNECTED") {
+        await client.leave();
+    }
+
+    isCallInProgress = false;
+
+    document.getElementById('remoteVideoContainer').innerHTML = "";
+    document.getElementById('localVideoContainer').innerHTML = "";
+    document.getElementById('activeCallScreen').classList.remove('active');
+    document.getElementById('incomingCallModal').classList.remove('active');
+    currentCallData = null;
+}
+        
     </script>
 </body>
 </html>
