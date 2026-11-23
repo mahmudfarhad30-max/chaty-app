@@ -551,8 +551,10 @@
             <button class="attachment-btn" onclick="openGallery()" title="Attach Image">📎</button>
             <input type="file" id="imageInput" accept="image/*" style="display: none;" onchange="handleImageUpload(event)">
 
-            <input type="text" id="messageInput" class="message-input" placeholder="Type a message..." onkeypress="handleMessageEnter(event)">
-            <button class="send-btn" onclick="sendMessage()" title="Send">➤</button>
+               <input type="text" id="messageInput" class="message-input" placeholder="Type a message..." oninput="toggleSendVoiceBtn()" onkeypress="handleMessageKeyPress(event)">
+                <button class="send-btn" id="voiceRecordBtn" onclick="toggleVoiceRecord()" title="Voice Record">🎤</button>
+                <button class="send-btn" id="sendMessageBtn" onclick="sendMessage()" title="Send" style="display: none;">➤</button>
+               <button class="send-btn" id="cancelVoiceBtn" onclick="cancelVoiceRecord()" title="Delete Voice" style="display: none; background: #ef4444;">🗑</button>
         </div>
     </div>
 
@@ -1282,6 +1284,15 @@
                 document.getElementById('audioAvatarArea').style.display = "block";
             }
 
+              const camBtn = document.getElementById("toggleCameraBtn");
+    const switchBtn = document.getElementById("switchCameraBtn");
+    if (type === "video") {
+        if (camBtn) camBtn.style.display = "inline-flex";
+        if (switchBtn) switchBtn.style.display = "inline-flex";
+    } else {
+        if (camBtn) camBtn.style.display = "none";
+        if (switchBtn) switchBtn.style.display = "none";
+    }
             document.getElementById('activeCallScreen').classList.add('active');
         }
 
@@ -1402,6 +1413,123 @@ async function toggleSpeaker() {
             document.getElementById('incomingCallModal').classList.remove('active');
             currentCallData = null;
         }
+           function toggleSendVoiceBtn() {
+    const input = document.getElementById("messageInput");
+    const voiceBtn = document.getElementById("voiceRecordBtn");
+    const sendBtn = document.getElementById("sendMessageBtn");
+    if (!input || !voiceBtn || !sendBtn) return;
+
+    if (input.value.trim().length > 0) {
+        voiceBtn.style.display = "none";
+        sendBtn.style.display = "inline-flex";
+    } else {
+        voiceBtn.style.display = "inline-flex";
+        sendBtn.style.display = "none";
+    }
+}
+       
+        let mediaRecorder = null;
+let audioChunks = [];
+let isRecordingVoice = false;
+let isCancellingVoice = false;
+
+function cancelVoiceRecord() {
+    isCancellingVoice = true;
+    isRecordingVoice = false;
+    audioChunks = [];
+
+    if (mediaRecorder && mediaRecorder.state !== "inactive") {
+        mediaRecorder.stop();
+    }
+    if (mediaRecorder && mediaRecorder.stream) {
+        mediaRecorder.stream.getTracks().forEach((track) => track.stop());
+    }
+
+    const voiceBtn = document.getElementById("voiceRecordBtn");
+    const cancelBtn = document.getElementById("cancelVoiceBtn");
+    if (voiceBtn) {
+        voiceBtn.innerHTML = "🎤";
+        voiceBtn.style.background = "";
+    }
+    if (cancelBtn) {
+        cancelBtn.style.display = "none";
+    }
+    showAutoToast("Voice recording deleted.");
+}
+
+async function toggleVoiceRecord() {
+    const voiceBtn = document.getElementById("voiceRecordBtn");
+    const cancelBtn = document.getElementById("cancelVoiceBtn");
+
+    if (!isRecordingVoice) {
+        try {
+            isCancellingVoice = false;
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            audioChunks = [];
+            mediaRecorder = new MediaRecorder(stream);
+
+            mediaRecorder.ondataavailable = (event) => {
+                if (event.data.size > 0) {
+                    audioChunks.push(event.data);
+                }
+            };
+
+            mediaRecorder.onstop = () => {
+                stream.getTracks().forEach((track) => track.stop());
+                if (isCancellingVoice) {
+                    isCancellingVoice = false;
+                    audioChunks = [];
+                    return;
+                }
+                const audioBlob = new Blob(audioChunks, { type: "audio/webm" });
+                const reader = new FileReader();
+                reader.readAsDataURL(audioBlob);
+                reader.onloadend = () => {
+                    const base64Audio = reader.result;
+                    if (typeof activeChatContact !== "undefined" && activeChatContact && typeof currentUser !== "undefined" && currentUser && typeof db !== "undefined") {
+                        const roomId = getChatRoomId(currentUser, activeChatContact);
+                        db.ref("chats/" + roomId).push({
+                            sender: currentUser,
+                            audio: base64Audio,
+                            timestamp: Date.now(),
+                            status: "sent"
+                        });
+                        db.ref("user-chats/" + currentUser + "/" + activeChatContact).set({ contact: activeChatContact });
+                        db.ref("user-chats/" + activeChatContact + "/" + currentUser).set({ contact: currentUser });
+                    }
+                };
+            };
+
+            mediaRecorder.start();
+            isRecordingVoice = true;
+            if (voiceBtn) {
+                voiceBtn.innerHTML = "⏹";
+                voiceBtn.style.background = "#ef4444";
+            }
+            if (cancelBtn) {
+                cancelBtn.style.display = "inline-flex";
+            }
+            showAutoToast("Recording voice... Tap 🗑 to delete or ⏹ to send.");
+        } catch (err) {
+            console.error("Voice record error:", err);
+            showAutoToast("Microphone access denied or not supported.");
+        }
+    } else {
+        isCancellingVoice = false;
+        isRecordingVoice = false;
+        if (voiceBtn) {
+            voiceBtn.innerHTML = "🎤";
+            voiceBtn.style.background = "";
+        }
+        if (cancelBtn) {
+            cancelBtn.style.display = "none";
+        }
+        if (mediaRecorder && mediaRecorder.state !== "inactive") {
+            mediaRecorder.stop();
+        }
+        showAutoToast("Voice message sent.");
+    }
+}
     </script>
 </body>
 </html>
