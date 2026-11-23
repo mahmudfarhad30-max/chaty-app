@@ -1138,8 +1138,7 @@
             if (!currentCallData) return;
             document.getElementById('incomingCallModal').classList.remove('active');
             await db.ref('calls/' + currentUser).update({ status: "rejected" });
-            const rejectedLabel = currentCallData.type === "video" ? "Rejected Video Call" : "Rejected Audio Call";
-        logCallHistory(currentCallData.caller, currentUser, rejectedLabel);
+            
             setTimeout(() => {
                 db.ref('calls/' + currentUser).remove();
             }, 1500);
