@@ -585,6 +585,9 @@
 
         <div class="call-controls">
             <button class="call-btn btn-mute" id="muteAudioBtn" onclick="toggleMuteAudio()" title="Mute/Unmute">🎤</button>
+             <button class="call-btn btn-mute" id="toggleCameraBtn" onclick="toggleCamera()" title="Camera On/Off">📷</button>
+            <button class="call-btn btn-mute" id="switchCameraBtn" onclick="switchCamera()" title="Switch Camera">🔄</button>
+            <button class="call-btn btn-mute" id="toggleSpeakerBtn" onclick="toggleSpeaker()" title="Speaker/Earpiece">🔊</button>
             <button class="call-btn btn-end" onclick="endActiveCall()" title="End Call">📵</button>
         </div>
     </div>
@@ -1301,6 +1304,54 @@
             document.getElementById('muteAudioBtn').style.background = isAudioMuted ? "#ef4444" : "#2a3942";
         }
 
+        let isCameraOff = false;
+let isUsingFrontCamera = true;
+
+async function toggleCamera() {
+    if (!localVideoTrack) return;
+    isCameraOff = !isCameraOff;
+    await localVideoTrack.setEnabled(!isCameraOff);
+    const btn = document.getElementById("toggleCameraBtn");
+    if (btn) {
+        btn.innerHTML = isCameraOff ? "🚫" : "🎥";
+        btn.style.background = isCameraOff ? "#ef4444" : "#2a3942";
+    }
+}
+
+async function switchCamera() {
+    if (!localVideoTrack) return;
+    try {
+        isUsingFrontCamera = !isUsingFrontCamera;
+        await localVideoTrack.setDevice(isUsingFrontCamera ? "user" : "environment");
+    } catch (err) {
+        console.error("Switch camera error:", err);
+        showAutoToast("Camera switch not supported on this device.");
+    }
+}
+
+
+        let isSpeakerOn = false;
+
+async function toggleSpeaker() {
+    isSpeakerOn = !isSpeakerOn;
+    const btn = document.getElementById("toggleSpeakerBtn");
+    if (btn) {
+        btn.innerHTML = isSpeakerOn ? "🔊" : "🔈";
+        btn.style.background = isSpeakerOn ? "#25d366" : "#2a3942";
+    }
+    try {
+        if (typeof client !== "undefined" && client.remoteUsers) {
+            client.remoteUsers.forEach((user) => {
+                if (user.audioTrack) {
+                    user.audioTrack.setVolume(isSpeakerOn ? 100 : 40);
+                }
+            });
+        }
+        showAutoToast(isSpeakerOn ? "Speaker On" : "Earpiece On");
+    } catch (err) {
+        console.error("Speaker toggle error:", err);
+    }
+}
         async function cleanupCall() {
             clearInterval(callTimerInterval);
             callTimerInterval = null;
@@ -1310,7 +1361,22 @@
 
             document.getElementById('muteAudioBtn').innerText = "🎤";
             document.getElementById('muteAudioBtn').style.background = "#2a3942";
+            isCameraOff = false;
+    isUsingFrontCamera = true;
+    isSpeakerOn = false;
 
+    const camBtn = document.getElementById("toggleCameraBtn");
+    if (camBtn) {
+        camBtn.innerHTML = "🎥";
+        camBtn.style.background = "#2a3942";
+    }
+
+    const spkBtn = document.getElementById("toggleSpeakerBtn");
+    if (spkBtn) {
+        spkBtn.innerHTML = "🔈";
+        spkBtn.style.background = "#2a3942";
+    }
+            
             if (outgoingCallRef) {
                 outgoingCallRef.off();
                 outgoingCallRef = null;
