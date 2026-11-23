@@ -983,8 +983,12 @@
                         tickHTML = `<span class="tick">✓</span>`;
                     }
 
-                    div.innerHTML = `
-                        <div>${msg.text}</div>
+                                    const contentHTML = msg.audio
+                    ? `<audio controls src="${msg.audio}" style="max-width: 220px; height: 36px;"></audio>`
+                    : `<div>${msg.text || ""}</div>`;
+
+                div.innerHTML = `
+                    ${contentHTML}
                         <div class="msg-footer">
                             <span>${formatTime(msg.timestamp)}</span>
                             ${tickHTML}
@@ -1329,17 +1333,18 @@ async function toggleCamera() {
     }
 }
 
+
 async function switchCamera() {
     if (!localVideoTrack) return;
     try {
         isUsingFrontCamera = !isUsingFrontCamera;
-        await localVideoTrack.setDevice(isUsingFrontCamera ? "user" : "environment");
+        await localVideoTrack.setCameraDirection(isUsingFrontCamera ? "front" : "back");
+        showAutoToast(isUsingFrontCamera ? "Front camera" : "Back camera");
     } catch (err) {
         console.error("Switch camera error:", err);
-        showAutoToast("Camera switch not supported on this device.");
+        showAutoToast("Camera switch failed.");
     }
 }
-
 
         let isSpeakerOn = false;
 
